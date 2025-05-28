@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
@@ -7,15 +6,18 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Mail, Lock, ArrowRight, AlertCircle, ArrowLeft } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
+import { useAuth } from '@/contexts/AuthContext';
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [errors, setErrors] = useState<{email?: string, password?: string}>({});
+  const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { signIn } = useAuth();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     // Validação simples
@@ -28,21 +30,29 @@ const Login = () => {
       setErrors(newErrors);
       return;
     }
+
+    setIsLoading(true);
     
-    // Simulação de login bem-sucedido
-    toast({
-      title: "Login realizado",
-      description: "Você será redirecionado para o dashboard.",
-      duration: 3000,
-    });
-    
-    // Redirecionamento após o login
-    setTimeout(() => {
+    try {
+      await signIn(email, password);
+      
+      toast({
+        title: "Login realizado com sucesso!",
+        description: "Você será redirecionado para o dashboard.",
+        duration: 3000,
+      });
+      
       navigate('/');
-    }, 1000);
-    
-    // Aqui seria implementada a lógica real de login
-    console.log("Login com:", { email, password });
+    } catch (error) {
+      toast({
+        title: "Erro ao fazer login",
+        description: error instanceof Error ? error.message : "Ocorreu um erro ao tentar fazer login",
+        variant: "destructive",
+        duration: 5000,
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -88,6 +98,7 @@ const Login = () => {
                       setEmail(e.target.value);
                       if (errors.email) setErrors({...errors, email: undefined});
                     }}
+                    disabled={isLoading}
                   />
                 </div>
                 {errors.email && (
@@ -118,6 +129,7 @@ const Login = () => {
                       setPassword(e.target.value);
                       if (errors.password) setErrors({...errors, password: undefined});
                     }}
+                    disabled={isLoading}
                   />
                 </div>
                 {errors.password && (
@@ -127,9 +139,13 @@ const Login = () => {
                 )}
               </div>
               
-              <Button type="submit" className="w-full gap-2 mt-6 group">
-                Entrar
-                <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+              <Button 
+                type="submit" 
+                className="w-full gap-2 mt-6 group"
+                disabled={isLoading}
+              >
+                {isLoading ? 'Entrando...' : 'Entrar'}
+                {!isLoading && <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />}
               </Button>
             </form>
           </CardContent>
