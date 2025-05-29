@@ -27,9 +27,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
   async function signIn(email: string, password: string) {
     try {
       const loginData: LoginRequest = { email, password };
-      console.log(loginData);
-      console.log(API_CONFIG.AUTH.BASE_URL);
-      const response = await api.post<ResponseRegisteredUser>('/Login', loginData);
+      const apiInstance = api.create({ baseURL: API_CONFIG.AUTH.BASE_URL });
+      const response = await apiInstance.post<ResponseRegisteredUser>('/doLogin', loginData);
+      
       const { success, identifier, name, tokens, errors } = response.data;
 
       if (!success || errors?.length) {

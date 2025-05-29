@@ -6,6 +6,7 @@ import { PrivateRoute } from './components/PrivateRoute';
 import { DashboardLayout } from './layouts/DashboardLayout';
 
 // Pages
+import { LandingPage } from './pages/LandingPage';
 import Login from './pages/Login';
 import Cadastro from './pages/Cadastro';
 import CadastroERP from './pages/CadastroERP';
@@ -19,6 +20,9 @@ function App() {
     <AuthProvider>
       <BrowserRouter>
         <Routes>
+          {/* Landing Page */}
+          <Route path="/" element={<LandingPage />} />
+
           {/* Rotas públicas */}
           <Route path="/login" element={<Login />} />
           <Route path="/cadastro" element={<Cadastro />} />
@@ -26,7 +30,7 @@ function App() {
 
           {/* Rotas protegidas */}
           <Route
-            path="/"
+            path="/dashboard"
             element={
               <PrivateRoute>
                 <DashboardLayout />
