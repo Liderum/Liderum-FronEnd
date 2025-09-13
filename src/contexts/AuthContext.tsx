@@ -32,8 +32,12 @@ export function AuthProvider({ children }: AuthProviderProps) {
       
       const { success, identifier, name, tokens, errors } = response.data;
 
-      if (!success || errors?.length) {
-        throw new Error(errors?.[0] || 'Falha na autenticação');
+      if (!success && errors && errors.length > 0) {
+        throw new Error(errors[0]);
+      }
+
+      if (!success) {
+        throw new Error('Falha na autenticação');
       }
 
       if (!tokens?.accessToken || !identifier || !name) {
@@ -54,9 +58,14 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
       setUser(userData);
     } catch (error) {
-      if (error instanceof Error) {
-        throw new Error(error.message);
+      if (error.response?.data?.errors?.length > 0) {
+        throw new Error(error.response.data.errors[0]);
       }
+      
+      if (error instanceof Error) {
+        throw error;
+      }
+      
       throw new Error('Falha na autenticação');
     }
   }
