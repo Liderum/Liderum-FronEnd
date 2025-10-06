@@ -45,12 +45,10 @@ const Login = () => {
         className: "bg-green-50 border-green-200",
       });
       
-      // Adiciona um pequeno delay antes do redirecionamento para mostrar a animação
       setTimeout(() => {
         navigate('/dashboard');
       }, 1000);
     } catch (error) {
-      // Trata o erro da API
       let errorMessage = "Não foi possível fazer login. Verifique suas credenciais.";
       
       if (error instanceof AxiosError && error.response?.data?.errors?.length > 0) {
@@ -67,10 +65,8 @@ const Login = () => {
         className: "bg-red-50 border-red-200",
       });
       
-      // Limpa os campos em caso de erro
       setPassword('');
       
-      // Se o erro for relacionado ao email, limpa também o campo de email
       if (errorMessage.toLowerCase().includes('email')) {
         setEmail('');
       }

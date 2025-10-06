@@ -1,7 +1,7 @@
 import { createContext, useContext, useState, ReactNode } from 'react';
 import api from '../services/api/axios';
 import { User, LoginRequest, ResponseRegisteredUser } from '../types/auth';
-import { API_CONFIG } from '@/config/api';
+import { API_CONFIG } from '@/config/api_config_prd';
 
 interface AuthContextData {
   user: User | null;
