@@ -1,13 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Mail, User, Phone, Building, Lock, Shield, Check, AlertCircle, ArrowLeft, Loader2 } from "lucide-react";
+import { Mail, User, Phone, Building, Lock, Shield, Check, AlertCircle, ArrowLeft, Loader2, Eye, EyeOff } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { useNavigate } from 'react-router-dom';
 import { motion } from "framer-motion";
+import { validateEmail } from '@/lib/emailValidation';
 
 const Cadastro = () => {
   const navigate = useNavigate();
@@ -21,7 +22,23 @@ const Cadastro = () => {
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const { toast } = useToast();
+
+
+  // Validação em tempo real com debounce para email
+  useEffect(() => {
+    if (formData.email && !validateEmail(formData.email)) {
+      const timer = setTimeout(() => {
+        setErrors(prev => ({...prev, email: "Por favor, insira um email válido"}));
+      }, 1000);
+      
+      return () => clearTimeout(timer);
+    } else if (formData.email && validateEmail(formData.email)) {
+      setErrors(prev => ({...prev, email: ''}));
+    }
+  }, [formData.email]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -30,7 +47,6 @@ const Cadastro = () => {
       [name]: value
     }));
     
-    // Limpa o erro ao editar o campo
     if (errors[name]) {
       setErrors(prev => ({
         ...prev,
@@ -46,8 +62,8 @@ const Cadastro = () => {
     
     if (!formData.email) {
       newErrors.email = "Email é obrigatório";
-    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = "Email inválido";
+    } else if (!validateEmail(formData.email)) {
+      newErrors.email = "Por favor, insira um email válido";
     }
     
     if (!formData.telefone) newErrors.telefone = "Telefone é obrigatório";
@@ -79,7 +95,6 @@ const Cadastro = () => {
       setIsLoading(true);
       
       try {
-        // Simulação de cadastro bem-sucedido
         toast({
           title: "Cadastro realizado com sucesso!",
           description: "Você será redirecionado para a página de login.",
@@ -87,7 +102,6 @@ const Cadastro = () => {
           duration: 3000,
         });
         
-        // Redirecionamento após o cadastro
         setTimeout(() => {
           navigate('/login');
         }, 1000);
@@ -269,13 +283,21 @@ const Cadastro = () => {
                       <Input 
                         id="senha"
                         name="senha"
-                        type="password" 
+                        type={showPassword ? "text" : "password"} 
                         placeholder="••••••••" 
-                        className={`pl-10 ${errors.senha ? 'border-red-500 focus-visible:ring-red-500' : ''}`}
+                        className={`pl-10 pr-10 ${errors.senha ? 'border-red-500 focus-visible:ring-red-500' : ''}`}
                         value={formData.senha}
                         onChange={handleChange}
                         disabled={isLoading}
                       />
+                      <button
+                        type="button"
+                        className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600 transition-colors"
+                        onClick={() => setShowPassword(!showPassword)}
+                        disabled={isLoading}
+                      >
+                        {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                      </button>
                     </div>
                     {errors.senha && (
                       <motion.p 
@@ -297,13 +319,21 @@ const Cadastro = () => {
                       <Input 
                         id="confirmaSenha"
                         name="confirmaSenha"
-                        type="password" 
+                        type={showConfirmPassword ? "text" : "password"} 
                         placeholder="••••••••" 
-                        className={`pl-10 ${errors.confirmaSenha ? 'border-red-500 focus-visible:ring-red-500' : ''}`}
+                        className={`pl-10 pr-10 ${errors.confirmaSenha ? 'border-red-500 focus-visible:ring-red-500' : ''}`}
                         value={formData.confirmaSenha}
                         onChange={handleChange}
                         disabled={isLoading}
                       />
+                      <button
+                        type="button"
+                        className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600 transition-colors"
+                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                        disabled={isLoading}
+                      >
+                        {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                      </button>
                     </div>
                     {errors.confirmaSenha && (
                       <motion.p 

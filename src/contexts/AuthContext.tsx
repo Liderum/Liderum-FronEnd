@@ -1,7 +1,7 @@
 import { createContext, useContext, useState, ReactNode } from 'react';
 import api from '../services/api/axios';
 import { User, LoginRequest, ResponseRegisteredUser } from '../types/auth';
-import { API_CONFIG } from '@/config/api_config_prd';
+import { API_CONFIG } from '@/config/api_config_dsv';
 
 interface AuthContextData {
   user: User | null;
@@ -26,47 +26,35 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   async function signIn(email: string, password: string) {
     try {
-      const loginData: LoginRequest = { email, password };
-      const apiInstance = api.create({ baseURL: API_CONFIG.AUTH.BASE_URL });
-      const response = await apiInstance.post<ResponseRegisteredUser>('/doLogin', loginData);
+      // Simulando delay da API
+      await new Promise(resolve => setTimeout(resolve, 1000));
       
-      const { success, identifier, name, tokens, errors } = response.data;
-
-      if (!success && errors && errors.length > 0) {
-        throw new Error(errors[0]);
-      }
-
-      if (!success) {
-        throw new Error('Falha na autenticação');
-      }
-
-      if (!tokens?.accessToken || !identifier || !name) {
-        throw new Error('Dados de autenticação incompletos');
-      }
-
-      const userData: User = {
-        identifier,
-        name,
-        email
+      // Login mockado - sempre retorna sucesso
+      const mockUserData: User = {
+        identifier: 'user_' + Date.now(),
+        name: email.split('@')[0].replace(/[._]/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
+        email: email
       };
 
-      localStorage.setItem('@Liderum:token', tokens.accessToken);
-      if (tokens.refreshToken) {
-        localStorage.setItem('@Liderum:refreshToken', tokens.refreshToken);
-      }
-      localStorage.setItem('@Liderum:user', JSON.stringify(userData));
+      // Token fake para desenvolvimento
+      const fakeToken = 'fake_token_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+      const fakeRefreshToken = 'fake_refresh_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
 
-      setUser(userData);
+      // Salvando dados mockados no localStorage
+      localStorage.setItem('@Liderum:token', fakeToken);
+      localStorage.setItem('@Liderum:refreshToken', fakeRefreshToken);
+      localStorage.setItem('@Liderum:user', JSON.stringify(mockUserData));
+
+      setUser(mockUserData);
+      
+      console.log('Login mockado realizado com sucesso:', {
+        user: mockUserData,
+        token: fakeToken,
+        refreshToken: fakeRefreshToken
+      });
     } catch (error) {
-      if (error.response?.data?.errors?.length > 0) {
-        throw new Error(error.response.data.errors[0]);
-      }
-      
-      if (error instanceof Error) {
-        throw error;
-      }
-      
-      throw new Error('Falha na autenticação');
+      console.error('Erro no login mockado:', error);
+      throw new Error('Erro interno do sistema');
     }
   }
 
@@ -75,6 +63,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
     localStorage.removeItem('@Liderum:refreshToken');
     localStorage.removeItem('@Liderum:user');
     setUser(null);
+    
+    console.log('Logout realizado com sucesso');
   }
 
   return (

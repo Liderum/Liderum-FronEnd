@@ -10,8 +10,10 @@ import { LandingPage } from './pages/LandingPage';
 import Login from './pages/Login';
 import Cadastro from './pages/Cadastro';
 import CadastroERP from './pages/CadastroERP';
+import Index from './pages/Index';
+import WelcomePage from './pages/WelcomePage';
 import { Dashboard } from './pages/Dashboard';
-import { Financial } from './pages/financial/Financial';
+import { Sales } from './pages/sales/Sales';
 import { Billing } from './pages/billing/Billing';
 import { Inventory } from './pages/inventory/Inventory';
 
@@ -30,6 +32,22 @@ function App() {
 
           {/* Rotas protegidas */}
           <Route
+            path="/welcome"
+            element={
+              <PrivateRoute>
+                <WelcomePage />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/index"
+            element={
+              <PrivateRoute>
+                <Index />
+              </PrivateRoute>
+            }
+          />
+          <Route
             path="/dashboard"
             element={
               <PrivateRoute>
@@ -38,7 +56,7 @@ function App() {
             }
           >
             <Route index element={<Dashboard />} />
-            <Route path="financial/*" element={<Financial />} />
+            <Route path="sales/*" element={<Sales />} />
             <Route path="billing/*" element={<Billing />} />
             <Route path="inventory/*" element={<Inventory />} />
           </Route>

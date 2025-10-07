@@ -1,32 +1,54 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Mail, Lock, ArrowRight, AlertCircle, ArrowLeft, Loader2 } from "lucide-react";
+import { Mail, Lock, ArrowRight, AlertCircle, ArrowLeft, Loader2, Eye, EyeOff } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { useAuth } from '@/contexts/AuthContext';
 import { motion } from "framer-motion";
 import { AxiosError } from 'axios';
+import { validateEmail } from '@/lib/emailValidation';
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [errors, setErrors] = useState<{email?: string, password?: string}>({});
   const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
   const { signIn } = useAuth();
 
+
+  useEffect(() => {
+    if (email && !validateEmail(email)) {
+      const timer = setTimeout(() => {
+        setErrors(prev => ({...prev, email: "Por favor, insira um email válido"}));
+      }, 1000);
+      
+      return () => clearTimeout(timer);
+    } else if (email && validateEmail(email)) {
+      setErrors(prev => ({...prev, email: undefined}));
+    }
+  }, [email]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Validação simples
+    // Validação completa
     const newErrors: {email?: string, password?: string} = {};
     
-    if (!email) newErrors.email = "Email é obrigatório";
-    if (!password) newErrors.password = "Senha é obrigatória";
+    if (!email) {
+      newErrors.email = "Email é obrigatório";
+    } else if (!validateEmail(email)) {
+      newErrors.email = "Por favor, insira um email válido";
+    }
+    
+    if (!password) {
+      newErrors.password = "Senha é obrigatória";
+    }
     
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
@@ -46,7 +68,7 @@ const Login = () => {
       });
       
       setTimeout(() => {
-        navigate('/dashboard');
+        navigate('/welcome');
       }, 1000);
     } catch (error) {
       let errorMessage = "Não foi possível fazer login. Verifique suas credenciais.";
@@ -131,7 +153,10 @@ const Login = () => {
                       value={email}
                       onChange={(e) => {
                         setEmail(e.target.value);
-                        if (errors.email) setErrors({...errors, email: undefined});
+                        // Remove erro quando usuário começa a digitar
+                        if (errors.email) {
+                          setErrors({...errors, email: undefined});
+                        }
                       }}
                       disabled={isLoading}
                     />
@@ -160,9 +185,9 @@ const Login = () => {
                     </div>
                     <Input 
                       id="password"
-                      type="password" 
+                      type={showPassword ? "text" : "password"} 
                       placeholder="••••••••" 
-                      className={`pl-10 ${errors.password ? 'border-red-500 focus-visible:ring-red-500' : ''}`}
+                      className={`pl-10 pr-10 ${errors.password ? 'border-red-500 focus-visible:ring-red-500' : ''}`}
                       value={password}
                       onChange={(e) => {
                         setPassword(e.target.value);
@@ -170,6 +195,14 @@ const Login = () => {
                       }}
                       disabled={isLoading}
                     />
+                    <button
+                      type="button"
+                      className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600 transition-colors"
+                      onClick={() => setShowPassword(!showPassword)}
+                      disabled={isLoading}
+                    >
+                      {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                    </button>
                   </div>
                   {errors.password && (
                     <motion.p 
