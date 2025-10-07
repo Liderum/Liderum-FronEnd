@@ -2,6 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import ChartShowcase from '@/components/ChartShowcase';
+import PricingSection from '@/components/PricingSection';
 import { 
   ArrowRight, 
   CheckCircle, 
@@ -23,6 +24,16 @@ import {
 export function LandingPage() {
   const navigate = useNavigate();
 
+  const scrollToSection = (sectionId: string) => {
+    const element = document.getElementById(sectionId);
+    if (element) {
+      element.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start',
+      });
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50/50 to-blue-100/50">
       {/* Header */}
@@ -36,11 +47,35 @@ export function LandingPage() {
                 </div>
                 <span className="text-2xl font-bold text-blue-600">Liderum</span>
               </div>
-              <nav className="hidden md:flex items-center space-x-8">
-                <Button variant="ghost" className="text-gray-700 hover:text-blue-600 text-base font-medium transition-colors duration-200">Funcionalidades</Button>
-                <Button variant="ghost" className="text-gray-700 hover:text-blue-600 text-base font-medium transition-colors duration-200">Módulos</Button>
-                <Button variant="ghost" className="text-gray-700 hover:text-blue-600 text-base font-medium transition-colors duration-200">Benefícios</Button>
-                <Button variant="ghost" className="text-gray-700 hover:text-blue-600 text-base font-medium transition-colors duration-200">Cadastros</Button>
+              <nav className="hidden md:flex items-center justify-center space-x-8">
+                <Button 
+                  variant="ghost" 
+                  onClick={() => scrollToSection('funcionalidades')}
+                  className="text-gray-700 hover:text-blue-600 text-base font-medium transition-colors duration-200 h-10 flex items-center"
+                >
+                  Funcionalidades
+                </Button>
+                <Button 
+                  variant="ghost" 
+                  onClick={() => scrollToSection('modulos')}
+                  className="text-gray-700 hover:text-blue-600 text-base font-medium transition-colors duration-200 h-10 flex items-center"
+                >
+                  Módulos
+                </Button>
+                <Button 
+                  variant="ghost" 
+                  onClick={() => scrollToSection('beneficios')}
+                  className="text-gray-700 hover:text-blue-600 text-base font-medium transition-colors duration-200 h-10 flex items-center"
+                >
+                  Benefícios
+                </Button>
+                <Button 
+                  variant="ghost" 
+                  onClick={() => scrollToSection('precos')}
+                  className="text-gray-700 hover:text-blue-600 text-base font-medium transition-colors duration-200 h-10 flex items-center"
+                >
+                  Preços
+                </Button>
               </nav>
             </div>
             <div className="flex items-center space-x-6">
@@ -69,10 +104,6 @@ export function LandingPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
             <div className="space-y-8">
               <div className="space-y-4">
-                <div className="flex items-center space-x-2 text-blue-600 font-semibold">
-                  <Star className="h-5 w-5 fill-current" />
-                  <span>Plataforma #1 em Gestão Empresarial</span>
-                </div>
                 <h1 className="text-4xl md:text-6xl font-bold tracking-tight text-gray-900 leading-tight">
                   Transforme a Gestão do seu 
                   <span className="text-blue-600"> Negócio</span>
@@ -133,10 +164,12 @@ export function LandingPage() {
         </section>
 
         {/* ChartShowcase Section */}
-        <ChartShowcase />
+        <div id="funcionalidades">
+          <ChartShowcase />
+        </div>
 
         {/* Modules Section */}
-        <section className="py-20 bg-gray-50 border-y-2 border-gray-200">
+        <section id="modulos" className="py-20 bg-gray-50 border-y-2 border-gray-200">
           <div className="container mx-auto px-4">
             <div className="text-center mb-16">
               <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Módulos Principais</h2>
@@ -281,7 +314,7 @@ export function LandingPage() {
         </section>
 
         {/* Why Choose Section */}
-        <section className="py-20 bg-white border-y-2 border-gray-200">
+        <section id="beneficios" className="py-20 bg-white border-y-2 border-gray-200">
           <div className="container mx-auto px-4">
             <div className="text-center mb-16">
               <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
@@ -335,6 +368,11 @@ export function LandingPage() {
           </div>
         </section>
 
+        {/* Pricing Section */}
+        <div id="precos">
+          <PricingSection />
+        </div>
+        
         {/* Testimonials Section */}
         <section className="py-20 bg-gray-50">
           <div className="container mx-auto px-4">
