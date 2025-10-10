@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import ChartShowcase from '@/components/ChartShowcase';
 import PricingSection from '@/components/PricingSection';
+import { useSessionCleanup } from '@/hooks/useSessionCleanup';
 import { 
   ArrowRight, 
   CheckCircle, 
@@ -23,6 +24,9 @@ import {
 
 export function LandingPage() {
   const navigate = useNavigate();
+  
+  // Limpa sessão ao acessar página pública
+  useSessionCleanup();
 
   const scrollToSection = (sectionId: string) => {
     const element = document.getElementById(sectionId);

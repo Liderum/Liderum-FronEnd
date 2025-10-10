@@ -2,12 +2,21 @@ import { createContext, useContext, useState, ReactNode } from 'react';
 import api from '../services/api/axios';
 import { User, LoginRequest, ResponseRegisteredUser } from '../types/auth';
 import { API_CONFIG } from '@/config/api_config_dsv';
+import { useErrorToast } from '@/hooks/useErrorToast';
 
 interface AuthContextData {
   user: User | null;
   isAuthenticated: boolean;
   signIn: (email: string, password: string) => Promise<void>;
   signOut: () => void;
+  refreshToken: () => Promise<boolean>;
+  errorToast: {
+    isVisible: boolean;
+    message: string;
+    type: 'error' | 'warning' | 'info';
+  };
+  showError: (message: string, type?: 'error' | 'warning' | 'info') => void;
+  hideError: () => void;
 }
 
 interface AuthProviderProps {
@@ -19,42 +28,115 @@ const AuthContext = createContext<AuthContextData>({} as AuthContextData);
 export function AuthProvider({ children }: AuthProviderProps) {
   const [user, setUser] = useState<User | null>(() => {
     const storedUser = localStorage.getItem('@Liderum:user');
-    return storedUser ? JSON.parse(storedUser) : null;
+    const storedToken = localStorage.getItem('@Liderum:token');
+    
+    // Verifica se existe tanto o usuário quanto o token
+    if (storedUser && storedToken) {
+      try {
+        return JSON.parse(storedUser);
+      } catch (error) {
+        console.error('Erro ao fazer parse do usuário armazenado:', error);
+        // Limpa dados corrompidos
+        localStorage.removeItem('@Liderum:user');
+        localStorage.removeItem('@Liderum:token');
+        localStorage.removeItem('@Liderum:refreshToken');
+        return null;
+      }
+    }
+    
+    return null;
   });
 
-  const isAuthenticated = !!user;
+  const isAuthenticated = !!user && !!localStorage.getItem('@Liderum:token');
+  
+  // Hook para gerenciar toasts de erro
+  const { errorToast, showError, hideError } = useErrorToast();
 
   async function signIn(email: string, password: string) {
     try {
-      // Simulando delay da API
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Login mockado - sempre retorna sucesso
-      const mockUserData: User = {
-        identifier: 'user_' + Date.now(),
-        name: email.split('@')[0].replace(/[._]/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
-        email: email
+      const response = await api.post('/doLogin', {
+        email,
+        password
+      });
+
+      const { success, identifier, name, tokens, errors } = response.data as ResponseRegisteredUser;
+
+      if (!success || errors) {
+        const errorMessage = Array.isArray(errors) ? errors[0] : errors || 'Erro no login';
+        throw new Error(errorMessage);
+      }
+
+      // Estrutura do usuário baseada na resposta da API
+      const userData: User = {
+        identifier,
+        name,
+        email
       };
 
-      // Token fake para desenvolvimento
-      const fakeToken = 'fake_token_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-      const fakeRefreshToken = 'fake_refresh_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+      // Salvando dados reais no localStorage
+      localStorage.setItem('@Liderum:token', tokens.accessToken);
+      localStorage.setItem('@Liderum:refreshToken', tokens.refreshToken);
+      localStorage.setItem('@Liderum:user', JSON.stringify(userData));
 
-      // Salvando dados mockados no localStorage
-      localStorage.setItem('@Liderum:token', fakeToken);
-      localStorage.setItem('@Liderum:refreshToken', fakeRefreshToken);
-      localStorage.setItem('@Liderum:user', JSON.stringify(mockUserData));
-
-      setUser(mockUserData);
+      setUser(userData);
       
-      console.log('Login mockado realizado com sucesso:', {
-        user: mockUserData,
-        token: fakeToken,
-        refreshToken: fakeRefreshToken
+      console.log('Login realizado com sucesso:', {
+        user: userData,
+        token: tokens.accessToken
       });
     } catch (error) {
-      console.error('Erro no login mockado:', error);
-      throw new Error('Erro interno do sistema');
+      console.error('Erro no login:', error);
+      
+      // Determina a mensagem de erro
+      let errorMessage = "Não foi possível fazer login. Verifique suas credenciais.";
+      
+      if (error instanceof Error) {
+        // Se o erro já tem uma mensagem específica do backend, usa ela
+        if (error.message && error.message !== 'Erro no login') {
+          errorMessage = error.message;
+        }
+      }
+      
+      // Mostra o toast de erro
+      showError(errorMessage, 'error');
+      
+      // Limpa dados em caso de erro
+      localStorage.removeItem('@Liderum:token');
+      localStorage.removeItem('@Liderum:refreshToken');
+      localStorage.removeItem('@Liderum:user');
+      setUser(null);
+      
+      throw error;
+    }
+  }
+
+  async function refreshToken(): Promise<boolean> {
+    try {
+      const storedRefreshToken = localStorage.getItem('@Liderum:refreshToken');
+      
+      if (!storedRefreshToken) {
+        return false;
+      }
+
+      const response = await api.post('/refresh', {
+        refreshToken: storedRefreshToken
+      });
+
+      const { success, tokens, errors } = response.data as ResponseRegisteredUser;
+
+      if (!success || errors) {
+        const errorMessage = Array.isArray(errors) ? errors[0] : errors || 'Erro ao renovar token';
+        throw new Error(errorMessage);
+      }
+
+      localStorage.setItem('@Liderum:token', tokens.accessToken);
+      localStorage.setItem('@Liderum:refreshToken', tokens.refreshToken);
+
+      return true;
+    } catch (error) {
+      console.error('Erro ao renovar token:', error);
+      signOut();
+      return false;
     }
   }
 
@@ -68,7 +150,16 @@ export function AuthProvider({ children }: AuthProviderProps) {
   }
 
   return (
-    <AuthContext.Provider value={{ user, isAuthenticated, signIn, signOut }}>
+    <AuthContext.Provider value={{ 
+      user, 
+      isAuthenticated, 
+      signIn, 
+      signOut, 
+      refreshToken,
+      errorToast,
+      showError,
+      hideError
+    }}>
       {children}
     </AuthContext.Provider>
   );

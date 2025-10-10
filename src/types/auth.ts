@@ -5,7 +5,7 @@ export interface LoginRequest {
 
 export interface ResponseTokens {
   accessToken: string;
-  refreshToken?: string;
+  refreshToken: string;
 }
 
 export interface ResponseRegisteredUser {

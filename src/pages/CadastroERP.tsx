@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { useSessionCleanup } from '@/hooks/useSessionCleanup';
 import {
   Card,
   CardContent,
@@ -26,6 +27,9 @@ import Footer from '../components/Footer';
 const CadastroERP = () => {
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState('produto');
+  
+  // Limpa sessão ao acessar página pública
+  useSessionCleanup();
   
   const handleSave = (formType: string) => {
     toast({

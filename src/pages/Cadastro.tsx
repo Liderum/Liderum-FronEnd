@@ -9,9 +9,14 @@ import { useToast } from "@/components/ui/use-toast";
 import { useNavigate } from 'react-router-dom';
 import { motion } from "framer-motion";
 import { validateEmail } from '@/lib/emailValidation';
+import { useSessionCleanup } from '@/hooks/useSessionCleanup';
 
 const Cadastro = () => {
   const navigate = useNavigate();
+  
+  // Limpa sessão ao acessar página pública
+  useSessionCleanup();
+  
   const [formData, setFormData] = useState({
     nome: '',
     email: '',
