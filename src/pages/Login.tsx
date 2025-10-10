@@ -236,9 +236,9 @@ const Login = () => {
                 <div className="space-y-2">
                   <div className="flex justify-between items-center">
                     <Label htmlFor="password">Senha</Label>
-                    <Link to="/recuperar-senha" className="text-xs text-primary hover:underline">
+                    {/* <Link to="/recuperar-senha" className="text-xs text-primary hover:underline">
                       Esqueci minha senha
-                    </Link>
+                    </Link> */}
                   </div>
                   <div className="relative">
                     <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-400">
@@ -310,6 +310,13 @@ const Login = () => {
                 Não possui uma conta?{" "}
                 <Link to="/cadastro" className="text-primary font-medium hover:underline">
                   Criar nova conta
+                </Link>
+              </p>
+              
+              <p className="text-center text-sm text-gray-600">
+                Esqueceu sua senha?{" "}
+                <Link to="/forgot-password" className="text-primary font-medium hover:underline">
+                  Recuperar senha
                 </Link>
               </p>
             </CardFooter>

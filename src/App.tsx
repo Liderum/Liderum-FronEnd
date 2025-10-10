@@ -17,6 +17,9 @@ import { Dashboard } from './pages/Dashboard';
 import { Sales } from './pages/sales/Sales';
 import { Billing } from './pages/billing/Billing';
 import { Inventory } from './pages/inventory/Inventory';
+import ForgotPassword from './pages/ForgotPassword';
+import ValidateCode from './pages/ValidateCode';
+import ResetPassword from './pages/ResetPassword';
 
 function AppContent() {
   // Monitora mudanças de rota para segurança
@@ -31,6 +34,9 @@ function AppContent() {
       <Route path="/login" element={<Login />} />
       <Route path="/cadastro" element={<Cadastro />} />
       <Route path="/cadastros" element={<CadastroERP />} />
+      <Route path="/forgot-password" element={<ForgotPassword />} />
+      <Route path="/validate-code" element={<ValidateCode />} />
+      <Route path="/reset-password" element={<ResetPassword />} />
 
       {/* Rotas protegidas */}
       <Route

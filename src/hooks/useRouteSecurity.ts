@@ -9,7 +9,7 @@ export function useRouteSecurity() {
   const location = useLocation();
 
   useEffect(() => {
-    const publicRoutes = ['/', '/login', '/cadastro', '/cadastros'];
+    const publicRoutes = ['/', '/login', '/cadastro', '/cadastros', '/forgot-password', '/validate-code', '/reset-password'];
     const currentPath = location.pathname;
 
     // Se está em uma rota pública, limpa dados de autenticação
