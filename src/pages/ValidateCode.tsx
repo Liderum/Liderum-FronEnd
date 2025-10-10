@@ -7,6 +7,9 @@ import { useToast } from "@/components/ui/use-toast";
 import { motion } from "framer-motion";
 import { ValidateCodeRequest, ValidateCodeResponse } from '@/types/auth';
 import api from '@/services/api/axios';
+import { Redirecting } from '@/components/Redirecting';
+import { SimpleToast } from '@/components/SimpleToast';
+import { useRedirect } from '@/hooks/useRedirect';
 
 const ValidateCode = () => {
   const [code, setCode] = useState(['', '', '', '', '', '']);
@@ -19,6 +22,25 @@ const ValidateCode = () => {
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   const email = location.state?.email;
+
+  // Hook para gerenciar redirecionamento
+  const { 
+    isRedirecting, 
+    countdown, 
+    startRedirect, 
+    cancelRedirect, 
+    redirectNow 
+  } = useRedirect({
+    delay: 3000,
+    destination: '/reset-password',
+    onRedirect: () => {
+      console.log('Redirecionando para redefinição de senha...');
+      // Passa o estado necessário para a próxima página
+      navigate('/reset-password', { 
+        state: { email, code: code.join('') } 
+      });
+    }
+  });
 
   // Redireciona se não houver email
   useEffect(() => {
@@ -83,40 +105,31 @@ const ValidateCode = () => {
         email,
         code: codeString
       } as ValidateCodeRequest, {
-        timeout: 15000 // 15 segundos para validação
+        timeout: 25000 // 25 segundos para validação
       });
 
-      if (response.data.success) {
-        toast({
-          title: "Código válido!",
-          description: "Redirecionando para redefinição de senha...",
-          variant: "default",
-          duration: 3000,
-          className: "bg-green-50 border-green-200",
-        });
-
-        // Redireciona para a tela de redefinição de senha
-        setTimeout(() => {
-          navigate('/reset-password', { 
-            state: { email, code: codeString } 
-          });
-        }, 1500);
+      if (response.data) {
+        // Inicia o redirecionamento com o padrão consistente
+        startRedirect('/reset-password');
       } else {
         const errorMessage = response.data.errors?.[0] || response.data.message || 'Código inválido';
         throw new Error(errorMessage);
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Erro ao validar código:', error);
       
       let errorMessage = "Código inválido. Tente novamente.";
       
-      if (error.response?.data?.errors) {
-        errorMessage = Array.isArray(error.response.data.errors) 
-          ? error.response.data.errors[0] 
-          : error.response.data.errors;
-      } else if (error.response?.data?.message) {
-        errorMessage = error.response.data.message;
-      } else if (error.message) {
+      if (error && typeof error === 'object' && 'response' in error) {
+        const axiosError = error as { response?: { data?: { errors?: string | string[], message?: string } } };
+        if (axiosError.response?.data?.errors) {
+          errorMessage = Array.isArray(axiosError.response.data.errors) 
+            ? axiosError.response.data.errors[0] 
+            : axiosError.response.data.errors;
+        } else if (axiosError.response?.data?.message) {
+          errorMessage = axiosError.response.data.message;
+        }
+      } else if (error instanceof Error) {
         errorMessage = error.message;
       }
 
@@ -145,7 +158,7 @@ const ValidateCode = () => {
         timeout: 30000 // 30 segundos para reenvio de email
       });
       
-      if (response.data.success) {
+      if (response.data) {
         toast({
           title: "Código reenviado!",
           description: "Verifique seu email para o novo código.",
@@ -172,7 +185,28 @@ const ValidateCode = () => {
   };
 
   if (!email) {
-    return null; // Será redirecionado pelo useEffect
+    return null;
+  }
+
+  // Se está redirecionando, mostra apenas o componente de redirecionamento
+  if (isRedirecting) {
+    return (
+      <>
+        <Redirecting 
+          message="Preparando redefinição de senha..."
+          destination="redefinição de senha"
+          countdown={countdown}
+          title="Código validado com sucesso!"
+        />
+        <SimpleToast
+          isVisible={true}
+          message="Código validado com sucesso!"
+          countdown={countdown}
+          onCancel={cancelRedirect}
+          onGoNow={() => redirectNow()}
+        />
+      </>
+    );
   }
 
   return (
@@ -209,7 +243,7 @@ const ValidateCode = () => {
                   onKeyDown={(e) => handleKeyDown(index, e)}
                   onPaste={handlePaste}
                   aria-label={`Dígito ${index + 1} do código`}
-                  className={`w-12 h-12 text-center text-xl font-bold border-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                  className={`w-12 h-12 text-center text-xl font-bold border-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300 ${
                     errors.code ? 'border-red-500' : 'border-gray-300'
                   } ${isValidating ? 'border-blue-500 bg-blue-50' : ''}`}
                   disabled={isLoading}

@@ -7,12 +7,14 @@ interface RedirectingProps {
   message?: string;
   destination?: string;
   countdown?: number;
+  title?: string;
 }
 
 export function Redirecting({ 
   message = "Redirecionando...", 
   destination = "dashboard",
-  countdown = 3 
+  countdown = 3,
+  title = "Login realizado com sucesso!"
 }: RedirectingProps) {
   const [timeLeft, setTimeLeft] = React.useState(countdown);
 
@@ -64,7 +66,7 @@ export function Redirecting({
             transition={{ delay: 0.4 }}
           >
             <h2 className="text-2xl font-semibold text-gray-900 mb-2">
-              Login realizado com sucesso!
+              {title}
             </h2>
             <p className="text-gray-600 mb-6">
               {message}

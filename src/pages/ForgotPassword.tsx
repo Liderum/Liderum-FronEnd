@@ -40,7 +40,7 @@ const ForgotPassword = () => {
         const response = await api.post<ForgotPasswordResponse>('/forgot-password', {
           email
         } as ForgotPasswordRequest, {
-          timeout: 30000 // 30 segundos para envio de email
+          timeout: 30000
         });
         response.data.success = true;
       if (response.data.success) {

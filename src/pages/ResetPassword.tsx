@@ -100,10 +100,10 @@ const ResetPassword = () => {
         newPassword: formData.newPassword,
         confirmPassword: formData.confirmPassword
       } as ResetPasswordRequest, {
-        timeout: 15000 // 15 segundos para redefinição
+        timeout: 20000 // 20 segundos para redefinição
       });
 
-      if (response.data.success) {
+      if (response.data) {
         setIsSuccess(true);
         toast({
           title: "Senha redefinida!",
@@ -154,7 +154,7 @@ const ResetPassword = () => {
   };
 
   if (!email || !code) {
-    return null; // Será redirecionado pelo useEffect
+    return null; 
   }
 
   if (isSuccess) {

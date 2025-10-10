@@ -50,8 +50,7 @@ const Login = () => {
     redirectNow 
   } = useRedirect({
     delay: 3000,
-    destination: from,
-    onRedirect: () => console.log('Redirecionando...')
+    destination: from
   });
 
 

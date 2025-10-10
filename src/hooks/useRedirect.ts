@@ -21,8 +21,13 @@ export function useRedirect(options: UseRedirectOptions = {}) {
       setCountdown((prev) => {
         if (prev <= 1) {
           clearInterval(timer);
-          onRedirect?.();
-          navigate(targetDestination, { replace: true });
+          // Se tem onRedirect callback, usa ele (caso ValidateCode)
+          if (onRedirect) {
+            onRedirect();
+          } else {
+            // Caso contrário, navega diretamente (caso Login)
+            navigate(targetDestination, { replace: true });
+          }
           return 0;
         }
         return prev - 1;
@@ -39,8 +44,13 @@ export function useRedirect(options: UseRedirectOptions = {}) {
 
   const redirectNow = useCallback((customDestination?: string) => {
     const targetDestination = customDestination || destination;
-    onRedirect?.();
-    navigate(targetDestination, { replace: true });
+    // Se tem onRedirect callback, usa ele (caso ValidateCode)
+    if (onRedirect) {
+      onRedirect();
+    } else {
+      // Caso contrário, navega diretamente (caso Login)
+      navigate(targetDestination, { replace: true });
+    }
   }, [destination, navigate, onRedirect]);
 
   return {
