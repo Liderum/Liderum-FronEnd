@@ -17,6 +17,8 @@ import { Dashboard } from './pages/Dashboard';
 import { Sales } from './pages/sales/Sales';
 import { Billing } from './pages/billing/Billing';
 import { Inventory } from './pages/inventory/Inventory';
+import { NewProductPage } from './pages/inventory/NewProductPage';
+import { Contact } from './pages/Contact';
 import ForgotPassword from './pages/ForgotPassword';
 import ValidateCode from './pages/ValidateCode';
 import ResetPassword from './pages/ResetPassword';
@@ -34,6 +36,7 @@ function AppContent() {
       <Route path="/login" element={<Login />} />
       <Route path="/cadastro" element={<Cadastro />} />
       <Route path="/cadastros" element={<CadastroERP />} />
+      <Route path="/contact" element={<Contact />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/validate-code" element={<ValidateCode />} />
       <Route path="/reset-password" element={<ResetPassword />} />
@@ -66,7 +69,8 @@ function AppContent() {
         <Route index element={<Dashboard />} />
         <Route path="sales/*" element={<Sales />} />
         <Route path="billing/*" element={<Billing />} />
-        <Route path="inventory/*" element={<Inventory />} />
+        <Route path="inventory" element={<Inventory />} />
+        <Route path="inventory/new-product" element={<NewProductPage />} />
       </Route>
 
       {/* Rota padrão */}

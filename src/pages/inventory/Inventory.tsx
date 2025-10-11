@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { motion } from "framer-motion";
 import { 
   Search, 
@@ -34,6 +34,8 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { useToast } from "@/components/ui/use-toast";
 import { Product, InventoryStats } from '../../types/inventory';
 import { InventoryService } from '../../services/inventoryService';
+import { CategoryModal } from '../../components/CategoryModal';
+import { CategoriaDto } from '../../types/category';
 
 export function Inventory() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -58,7 +60,9 @@ export function Inventory() {
     categoriesCount: 0,
     suppliersCount: 0
   });
+  const [showCategoryModal, setShowCategoryModal] = useState(false);
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   // Carrega dados da API
   useEffect(() => {
@@ -102,6 +106,11 @@ export function Inventory() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleCategorySelected = (category: CategoriaDto) => {
+    // Navega para a página de novo produto com a categoria selecionada
+    navigate('/dashboard/inventory/new-product', { state: { category } });
   };
 
   // Filtros e busca
@@ -258,7 +267,7 @@ export function Inventory() {
                 <Upload className="h-4 w-4 mr-2" />
                 Importar
               </Button>
-              <Button size="sm">
+              <Button size="sm" onClick={() => setShowCategoryModal(true)}>
                 <Plus className="h-4 w-4 mr-2" />
                 Novo Produto
               </Button>
@@ -526,7 +535,7 @@ export function Inventory() {
                       : "Nenhum produto corresponde aos filtros aplicados."
                     }
                   </p>
-                  <Button size="sm">
+                  <Button size="sm" onClick={() => setShowCategoryModal(true)}>
                     <Plus className="h-4 w-4 mr-2" />
                     Adicionar Primeiro Produto
                   </Button>
@@ -566,6 +575,13 @@ export function Inventory() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Modal de Categoria */}
+      <CategoryModal
+        isOpen={showCategoryModal}
+        onClose={() => setShowCategoryModal(false)}
+        onCategorySelected={handleCategorySelected}
+      />
     </div>
   );
 }
