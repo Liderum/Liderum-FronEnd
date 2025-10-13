@@ -2,12 +2,10 @@ import { inventoryApi } from '../services/api/apiFactory';
 import { ProdutoDashboardDto, ProdutoDto, Product, InventoryStats, ApiResponse } from '../types/inventory';
 
 export class InventoryService {
-  /**
-   * Busca todos os produtos do dashboard
-   */
+
   static async getProducts(): Promise<ProdutoDashboardDto> {
     try {
-      const response = await inventoryApi.get<ApiResponse<ProdutoDashboardDto>>('/api/Produtos');
+      const response = await inventoryApi.get<ApiResponse<ProdutoDashboardDto>>('/Products/GetAll');
       
       if (!response.data.isSuccess) {
         throw new Error(response.data.message || 'Erro na API');

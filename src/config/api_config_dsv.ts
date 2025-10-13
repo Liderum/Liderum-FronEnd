@@ -9,7 +9,7 @@ export const API_CONFIG = {
       BASE_URL_DSV: import.meta.env.DSV_BILLING_API_URL || 'https://localhost:3003', //ajustar conforme o uso.
     },
     INVENTORY: {
-      BASE_URL_DSV: import.meta.env.DSV_INVENTORY_API_URL || 'https://localhost:7143', //ajustar conforme o uso.
+      BASE_URL_DSV: import.meta.env.DSV_INVENTORY_API_URL || 'https://localhost:7143/Liderum', //ajustar conforme o uso.
     },
     USERS: {
       BASE_URL_DSV: import.meta.env.DSV_USERS_API_URL || 'https://localhost:7247/liderum/api/user', //ajustar conforme o uso.  

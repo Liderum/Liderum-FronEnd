@@ -64,7 +64,6 @@ export function Inventory() {
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  // Carrega dados da API
   useEffect(() => {
     loadProducts();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
@@ -74,14 +73,12 @@ export function Inventory() {
       setLoading(true);
       setError('');
       
-      // Carrega dados da API real
       const { products, stats, message } = await InventoryService.getInventoryData();
       
       setProducts(products);
       setFilteredProducts(products);
       setStats(stats);
       
-      // Mostra toast apropriado baseado no resultado
       if (message) {
         toast({
           title: "Informação",
@@ -109,15 +106,12 @@ export function Inventory() {
   };
 
   const handleCategorySelected = (category: CategoriaDto) => {
-    // Navega para a página de novo produto com a categoria selecionada
     navigate('/inventory/new-product', { state: { category } });
   };
 
-  // Filtros e busca
   useEffect(() => {
     let filtered = [...products];
 
-    // Filtro por busca
     if (searchTerm) {
       filtered = filtered.filter(product =>
         product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -256,7 +250,7 @@ export function Inventory() {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-3xl font-bold text-gray-900">Estoque</h1>
-              <p className="text-gray-600 mt-1">Gerencie seu inventário de produtos</p>
+              <p className="text-gray-600 mt-1">Gerencie seu estoque de produtos</p>
             </div>
             <div className="flex space-x-3">
               <Button variant="outline" size="sm">
@@ -466,8 +460,8 @@ export function Inventory() {
                       <th className="text-left py-3 px-4 font-medium text-gray-900">Categoria</th>
                       <th className="text-left py-3 px-4 font-medium text-gray-900">Marca</th>
                       <th className="text-left py-3 px-4 font-medium text-gray-900">Estoque</th>
+                      <th className="text-left py-3 px-4 font-medium text-gray-900">Status do Estoque</th>
                       <th className="text-left py-3 px-4 font-medium text-gray-900">Preço</th>
-                      <th className="text-left py-3 px-4 font-medium text-gray-900">Status</th>
                       <th className="text-left py-3 px-4 font-medium text-gray-900">Ações</th>
                     </tr>
                   </thead>
@@ -484,10 +478,10 @@ export function Inventory() {
                         <td className="py-3 px-4 text-sm text-gray-900">{product.category}</td>
                         <td className="py-3 px-4 text-sm text-gray-900">{product.brand}</td>
                         <td className="py-3 px-4">
-                          <div className="flex items-center space-x-2">
-                            <span className="text-sm text-gray-900">{product.quantity}</span>
-                            {getStockBadge(product.quantity, product.minQuantity)}
-                          </div>
+                          <span className="text-sm text-gray-900 font-medium">{product.quantity}</span>
+                        </td>
+                        <td className="py-3 px-4">
+                          {getStockBadge(product.quantity, product.minQuantity)}
                         </td>
                         <td className="py-3 px-4">
                           <div className="text-sm text-gray-900">

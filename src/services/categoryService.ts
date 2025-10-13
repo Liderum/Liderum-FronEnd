@@ -14,7 +14,7 @@ export class CategoryService {
    */
   static async getCategories(): Promise<CategoriaDto[]> {
     try {
-      const response = await inventoryApi.get<CategoriaApiResponse>('/api/Categoria');
+      const response = await inventoryApi.get<CategoriaApiResponse>('/Categories/GetAll');
       
       if (!response.data.isSuccess) {
         throw new Error(response.data.message || 'Erro ao buscar categorias');
@@ -32,7 +32,7 @@ export class CategoryService {
    */
   static async createCategory(categoria: CategoriaRequest): Promise<CategoriaDto> {
     try {
-      const response = await inventoryApi.post<CategoriaCreateResponse>('/api/Categoria', categoria);
+      const response = await inventoryApi.post<CategoriaCreateResponse>('/Categories/Create', categoria);
       
       if (!response.data.isSuccess) {
         throw new Error(response.data.message || 'Erro ao criar categoria');
@@ -60,7 +60,7 @@ export class ProductService {
    */
   static async createProduct(produto: ProdutoRequest): Promise<string> {
     try {
-      const response = await inventoryApi.post<ProdutoCreateResponse>('/api/Produtos', produto);
+      const response = await inventoryApi.post<ProdutoCreateResponse>('/Products/Create', produto);
       
       if (!response.data.isSuccess) {
         throw new Error(response.data.message || 'Erro ao criar produto');

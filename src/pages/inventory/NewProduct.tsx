@@ -179,7 +179,7 @@ export function ProductForm({ selectedCategory }: ProductFormProps) {
               <Button 
                 variant="outline" 
                 size="icon" 
-                onClick={() => navigate('/dashboard/inventory')}
+                onClick={() => navigate('/inventory')}
                 className="rounded-full"
               >
                 <ArrowLeft className="h-5 w-5" />
@@ -373,7 +373,7 @@ export function ProductForm({ selectedCategory }: ProductFormProps) {
                 <Button 
                   type="button" 
                   variant="outline" 
-                  onClick={() => navigate('/dashboard/inventory')}
+                  onClick={() => navigate('/inventory')}
                   disabled={loading}
                 >
                   Cancelar
