@@ -21,7 +21,8 @@ import {
   HelpCircle,
   LogOut,
   ExternalLink,
-  Zap
+  Zap,
+  LayoutDashboard
 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -30,26 +31,32 @@ import { useAuth } from '../contexts/AuthContext';
 
 const mainNavigation = [
   { 
-    name: 'Dashboard', 
-    href: '/dashboard', 
+    name: 'Home', 
+    href: '/home', 
     icon: Home,
     badge: null
   },
   { 
+    name: 'Dashboard', 
+    href: '/dashboard', 
+    icon: LayoutDashboard,
+    badge: null
+  },
+  { 
     name: 'Vendas', 
-    href: '/dashboard/sales', 
+    href: '/sales', 
     icon: ShoppingCart,
     badge: '5'
   },
   { 
     name: 'Faturamento', 
-    href: '/dashboard/billing', 
+    href: '/billing', 
     icon: FileText,
     badge: '3'
   },
   { 
     name: 'Estoque', 
-    href: '/dashboard/inventory', 
+    href: '/inventory', 
     icon: Package,
     badge: '2'
   },
@@ -60,9 +67,9 @@ const secondaryNavigation = [
     name: 'Marketplaces',
     icon: Zap,
     children: [
-      { name: 'Mercado Livre', href: '/dashboard/sales/mercadolivre', icon: ExternalLink },
-      { name: 'Amazon', href: '/dashboard/sales/amazon', icon: ExternalLink },
-      { name: 'Shopee', href: '/dashboard/sales/shopee', icon: ExternalLink },
+      { name: 'Mercado Livre', href: '/sales/mercadolivre', icon: ExternalLink },
+      { name: 'Amazon', href: '/sales/amazon', icon: ExternalLink },
+      { name: 'Shopee', href: '/sales/shopee', icon: ExternalLink },
     ]
   },
   {

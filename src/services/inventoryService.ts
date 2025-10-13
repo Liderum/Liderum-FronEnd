@@ -9,16 +9,13 @@ export class InventoryService {
     try {
       const response = await inventoryApi.get<ApiResponse<ProdutoDashboardDto>>('/api/Produtos');
       
-      // Verifica se a resposta é bem-sucedida
       if (!response.data.isSuccess) {
         throw new Error(response.data.message || 'Erro na API');
       }
       
-      // A API retorna os dados em data[0]
       const dashboardData = response.data.data[0];
       
       if (!dashboardData) {
-        // Retorna dados vazios se não há produtos
         return {
           totalProdutos: 0,
           totalCategorias: 0,
@@ -36,38 +33,32 @@ export class InventoryService {
     }
   }
 
-  /**
-   * Converte ProdutoDto da API para Product do componente
-   */
   static convertApiProductToComponent(produto: ProdutoDto): Product {
     return {
       id: produto.id,
       name: produto.nome,
       sku: produto.sku,
-      barcode: '', // Não disponível na API
+      barcode: '',
       quantity: produto.quantidadeEstoque,
       minQuantity: produto.quantidadeMinima,
-      maxQuantity: produto.quantidadeMinima * 3, // Estimativa baseada no mínimo
+      maxQuantity: produto.quantidadeMinima * 3,
       price: produto.precoVenda,
       costPrice: produto.precoCusto,
       category: produto.categoriaNome,
       brand: produto.marca,
-      supplier: 'N/A', // Não disponível na API
-      location: 'N/A', // Não disponível na API
+      supplier: 'N/A', 
+      location: 'N/A', 
       status: produto.status.toLowerCase() as 'active' | 'inactive' | 'discontinued',
-      lastMovement: new Date().toISOString().split('T')[0], // Data atual como fallback
-      createdAt: new Date().toISOString().split('T')[0], // Data atual como fallback
-      updatedAt: new Date().toISOString().split('T')[0], // Data atual como fallback
-      description: '', // Não disponível na API
-      weight: undefined, // Não disponível na API
-      dimensions: undefined, // Não disponível na API
-      image: undefined // Não disponível na API
+      lastMovement: new Date().toISOString().split('T')[0], 
+      createdAt: new Date().toISOString().split('T')[0], 
+      updatedAt: new Date().toISOString().split('T')[0], 
+      description: '',
+      weight: undefined,
+      dimensions: undefined,
+      image: undefined
     };
   }
 
-  /**
-   * Converte ProdutoDashboardDto da API para InventoryStats do componente
-   */
   static convertApiStatsToComponent(dashboardData: ProdutoDashboardDto): InventoryStats {
     return {
       totalProducts: dashboardData.totalProdutos,
@@ -75,13 +66,10 @@ export class InventoryService {
       lowStockItems: dashboardData.estoqueBaixo,
       outOfStockItems: dashboardData.semEstoque,
       categoriesCount: dashboardData.totalCategorias,
-      suppliersCount: 0 // Não disponível na API
+      suppliersCount: 0
     };
   }
 
-  /**
-   * Busca produtos e converte para o formato do componente
-   */
   static async getInventoryData(): Promise<{
     products: Product[];
     stats: InventoryStats;
@@ -96,7 +84,6 @@ export class InventoryService {
       
       const stats = this.convertApiStatsToComponent(dashboardData);
       
-      // Se não há produtos, retorna uma mensagem informativa
       const message = products.length === 0 ? 'Nenhum produto encontrado no estoque.' : undefined;
       
       return { products, stats, message };

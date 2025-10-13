@@ -28,7 +28,7 @@ const Login = () => {
   const { signIn, errorToast, hideError } = useAuth();
 
   // Pega a página de origem para redirecionar após login
-  const from = location.state?.from?.pathname || '/welcome';
+  const from = location.state?.from?.pathname || '/home';
   
   // Limpa sessão apenas se não veio de uma página protegida
   useEffect(() => {
@@ -120,7 +120,7 @@ const Login = () => {
 
   // Se está redirecionando, mostra apenas o componente de redirecionamento
   if (isRedirecting) {
-    const destination = from === '/welcome' ? 'painel de boas-vindas' : 'dashboard';
+    const destination = from === '/home' ? 'página inicial' : 'dashboard';
     return (
       <>
         <Redirecting 

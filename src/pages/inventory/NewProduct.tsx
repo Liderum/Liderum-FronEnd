@@ -116,7 +116,7 @@ export function ProductForm({ selectedCategory }: ProductFormProps) {
       });
 
       // Redireciona para a listagem de produtos
-      navigate('/dashboard/inventory');
+      navigate('/inventory');
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Erro ao cadastrar produto';
       toast({

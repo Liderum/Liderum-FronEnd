@@ -30,7 +30,7 @@ export function NewProductPage() {
   };
 
   const handleBackToInventory = () => {
-    navigate('/dashboard/inventory');
+    navigate('/inventory');
   };
 
   // Se não tem categoria selecionada, mostra tela de seleção

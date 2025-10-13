@@ -38,7 +38,7 @@ const WelcomePage = () => {
     },
     {
       title: "Estoque",
-      description: "Controle de inventário",
+      description: "Controle de Estoque",
       icon: Package,
       path: "/dashboard/inventory",
       color: "bg-orange-500"
@@ -211,75 +211,7 @@ const WelcomePage = () => {
                 </div>
               </CardContent>
             </Card>
-          </motion.div>
-
-          {/* Additional Options */}
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 1.0 }}
-            className="grid grid-cols-1 md:grid-cols-2 gap-6"
-          >
-            {/* Recent Activity */}
-            <Card className="border-2 hover:border-primary/50 shadow-md">
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <Bell className="h-5 w-5 mr-2 text-blue-500" />
-                  Atividade Recente
-                </CardTitle>
-                <CardDescription>
-                  Últimas ações no sistema
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  <div className="flex items-center p-3 bg-gray-50 rounded-lg">
-                    <CheckCircle className="h-4 w-4 text-green-500 mr-3" />
-                    <div>
-                      <p className="text-sm font-medium">Login realizado com sucesso</p>
-                      <p className="text-xs text-gray-500">Agora mesmo</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center p-3 bg-gray-50 rounded-lg">
-                    <Settings className="h-4 w-4 text-blue-500 mr-3" />
-                    <div>
-                      <p className="text-sm font-medium">Sistema atualizado</p>
-                      <p className="text-xs text-gray-500">Há 2 horas</p>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* System Status */}
-            <Card className="border-2 hover:border-primary/50 shadow-md">
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <Settings className="h-5 w-5 mr-2 text-green-500" />
-                  Status do Sistema
-                </CardTitle>
-                <CardDescription>
-                  Informações sobre o sistema
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg">
-                    <span className="text-sm font-medium">Sistema Online</span>
-                    <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-                  </div>
-                  <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
-                    <span className="text-sm font-medium">API Conectada</span>
-                    <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
-                  </div>
-                  <div className="flex items-center justify-between p-3 bg-yellow-50 rounded-lg">
-                    <span className="text-sm font-medium">Última Atualização</span>
-                    <span className="text-xs text-gray-500">Hoje</span>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </motion.div>
+          </motion.div>           
 
           {/* Footer Actions */}
           <motion.div 

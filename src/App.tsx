@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
 import { PrivateRoute } from './components/PrivateRoute';
 import { useRouteSecurity } from './hooks/useRouteSecurity';
+import { Toaster } from './components/ui/toaster';
 
 // Layouts
 import { DashboardLayout } from './layouts/DashboardLayout';
@@ -10,9 +11,8 @@ import { DashboardLayout } from './layouts/DashboardLayout';
 import { LandingPage } from './pages/LandingPage';
 import Login from './pages/Login';
 import Cadastro from './pages/Cadastro';
-import CadastroERP from './pages/CadastroERP';
 import Index from './pages/Index';
-import WelcomePage from './pages/WelcomePage';
+import Home from './pages/Home';
 import { Dashboard } from './pages/Dashboard';
 import { Sales } from './pages/sales/Sales';
 import { Billing } from './pages/billing/Billing';
@@ -35,7 +35,7 @@ function AppContent() {
       {/* Rotas públicas */}
       <Route path="/login" element={<Login />} />
       <Route path="/cadastro" element={<Cadastro />} />
-      <Route path="/cadastros" element={<CadastroERP />} />
+      {/* <Route path="/cadastros" element={<CadastroERP />} /> */}
       <Route path="/contact" element={<Contact />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/validate-code" element={<ValidateCode />} />
@@ -43,13 +43,15 @@ function AppContent() {
 
       {/* Rotas protegidas */}
       <Route
-        path="/welcome"
+        path="/home"
         element={
           <PrivateRoute>
-            <WelcomePage />
+            <DashboardLayout />
           </PrivateRoute>
         }
-      />
+      >
+        <Route index element={<Home />} />
+      </Route>
       <Route
         path="/index"
         element={
@@ -67,10 +69,37 @@ function AppContent() {
         }
       >
         <Route index element={<Dashboard />} />
-        <Route path="sales/*" element={<Sales />} />
-        <Route path="billing/*" element={<Billing />} />
-        <Route path="inventory" element={<Inventory />} />
-        <Route path="inventory/new-product" element={<NewProductPage />} />
+      </Route>
+      <Route
+        path="/sales"
+        element={
+          <PrivateRoute>
+            <DashboardLayout />
+          </PrivateRoute>
+        }
+      >
+        <Route index element={<Sales />} />
+      </Route>
+      <Route
+        path="/billing"
+        element={
+          <PrivateRoute>
+            <DashboardLayout />
+          </PrivateRoute>
+        }
+      >
+        <Route index element={<Billing />} />
+      </Route>
+      <Route
+        path="/inventory"
+        element={
+          <PrivateRoute>
+            <DashboardLayout />
+          </PrivateRoute>
+        }
+      >
+        <Route index element={<Inventory />} />
+        <Route path="new-product" element={<NewProductPage />} />
       </Route>
 
       {/* Rota padrão */}
@@ -84,6 +113,7 @@ function App() {
     <AuthProvider>
       <BrowserRouter>
         <AppContent />
+        <Toaster />
       </BrowserRouter>
     </AuthProvider>
   );

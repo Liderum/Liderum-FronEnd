@@ -110,7 +110,7 @@ export function Inventory() {
 
   const handleCategorySelected = (category: CategoriaDto) => {
     // Navega para a página de novo produto com a categoria selecionada
-    navigate('/dashboard/inventory/new-product', { state: { category } });
+    navigate('/inventory/new-product', { state: { category } });
   };
 
   // Filtros e busca
