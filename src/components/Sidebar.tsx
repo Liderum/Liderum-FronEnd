@@ -7,7 +7,6 @@ import {
   FileText,
   Package,
   Users,
-  Settings,
   BarChart3,
   Truck,
   CreditCard,
@@ -17,9 +16,6 @@ import {
   ChevronDown,
   Building2,
   UserCheck,
-  Bell,
-  HelpCircle,
-  LogOut,
   ExternalLink,
   Zap,
   LayoutDashboard
@@ -27,7 +23,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { useAuth } from '../contexts/AuthContext';
 
 const mainNavigation = [
   { 
@@ -85,9 +80,9 @@ const secondaryNavigation = [
     name: 'Gestão',
     icon: Building2,
     children: [
-      { name: 'Clientes', href: '/dashboard/customers', icon: Users },
-      { name: 'Fornecedores', href: '/dashboard/suppliers', icon: Truck },
-      { name: 'Usuários', href: '/dashboard/users', icon: UserCheck },
+      { name: 'Clientes', href: '/management/customers', icon: Users },
+      { name: 'Fornecedores', href: '/management/suppliers', icon: Truck },
+      { name: 'Usuários', href: '/management/users', icon: UserCheck },
     ]
   },
   {
@@ -101,15 +96,11 @@ const secondaryNavigation = [
   }
 ];
 
-const bottomNavigation = [
-  { name: 'Configurações', href: '/dashboard/settings', icon: Settings },
-  { name: 'Ajuda', href: '/dashboard/help', icon: HelpCircle },
-];
+const bottomNavigation = [];
 
 export function Sidebar() {
   const [expandedSections, setExpandedSections] = useState<string[]>([]);
   const location = useLocation();
-  const { signOut } = useAuth();
 
   const toggleSection = (sectionName: string) => {
     setExpandedSections(prev => 
@@ -123,14 +114,10 @@ export function Sidebar() {
     return location.pathname === href || location.pathname.startsWith(href + '/');
   };
 
-  const handleSignOut = () => {
-    signOut();
-  };
-
   return (
     <div className="w-64 bg-white border-r border-gray-200 h-full flex flex-col">
       {/* Logo */}
-      <div className="p-6 border-b border-gray-200">
+      <div className="p-6">
         <div className="flex items-center space-x-2">
           <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-blue-800 rounded-lg flex items-center justify-center">
             <span className="text-white font-bold text-sm">L</span>
@@ -251,43 +238,6 @@ export function Sidebar() {
             })}
           </div>
         </nav>
-      </div>
-
-      {/* Navegação Inferior */}
-      <div className="p-4 border-t border-gray-200">
-        <div className="space-y-1">
-          {bottomNavigation.map((item) => {
-            const Icon = item.icon;
-            const active = isActive(item.href);
-            
-            return (
-              <NavLink
-                key={item.name}
-                to={item.href}
-                className={({ isActive }) =>
-                  `group flex items-center space-x-3 px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200 ${
-                    isActive || active
-                      ? 'bg-blue-50 text-blue-700'
-                      : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'
-                  }`
-                }
-              >
-                <Icon className={`h-5 w-5 ${active ? 'text-blue-600' : 'text-gray-400 group-hover:text-gray-600'}`} />
-                <span>{item.name}</span>
-              </NavLink>
-            );
-          })}
-          
-          <Separator className="my-3" />
-          
-          <button
-            onClick={handleSignOut}
-            className="w-full flex items-center space-x-3 px-3 py-2.5 text-sm font-medium rounded-lg text-red-600 hover:bg-red-50 hover:text-red-700 transition-all duration-200"
-          >
-            <LogOut className="h-5 w-5" />
-            <span>Sair</span>
-          </button>
-        </div>
       </div>
     </div>
   );

@@ -31,6 +31,15 @@ export interface ApiResponse<T> {
   isSuccess: boolean;
 }
 
+// Resposta da API para produto único
+export interface ApiResponseSingle<T> {
+  statusCode: number;
+  message: string;
+  data: T;
+  error: null | string;
+  isSuccess: boolean;
+}
+
 // Tipos para compatibilidade com o componente atual
 export interface Product {
   id: string;

@@ -1,21 +1,14 @@
 import { useAuth } from '../contexts/AuthContext';
-import { useState } from 'react';
-import { motion } from "framer-motion";
+import { useNavigate } from 'react-router-dom';
 import { 
   Bell, 
-  Search, 
   Settings, 
   LogOut, 
   User, 
   ChevronDown,
-  Menu,
-  X,
-  Sun,
-  Moon,
   HelpCircle
 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
@@ -23,8 +16,7 @@ import { useToast } from "@/components/ui/use-toast";
 
 export function Header() {
   const { user, signOut } = useAuth();
-  const [isSearchOpen, setIsSearchOpen] = useState(false);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const navigate = useNavigate();
   const { toast } = useToast();
 
   const handleSignOut = () => {
@@ -33,6 +25,14 @@ export function Header() {
       title: "Logout realizado",
       description: "Você foi desconectado com sucesso",
     });
+  };
+
+  const handleSettings = () => {
+    navigate('/settings');
+  };
+
+  const handleHelp = () => {
+    navigate('/dashboard/help');
   };
 
   const getInitials = (name: string) => {
@@ -45,57 +45,9 @@ export function Header() {
   };
 
   return (
-    <header className="bg-white border-b border-gray-200 sticky top-0 z-50">
+    <header className="bg-white sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
-          {/* Logo e Menu Mobile */}
-          <div className="flex items-center space-x-4">
-            <Button
-              variant="ghost"
-              size="sm"
-              className="md:hidden"
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            >
-              {isMobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-            </Button>
-            
-            <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-blue-800 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-sm">L</span>
-              </div>
-              <h1 className="text-xl font-bold text-gray-900 hidden sm:block">Liderum ERP</h1>
-            </div>
-          </div>
-
-          {/* Barra de Pesquisa */}
-          <div className="flex-1 max-w-lg mx-4 hidden md:block">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-              <Input
-                placeholder="Buscar produtos, clientes, vendas..."
-                className="pl-10 pr-4"
-                onFocus={() => setIsSearchOpen(true)}
-                onBlur={() => setIsSearchOpen(false)}
-              />
-              {isSearchOpen && (
-                <motion.div
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-md shadow-lg z-50"
-                >
-                  <div className="p-2">
-                    <p className="text-sm text-gray-500 px-2 py-1">Sugestões de busca:</p>
-                    <div className="space-y-1">
-                      <div className="px-2 py-1 hover:bg-gray-50 rounded cursor-pointer text-sm">Produtos em estoque baixo</div>
-                      <div className="px-2 py-1 hover:bg-gray-50 rounded cursor-pointer text-sm">Vendas do mês</div>
-                      <div className="px-2 py-1 hover:bg-gray-50 rounded cursor-pointer text-sm">Clientes ativos</div>
-                    </div>
-                  </div>
-                </motion.div>
-              )}
-            </div>
-          </div>
-
+        <div className="flex justify-end items-center h-16">
           {/* Ações do Usuário */}
           <div className="flex items-center space-x-2">
             {/* Notificações */}
@@ -155,15 +107,6 @@ export function Header() {
               </DropdownMenuContent>
             </DropdownMenu>
 
-            {/* Configurações */}
-            <Button variant="ghost" size="sm">
-              <Settings className="h-5 w-5" />
-            </Button>
-
-            {/* Ajuda */}
-            <Button variant="ghost" size="sm">
-              <HelpCircle className="h-5 w-5" />
-            </Button>
 
             {/* Menu do Usuário */}
             <DropdownMenu>
@@ -198,52 +141,27 @@ export function Header() {
                   </div>
                 </div>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem>
-                  <User className="h-4 w-4 mr-2" />
-                  Meu Perfil
-                </DropdownMenuItem>
-                <DropdownMenuItem>
-                  <Settings className="h-4 w-4 mr-2" />
-                  Configurações
-                </DropdownMenuItem>
-                <DropdownMenuItem>
-                  <HelpCircle className="h-4 w-4 mr-2" />
-                  Ajuda
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={handleSignOut} className="text-red-600">
-                  <LogOut className="h-4 w-4 mr-2" />
-                  Sair
-                </DropdownMenuItem>
+                    <DropdownMenuItem>
+                      <User className="h-4 w-4 mr-2" />
+                      Meu Perfil
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={handleSettings}>
+                      <Settings className="h-4 w-4 mr-2" />
+                      Configurações
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={handleHelp}>
+                      <HelpCircle className="h-4 w-4 mr-2" />
+                      Ajuda
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={handleSignOut} className="text-red-600">
+                      <LogOut className="h-4 w-4 mr-2" />
+                      Sair
+                    </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
         </div>
-
-        {/* Menu Mobile */}
-        {isMobileMenuOpen && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            exit={{ opacity: 0, height: 0 }}
-            className="md:hidden border-t border-gray-200 py-4"
-          >
-            <div className="space-y-2">
-              <div className="px-2">
-                <Input
-                  placeholder="Buscar..."
-                  className="w-full"
-                />
-              </div>
-              <div className="px-2">
-                <div className="flex items-center space-x-2 text-sm text-gray-600">
-                  <User className="h-4 w-4" />
-                  <span>{user?.name}</span>
-                </div>
-              </div>
-            </div>
-          </motion.div>
-        )}
       </div>
     </header>
   );

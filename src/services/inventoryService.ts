@@ -1,5 +1,6 @@
 import { inventoryApi } from '../services/api/apiFactory';
-import { ProdutoDashboardDto, ProdutoDto, Product, InventoryStats, ApiResponse } from '../types/inventory';
+import { ProdutoDashboardDto, ProdutoDto, Product, InventoryStats, ApiResponse, ApiResponseSingle } from '../types/inventory';
+import { ProdutoRequest } from '../types/category';
 
 export class InventoryService {
 
@@ -88,6 +89,57 @@ export class InventoryService {
     } catch (error) {
       console.error('Erro ao processar dados do estoque:', error);
       throw error;
+    }
+  }
+
+  static async getProductById(id: string): Promise<Product> {
+    try {
+      const response = await inventoryApi.get<ApiResponseSingle<ProdutoDto>>(`/Products/GetById/${id}`);
+      
+      if (!response.data.isSuccess) {
+        throw new Error(response.data.message || 'Erro ao buscar produto');
+      }
+      
+      const produto = response.data.data;
+      
+      if (!produto) {
+        throw new Error('Produto não encontrado');
+      }
+      
+      return this.convertApiProductToComponent(produto);
+    } catch (error) {
+      console.error('Erro ao buscar produto:', error);
+      throw new Error('Falha ao carregar produto');
+    }
+  }
+
+  static async deleteProduct(id: string): Promise<string> {
+    try {
+      const response = await inventoryApi.delete<ApiResponse<string>>(`/Products/Delete/${id}`);
+      
+      if (!response.data.isSuccess) {
+        throw new Error(response.data.message || 'Erro ao excluir produto');
+      }
+      
+      return response.data.message || 'Produto excluído com sucesso';
+    } catch (error) {
+      console.error('Erro ao excluir produto:', error);
+      throw new Error('Falha ao excluir produto');
+    }
+  }
+
+  static async updateProduct(id: string, productData: ProdutoRequest): Promise<string> {
+    try {
+      const response = await inventoryApi.put<ApiResponse<string>>(`/Products/Update/${id}`, productData);
+      
+      if (!response.data.isSuccess) {
+        throw new Error(response.data.message || 'Erro ao atualizar produto');
+      }
+      
+      return response.data.message || 'Produto atualizado com sucesso';
+    } catch (error) {
+      console.error('Erro ao atualizar produto:', error);
+      throw new Error('Falha ao atualizar produto');
     }
   }
 }

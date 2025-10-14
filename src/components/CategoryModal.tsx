@@ -6,7 +6,8 @@ import {
   ArrowLeft, 
   Loader2,
   CheckCircle,
-  XCircle
+  XCircle,
+  X
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -136,7 +137,15 @@ export function CategoryModal({ isOpen, onClose, onCategorySelected }: CategoryM
         className="w-full max-w-md"
       >
         <Card className="border-0 shadow-lg">
-          <CardHeader className="text-center">
+          <CardHeader className="text-center relative">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleClose}
+              className="absolute top-4 right-4 h-8 w-8 p-0 hover:bg-gray-100"
+            >
+              <X className="h-4 w-4" />
+            </Button>
             <div className="flex justify-center mb-4">
               <Package className="h-12 w-12 text-blue-500" />
             </div>

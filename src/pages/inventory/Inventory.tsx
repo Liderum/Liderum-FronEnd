@@ -31,6 +31,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useToast } from "@/components/ui/use-toast";
 import { Product, InventoryStats } from '../../types/inventory';
 import { InventoryService } from '../../services/inventoryService';
@@ -61,6 +62,9 @@ export function Inventory() {
     suppliersCount: 0
   });
   const [showCategoryModal, setShowCategoryModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [productToDelete, setProductToDelete] = useState<Product | null>(null);
+  const [deleting, setDeleting] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -102,6 +106,49 @@ export function Inventory() {
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleViewProduct = (product: Product) => {
+    navigate(`/inventory/view/${product.id}`);
+  };
+
+  const handleEditProduct = (product: Product) => {
+    navigate(`/inventory/edit/${product.id}`);
+  };
+
+  const handleDeleteProduct = (product: Product) => {
+    setProductToDelete(product);
+    setShowDeleteModal(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!productToDelete) return;
+    
+    try {
+      setDeleting(true);
+      await InventoryService.deleteProduct(productToDelete.id);
+      
+      toast({
+        title: "Sucesso",
+        description: "Produto excluído com sucesso",
+        variant: "default",
+      });
+      
+      // Reload products after deletion
+      await loadProducts();
+      
+      setShowDeleteModal(false);
+      setProductToDelete(null);
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Erro ao excluir produto';
+      toast({
+        title: "Erro",
+        description: errorMessage,
+        variant: "destructive",
+      });
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -205,11 +252,11 @@ export function Inventory() {
 
   const getStockBadge = (quantity: number, minQuantity: number) => {
     if (quantity === 0) {
-      return <Badge variant="destructive">Sem Estoque</Badge>;
+      return <Badge variant="destructive">Sem Estoque (0)</Badge>;
     } else if (quantity <= minQuantity) {
-      return <Badge variant="destructive" className="bg-orange-100 text-orange-800">Estoque Baixo</Badge>;
+      return <Badge variant="destructive" className="bg-orange-100 text-orange-800">Estoque Baixo ({quantity})</Badge>;
     } else {
-      return <Badge variant="default" className="bg-green-100 text-green-800">Em Estoque</Badge>;
+      return <Badge variant="default" className="bg-green-100 text-green-800">Em Estoque ({quantity})</Badge>;
     }
   };
 
@@ -460,7 +507,6 @@ export function Inventory() {
                       <th className="text-left py-3 px-4 font-medium text-gray-900">Categoria</th>
                       <th className="text-left py-3 px-4 font-medium text-gray-900">Marca</th>
                       <th className="text-left py-3 px-4 font-medium text-gray-900">Estoque</th>
-                      <th className="text-left py-3 px-4 font-medium text-gray-900">Status do Estoque</th>
                       <th className="text-left py-3 px-4 font-medium text-gray-900">Preço</th>
                       <th className="text-left py-3 px-4 font-medium text-gray-900">Ações</th>
                     </tr>
@@ -478,10 +524,7 @@ export function Inventory() {
                         <td className="py-3 px-4 text-sm text-gray-900">{product.category}</td>
                         <td className="py-3 px-4 text-sm text-gray-900">{product.brand}</td>
                         <td className="py-3 px-4">
-                          <span className="text-sm text-gray-900 font-medium">{product.quantity}</span>
-                        </td>
-                        <td className="py-3 px-4">
-                          {getStockBadge(product.quantity, product.minQuantity)}
+                          {getStockBadge(product.quantity, product.maxQuantity)}
                         </td>
                         <td className="py-3 px-4">
                           <div className="text-sm text-gray-900">
@@ -491,7 +534,6 @@ export function Inventory() {
                             Custo: R$ {product.costPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                           </div>
                         </td>
-                        <td className="py-3 px-4">{getStatusBadge(product.status)}</td>
                         <td className="py-3 px-4">
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
@@ -500,15 +542,18 @@ export function Inventory() {
                               </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
-                              <DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => handleViewProduct(product)}>
                                 <Eye className="h-4 w-4 mr-2" />
                                 Visualizar
                               </DropdownMenuItem>
-                              <DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => handleEditProduct(product)}>
                                 <Edit className="h-4 w-4 mr-2" />
                                 Editar
                               </DropdownMenuItem>
-                              <DropdownMenuItem className="text-red-600">
+                              <DropdownMenuItem 
+                                className="text-red-600"
+                                onClick={() => handleDeleteProduct(product)}
+                              >
                                 <Trash2 className="h-4 w-4 mr-2" />
                                 Excluir
                               </DropdownMenuItem>
@@ -576,6 +621,36 @@ export function Inventory() {
         onClose={() => setShowCategoryModal(false)}
         onCategorySelected={handleCategorySelected}
       />
+
+      {/* Modal de Confirmação de Exclusão */}
+      <Dialog open={showDeleteModal} onOpenChange={setShowDeleteModal}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Confirmar Exclusão</DialogTitle>
+            <DialogDescription>
+              Tem certeza que deseja excluir o produto <strong>{productToDelete?.name}</strong>?
+              <br />
+              <span className="text-red-600 font-medium">Esta ação não pode ser desfeita.</span>
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button 
+              variant="outline" 
+              onClick={() => setShowDeleteModal(false)}
+              disabled={deleting}
+            >
+              Cancelar
+            </Button>
+            <Button 
+              variant="destructive" 
+              onClick={confirmDelete}
+              disabled={deleting}
+            >
+              {deleting ? 'Excluindo...' : 'Excluir Produto'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

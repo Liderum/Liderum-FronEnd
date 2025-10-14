@@ -18,10 +18,14 @@ import { Sales } from './pages/sales/Sales';
 import { Billing } from './pages/billing/Billing';
 import { Inventory } from './pages/inventory/Inventory';
 import { NewProductPage } from './pages/inventory/NewProductPage';
+import ProductView from './pages/inventory/ProductView';
+import ProductEdit from './pages/inventory/ProductEdit';
+import Users from './pages/users/Users';
 import { Contact } from './pages/Contact';
 import ForgotPassword from './pages/ForgotPassword';
 import ValidateCode from './pages/ValidateCode';
 import ResetPassword from './pages/ResetPassword';
+import Settings from './pages/settings/Settings';
 
 function AppContent() {
   // Monitora mudanças de rota para segurança
@@ -70,6 +74,18 @@ function AppContent() {
       >
         <Route index element={<Dashboard />} />
       </Route>
+
+      {/* Gestão / Management */}
+      <Route
+        path="/management"
+        element={
+          <PrivateRoute>
+            <DashboardLayout />
+          </PrivateRoute>
+        }
+      >
+        <Route path="users" element={<Users />} />
+      </Route>
       <Route
         path="/sales"
         element={
@@ -100,6 +116,18 @@ function AppContent() {
       >
         <Route index element={<Inventory />} />
         <Route path="new-product" element={<NewProductPage />} />
+        <Route path="view/:id" element={<ProductView />} />
+        <Route path="edit/:id" element={<ProductEdit />} />
+      </Route>
+      <Route
+        path="/settings"
+        element={
+          <PrivateRoute>
+            <DashboardLayout />
+          </PrivateRoute>
+        }
+      >
+        <Route index element={<Settings />} />
       </Route>
 
       {/* Rota padrão */}

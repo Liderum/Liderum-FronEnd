@@ -11,13 +11,28 @@ export function DashboardLayout() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <Header />
-      
       <div className="flex">
         {/* Sidebar Desktop */}
-        <div className="hidden md:flex md:w-64 md:flex-col md:fixed md:inset-y-0 md:pt-16">
+        <div className="hidden md:flex md:w-64 md:flex-col md:fixed md:inset-y-0">
           <Sidebar />
+        </div>
+
+        {/* Main Content */}
+        <div className="md:pl-64 flex flex-col flex-1">
+          <Header />
+          <main className="flex-1">
+            <div className="py-6">
+              <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <Outlet />
+                </motion.div>
+              </div>
+            </div>
+          </main>
         </div>
 
         {/* Sidebar Mobile */}
@@ -44,23 +59,6 @@ export function DashboardLayout() {
             </div>
           </motion.div>
         )}
-
-        {/* Main Content */}
-        <div className="md:pl-64 flex flex-col flex-1">
-          <main className="flex-1">
-            <div className="py-6">
-              <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.3 }}
-                >
-                  <Outlet />
-                </motion.div>
-              </div>
-            </div>
-          </main>
-        </div>
       </div>
 
       {/* Mobile Menu Button */}
