@@ -7,8 +7,12 @@ import ChartShowcase from '../components/ChartShowcase';
 import Beneficios from '../components/Beneficios';
 import CTA from '../components/CTA';
 import Footer from '../components/Footer';
+import { useSessionCleanup } from '@/hooks/useSessionCleanup';
 
 const Index = () => {
+  // Limpa sessão ao acessar página pública
+  useSessionCleanup();
+
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />

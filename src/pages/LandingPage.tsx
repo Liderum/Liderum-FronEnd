@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import ChartShowcase from '@/components/ChartShowcase';
 import PricingSection from '@/components/PricingSection';
+import { useSessionCleanup } from '@/hooks/useSessionCleanup';
 import { 
   ArrowRight, 
   CheckCircle, 
@@ -23,6 +24,9 @@ import {
 
 export function LandingPage() {
   const navigate = useNavigate();
+  
+  // Limpa sessão ao acessar página pública
+  useSessionCleanup();
 
   const scrollToSection = (sectionId: string) => {
     const element = document.getElementById(sectionId);
@@ -124,7 +128,7 @@ export function LandingPage() {
                 </Button>
                 <Button 
                   size="lg" 
-                  onClick={() => navigate('/cadastro')}
+                  onClick={() => navigate('/contact')}
                   className="bg-blue-600 hover:bg-blue-700 text-white border-2 border-blue-600 shadow-md hover:shadow-lg transition-all duration-300 transform hover:scale-105 px-8 py-4 text-lg font-semibold"
                 >
                   <Clock className="mr-2 h-5 w-5" />
@@ -211,14 +215,14 @@ export function LandingPage() {
                 </Button>
               </Card>
 
-              <Card className="p-8 hover:shadow-xl transition-all duration-300 border-2 border-gray-200 hover:border-blue-300 bg-white group hover:-translate-y-2">
+              <Card className="p-8 hover:shadow-xl transition-all duration-300 border-2 border-gray-200 dark:border-gray-700 hover:border-green-300 dark:hover:border-green-500 bg-white dark:bg-gray-900 group hover:-translate-y-2">
                 <div className="flex items-center gap-4 mb-6">
-                  <div className="p-3 bg-green-100 rounded-lg group-hover:bg-green-200 transition-colors duration-300">
-                    <ShoppingCart className="h-8 w-8 text-green-600" />
+                  <div className="p-3 bg-green-100 dark:bg-green-900 rounded-lg group-hover:bg-green-200 dark:group-hover:bg-green-800 transition-colors duration-300">
+                    <ShoppingCart className="h-8 w-8 text-green-600 dark:text-green-400" />
                   </div>
-                  <h3 className="text-xl font-semibold text-gray-900">Vendas</h3>
+                  <h3 className="text-xl font-semibold text-gray-900 dark:text-white">Vendas</h3>
                 </div>
-                <ul className="space-y-3 text-gray-700 mb-6">
+                <ul className="space-y-3 text-gray-700 dark:text-gray-300 mb-6">
                   <li className="flex items-center gap-2">
                     <CheckCircle className="h-4 w-4 text-green-500" />
                     Pedidos de Vendas
@@ -238,20 +242,20 @@ export function LandingPage() {
                 </ul>
                 <Button 
                   variant="outline" 
-                  className="w-full group-hover:bg-green-50 group-hover:border-green-300 transition-all duration-300"
+                  className="w-full group-hover:bg-green-50 dark:group-hover:bg-green-900 group-hover:border-green-300 dark:group-hover:border-green-500 transition-all duration-300"
                 >
                   Saiba mais <ChevronRight className="h-4 w-4 ml-2" />
                 </Button>
               </Card>
 
-              <Card className="p-8 hover:shadow-xl transition-all duration-300 border-2 border-gray-200 hover:border-blue-300 bg-white group hover:-translate-y-2">
+              <Card className="p-8 hover:shadow-xl transition-all duration-300 border-2 border-gray-200 dark:border-gray-700 hover:border-orange-300 dark:hover:border-orange-500 bg-white dark:bg-gray-900 group hover:-translate-y-2">
                 <div className="flex items-center gap-4 mb-6">
-                  <div className="p-3 bg-orange-100 rounded-lg group-hover:bg-orange-200 transition-colors duration-300">
-                    <Package className="h-8 w-8 text-orange-600" />
+                  <div className="p-3 bg-orange-100 dark:bg-orange-900 rounded-lg group-hover:bg-orange-200 dark:group-hover:bg-orange-800 transition-colors duration-300">
+                    <Package className="h-8 w-8 text-orange-600 dark:text-orange-400" />
                   </div>
-                  <h3 className="text-xl font-semibold text-gray-900">Estoque</h3>
+                  <h3 className="text-xl font-semibold text-gray-900 dark:text-white">Estoque</h3>
                 </div>
-                <ul className="space-y-3 text-gray-700 mb-6">
+                <ul className="space-y-3 text-gray-700 dark:text-gray-300 mb-6">
                   <li className="flex items-center gap-2">
                     <CheckCircle className="h-4 w-4 text-green-500" />
                     Controle de Estoque
@@ -271,20 +275,20 @@ export function LandingPage() {
                 </ul>
                 <Button 
                   variant="outline" 
-                  className="w-full group-hover:bg-orange-50 group-hover:border-orange-300 transition-all duration-300"
+                  className="w-full group-hover:bg-orange-50 dark:group-hover:bg-orange-900 group-hover:border-orange-300 dark:group-hover:border-orange-500 transition-all duration-300"
                 >
                   Saiba mais <ChevronRight className="h-4 w-4 ml-2" />
                 </Button>
               </Card>
 
-              <Card className="p-8 hover:shadow-xl transition-all duration-300 border-2 border-gray-200 hover:border-blue-300 bg-white group hover:-translate-y-2">
+              <Card className="p-8 hover:shadow-xl transition-all duration-300 border-2 border-gray-200 dark:border-gray-700 hover:border-purple-300 dark:hover:border-purple-500 bg-white dark:bg-gray-900 group hover:-translate-y-2">
                 <div className="flex items-center gap-4 mb-6">
-                  <div className="p-3 bg-purple-100 rounded-lg group-hover:bg-purple-200 transition-colors duration-300">
-                    <DollarSign className="h-8 w-8 text-purple-600" />
+                  <div className="p-3 bg-purple-100 dark:bg-purple-900 rounded-lg group-hover:bg-purple-200 dark:group-hover:bg-purple-800 transition-colors duration-300">
+                    <DollarSign className="h-8 w-8 text-purple-600 dark:text-purple-400" />
                   </div>
-                  <h3 className="text-xl font-semibold text-gray-900">Financeiro</h3>
+                  <h3 className="text-xl font-semibold text-gray-900 dark:text-white">Financeiro</h3>
                 </div>
-                <ul className="space-y-3 text-gray-700 mb-6">
+                <ul className="space-y-3 text-gray-700 dark:text-gray-300 mb-6">
                   <li className="flex items-center gap-2">
                     <CheckCircle className="h-4 w-4 text-green-500" />
                     Contas a Pagar
@@ -304,7 +308,7 @@ export function LandingPage() {
                 </ul>
                 <Button 
                   variant="outline" 
-                  className="w-full group-hover:bg-purple-50 group-hover:border-purple-300 transition-all duration-300"
+                  className="w-full group-hover:bg-purple-50 dark:group-hover:bg-purple-900 group-hover:border-purple-300 dark:group-hover:border-purple-500 transition-all duration-300"
                 >
                   Saiba mais <ChevronRight className="h-4 w-4 ml-2" />
                 </Button>
@@ -471,7 +475,7 @@ export function LandingPage() {
                 </Button>
                 <Button 
                   size="lg" 
-                  onClick={() => navigate('/cadastro')}
+                  onClick={() => navigate('/contact')}
                   className="bg-white text-gray-900 hover:bg-gray-100 px-8 py-6 text-lg font-semibold shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105"
                 >
                   <Clock className="mr-2 h-6 w-6" />

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -10,6 +10,11 @@ import { useAuth } from '@/contexts/AuthContext';
 import { motion } from "framer-motion";
 import { AxiosError } from 'axios';
 import { validateEmail } from '@/lib/emailValidation';
+import { Redirecting } from '@/components/Redirecting';
+import { SimpleToast } from '@/components/SimpleToast';
+import { useRedirect } from '@/hooks/useRedirect';
+import { useSessionCleanup } from '@/hooks/useSessionCleanup';
+import { useSimpleToast } from '@/hooks/useSimpleToast';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -19,7 +24,34 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
-  const { signIn } = useAuth();
+  const location = useLocation();
+  const { signIn, errorToast, hideError } = useAuth();
+
+  // Pega a página de origem para redirecionar após login
+  const from = location.state?.from?.pathname || '/home';
+  
+  // Limpa sessão apenas se não veio de uma página protegida
+  useEffect(() => {
+    if (!location.state?.from) {
+      // Se acessou diretamente a página de login, limpa sessão
+      localStorage.removeItem('@Liderum:token');
+      localStorage.removeItem('@Liderum:refreshToken');
+      localStorage.removeItem('@Liderum:user');
+      console.log('Sessão limpa - acesso direto à página de login');
+    }
+  }, [location.state]);
+  
+  // Hook para gerenciar redirecionamento
+  const { 
+    isRedirecting, 
+    countdown, 
+    startRedirect, 
+    cancelRedirect, 
+    redirectNow 
+  } = useRedirect({
+    delay: 3000,
+    destination: from
+  });
 
 
   useEffect(() => {
@@ -62,34 +94,20 @@ const Login = () => {
       
       toast({
         title: "Bem-vindo!",
-        description: "Login realizado com sucesso. Redirecionando...",
+        description: "Login realizado com sucesso.",
         duration: 2000,
         className: "bg-green-50 border-green-200",
       });
       
-      setTimeout(() => {
-        navigate('/welcome');
-      }, 1000);
+      // Inicia o redirecionamento
+      startRedirect();
     } catch (error) {
-      let errorMessage = "Não foi possível fazer login. Verifique suas credenciais.";
-      
-      if (error instanceof AxiosError && error.response?.data?.errors?.length > 0) {
-        errorMessage = error.response.data.errors[0];
-      } else if (error instanceof Error) {
-        errorMessage = error.message;
-      }
-        
-      toast({
-        title: "Erro ao fazer login",
-        description: errorMessage,
-        variant: "destructive",
-        duration: 5000,
-        className: "bg-red-50 border-red-200",
-      });
-      
+      // O erro já é tratado no AuthContext e mostrado via toast
+      // Aqui apenas limpamos os campos se necessário
       setPassword('');
       
-      if (errorMessage.toLowerCase().includes('email')) {
+      // Se o erro menciona email, limpa o campo de email também
+      if (error instanceof Error && error.message.toLowerCase().includes('email')) {
         setEmail('');
       }
     } finally {
@@ -97,7 +115,49 @@ const Login = () => {
     }
   };
 
+  // Hook para toast simples
+  const { toast: simpleToast, showToast, hideToast, updateCountdown } = useSimpleToast();
+
+  // Se está redirecionando, mostra apenas o componente de redirecionamento
+  if (isRedirecting) {
+    const destination = from === '/home' ? 'página inicial' : 'dashboard';
+    return (
+      <>
+        <Redirecting 
+          message="Preparando seu ambiente de trabalho..."
+          destination={destination}
+          countdown={countdown}
+        />
+        <SimpleToast
+          isVisible={true}
+          message="Login realizado com sucesso!"
+          countdown={countdown}
+          onCancel={cancelRedirect}
+          onGoNow={() => redirectNow()}
+        />
+        
+        {/* Toast de erro do AuthContext */}
+        <SimpleToast
+          isVisible={errorToast.isVisible}
+          message={errorToast.message}
+          type={errorToast.type}
+          onCancel={hideError}
+          showActions={false}
+        />
+      </>
+    );
+  }
+
   return (
+    <>
+      {/* Toast de erro do AuthContext */}
+      <SimpleToast
+        isVisible={errorToast.isVisible}
+        message={errorToast.message}
+        type={errorToast.type}
+        onCancel={hideError}
+        showActions={false}
+      />
     <motion.div 
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
@@ -121,7 +181,9 @@ const Login = () => {
               <ArrowLeft className="h-5 w-5 text-primary" />
             </Link>
           </Button>
-          <h1 className="text-3xl font-bold text-primary">Liderum</h1>
+          <div className="flex items-center space-x-4">
+            <h1 className="text-3xl font-bold text-primary">Liderum</h1>
+          </div>
         </motion.div>
         
         <motion.div
@@ -175,9 +237,9 @@ const Login = () => {
                 <div className="space-y-2">
                   <div className="flex justify-between items-center">
                     <Label htmlFor="password">Senha</Label>
-                    <Link to="/recuperar-senha" className="text-xs text-primary hover:underline">
+                    {/* <Link to="/recuperar-senha" className="text-xs text-primary hover:underline">
                       Esqueci minha senha
-                    </Link>
+                    </Link> */}
                   </div>
                   <div className="relative">
                     <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-400">
@@ -251,6 +313,13 @@ const Login = () => {
                   Criar nova conta
                 </Link>
               </p>
+              
+              <p className="text-center text-sm text-gray-600">
+                Esqueceu sua senha?{" "}
+                <Link to="/forgot-password" className="text-primary font-medium hover:underline">
+                  Recuperar senha
+                </Link>
+              </p>
             </CardFooter>
           </Card>
         </motion.div>
@@ -265,6 +334,7 @@ const Login = () => {
         </motion.p>
       </div>
     </motion.div>
+    </>
   );
 };
 
