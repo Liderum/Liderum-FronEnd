@@ -50,7 +50,9 @@ export function Inventory() {
   const [sortBy, setSortBy] = useState('name');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage] = useState(20);
+  const [itemsPerPage] = useState(10); // Mudado para 10 para corresponder à API
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
   const [showLowStockOnly, setShowLowStockOnly] = useState(false);
   const [showOutOfStockOnly, setShowOutOfStockOnly] = useState(false);
   const [stats, setStats] = useState<InventoryStats>({
@@ -72,16 +74,22 @@ export function Inventory() {
     loadProducts();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const loadProducts = async () => {
+  const loadProducts = async (page: number = currentPage) => {
     try {
       setLoading(true);
       setError('');
       
-      const { products, stats, message } = await InventoryService.getInventoryData();
+      const { products, stats, pagination, message } = await InventoryService.getInventoryData(page, itemsPerPage);
       
       setProducts(products);
       setFilteredProducts(products);
       setStats(stats);
+      
+      if (pagination) {
+        setTotalPages(pagination.totalPages);
+        setTotalItems(pagination.total);
+        setCurrentPage(pagination.page);
+      }
       
       if (message) {
         toast({
@@ -159,6 +167,7 @@ export function Inventory() {
   useEffect(() => {
     let filtered = [...products];
 
+    // Aplicar filtros apenas nos produtos carregados
     if (searchTerm) {
       filtered = filtered.filter(product =>
         product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -210,14 +219,12 @@ export function Inventory() {
     });
 
     setFilteredProducts(filtered);
-    setCurrentPage(1);
   }, [products, searchTerm, selectedCategory, selectedStatus, selectedSupplier, sortBy, sortOrder, showLowStockOnly, showOutOfStockOnly]);
 
-  // Paginação
-  const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
+  // Paginação do servidor - não precisamos mais de paginação local
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
-  const currentProducts = filteredProducts.slice(startIndex, endIndex);
+  const currentProducts = filteredProducts; // Mostra todos os produtos filtrados da página atual
 
   // Categorias únicas dos produtos
   const categories = useMemo(() => {
@@ -279,7 +286,7 @@ export function Inventory() {
             <XCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
             <h3 className="text-lg font-semibold text-gray-900 mb-2">Erro ao carregar estoque</h3>
             <p className="text-gray-600 mb-4">{error}</p>
-            <Button onClick={loadProducts}>
+            <Button onClick={() => loadProducts()}>
               <RefreshCw className="h-4 w-4 mr-2" />
               Tentar novamente
             </Button>
@@ -469,7 +476,7 @@ export function Inventory() {
               <div>
                 <CardTitle>Produtos</CardTitle>
                 <CardDescription>
-                  {filteredProducts.length} de {products.length} produtos
+                  {filteredProducts.length} de {totalItems} produtos
                 </CardDescription>
               </div>
               <div className="flex items-center space-x-2">
@@ -586,13 +593,13 @@ export function Inventory() {
             {totalPages > 1 && (
               <div className="flex items-center justify-between mt-6">
                 <div className="text-sm text-gray-700">
-                  Mostrando {startIndex + 1} a {Math.min(endIndex, filteredProducts.length)} de {filteredProducts.length} produtos
+                  Mostrando {startIndex + 1} a {Math.min(endIndex, filteredProducts.length)} de {totalItems} produtos
                 </div>
                 <div className="flex items-center space-x-2">
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => setCurrentPage(currentPage - 1)}
+                    onClick={() => loadProducts(currentPage - 1)}
                     disabled={currentPage === 1}
                   >
                     Anterior
@@ -603,7 +610,7 @@ export function Inventory() {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => setCurrentPage(currentPage + 1)}
+                    onClick={() => loadProducts(currentPage + 1)}
                     disabled={currentPage === totalPages}
                   >
                     Próximo
