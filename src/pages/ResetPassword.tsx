@@ -9,6 +9,8 @@ import { useToast } from "@/components/ui/use-toast";
 import { motion } from "framer-motion";
 import { ResetPasswordRequest, ResetPasswordResponse } from '@/types/auth';
 import api from '@/services/api/axios';
+import { useAuth } from '@/contexts/AuthContext';
+import { SimpleToast } from '@/components/SimpleToast';
 
 const ResetPassword = () => {
   const [formData, setFormData] = useState({
@@ -25,6 +27,7 @@ const ResetPassword = () => {
     general?: string;
   }>({});
   const { toast } = useToast();
+  const { showError, errorToast, hideError } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -119,31 +122,10 @@ const ResetPassword = () => {
     } catch (error: unknown) {
       console.error('Erro ao redefinir senha:', error);
       
-      let errorMessage = "Não foi possível redefinir a senha. Tente novamente.";
-      
-      if (error && typeof error === 'object' && 'response' in error) {
-        const axiosError = error as { response?: { data?: { errors?: string | string[], message?: string } } };
-        
-        if (axiosError.response?.data?.errors) {
-          errorMessage = Array.isArray(axiosError.response.data.errors) 
-            ? axiosError.response.data.errors[0] 
-            : axiosError.response.data.errors;
-        } else if (axiosError.response?.data?.message) {
-          errorMessage = axiosError.response.data.message;
-        }
-      } else if (error instanceof Error) {
-        errorMessage = error.message;
-      }
+      // Usa o novo sistema de toast melhorado que detecta automaticamente o tipo de erro
+      showError(error as Error);
 
-      toast({
-        title: "Erro ao redefinir senha",
-        description: errorMessage,
-        variant: "destructive",
-        duration: 5000,
-        className: "bg-red-50 border-red-200",
-      });
-
-      setErrors({ general: errorMessage });
+      setErrors({ general: 'Erro ao redefinir senha' });
     } finally {
       setIsLoading(false);
     }
@@ -351,6 +333,18 @@ const ResetPassword = () => {
           </Button>
         </CardFooter>
       </Card>
+      
+      {/* Toast de erro melhorado */}
+      <SimpleToast
+        isVisible={errorToast.isVisible}
+        message={errorToast.message}
+        type={errorToast.type}
+        onCancel={hideError}
+        showActions={false}
+        details={errorToast.details}
+        errorCode={errorToast.errorCode}
+        timestamp={errorToast.timestamp}
+      />
     </motion.div>
   );
 };

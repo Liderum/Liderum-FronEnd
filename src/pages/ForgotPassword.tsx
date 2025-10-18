@@ -10,6 +10,8 @@ import { motion } from "framer-motion";
 import { validateEmail } from '@/lib/emailValidation';
 import { ForgotPasswordRequest, ForgotPasswordResponse } from '@/types/auth';
 import api from '@/services/api/axios';
+import { useAuth } from '@/contexts/AuthContext';
+import { SimpleToast } from '@/components/SimpleToast';
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState('');
@@ -17,6 +19,7 @@ const ForgotPassword = () => {
   const [isSuccess, setIsSuccess] = useState(false);
   const [errors, setErrors] = useState<{email?: string}>({});
   const { toast } = useToast();
+  const { showError, errorToast, hideError } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -59,29 +62,8 @@ const ForgotPassword = () => {
     } catch (error: unknown) {
       console.error('Erro ao solicitar recuperação:', error);
       
-      let errorMessage = "Não foi possível enviar o código. Tente novamente.";
-      
-      if (error && typeof error === 'object' && 'response' in error) {
-        const axiosError = error as { response?: { data?: { errors?: string | string[], message?: string } } };
-        
-        if (axiosError.response?.data?.errors) {
-          errorMessage = Array.isArray(axiosError.response.data.errors) 
-            ? axiosError.response.data.errors[0] 
-            : axiosError.response.data.errors;
-        } else if (axiosError.response?.data?.message) {
-          errorMessage = axiosError.response.data.message;
-        }
-      } else if (error instanceof Error) {
-        errorMessage = error.message;
-      }
-
-      toast({
-        title: "Erro ao enviar código",
-        description: errorMessage,
-        variant: "destructive",
-        duration: 5000,
-        className: "bg-red-50 border-red-200",
-      });
+      // Usa o novo sistema de toast melhorado que detecta automaticamente o tipo de erro
+      showError(error as Error);
     } finally {
       setIsLoading(false);
     }
@@ -210,6 +192,18 @@ const ForgotPassword = () => {
           </Button>
         </CardFooter>
       </Card>
+      
+      {/* Toast de erro melhorado */}
+      <SimpleToast
+        isVisible={errorToast.isVisible}
+        message={errorToast.message}
+        type={errorToast.type}
+        onCancel={hideError}
+        showActions={false}
+        details={errorToast.details}
+        errorCode={errorToast.errorCode}
+        timestamp={errorToast.timestamp}
+      />
     </motion.div>
   );
 };

@@ -5,7 +5,7 @@ import { ResponseRegisteredUser } from '@/types/auth';
 // Instância base para autenticação
 const authApi = axios.create({
   baseURL: API_CONFIG.AUTH.BASE_URL,
-  timeout: 10000,
+  timeout: 15000, // Aumentado para 15 segundos
   headers: {
     'Content-Type': 'application/json',
   },
@@ -19,7 +19,7 @@ class ApiFactory {
     if (!this.instances.has(module)) {
       const instance = axios.create({
         baseURL: API_CONFIG[module].BASE_URL,
-        timeout: 10000,
+        timeout: 15000, // Aumentado para 15 segundos
         headers: {
           'Content-Type': 'application/json',
         },
@@ -48,11 +48,21 @@ class ApiFactory {
       }
     );
 
-    // Response interceptor para renovar token
+    // Response interceptor para renovar token e tratamento de erros
     instance.interceptors.response.use(
       (response) => response,
       async (error) => {
         const originalRequest = error.config;
+        
+        // Log detalhado do erro para debug
+        console.error('Erro na API:', {
+          message: error.message,
+          code: error.code,
+          status: error.response?.status,
+          url: originalRequest?.url,
+          method: originalRequest?.method,
+          timeout: error.code === 'ECONNABORTED'
+        });
         
         if (error.response?.status === 401 && !originalRequest._retry) {
           originalRequest._retry = true;
@@ -85,6 +95,11 @@ class ApiFactory {
             localStorage.removeItem('@Liderum:user');
             window.location.href = '/login';
           }
+        }
+        
+        // Melhora a mensagem de erro para timeouts
+        if (error.code === 'ECONNABORTED' || error.message.includes('timeout')) {
+          error.message = `Timeout na requisição para ${originalRequest?.url || 'servidor'}`;
         }
         
         return Promise.reject(error);

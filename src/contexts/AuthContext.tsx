@@ -1,7 +1,7 @@
 import { createContext, useContext, useState, ReactNode } from 'react';
 import api from '../services/api/axios';
 import { User, LoginRequest, ResponseRegisteredUser } from '../types/auth';
-import { API_CONFIG } from '@/config/api_config_dsv';
+import { API_CONFIG } from '@/config/api';
 import { useErrorToast } from '@/hooks/useErrorToast';
 
 interface AuthContextData {
@@ -14,8 +14,11 @@ interface AuthContextData {
     isVisible: boolean;
     message: string;
     type: 'error' | 'warning' | 'info';
+    details?: string;
+    errorCode?: string;
+    timestamp?: string;
   };
-  showError: (message: string, type?: 'error' | 'warning' | 'info') => void;
+  showError: (error: string | Error | { message: string; type?: 'error' | 'warning' | 'info'; details?: string; errorCode?: string }) => void;
   hideError: () => void;
 }
 
@@ -87,18 +90,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
     } catch (error) {
       console.error('Erro no login:', error);
       
-      // Determina a mensagem de erro
-      let errorMessage = "Não foi possível fazer login. Verifique suas credenciais.";
-      
-      if (error instanceof Error) {
-        // Se o erro já tem uma mensagem específica do backend, usa ela
-        if (error.message && error.message !== 'Erro no login') {
-          errorMessage = error.message;
-        }
-      }
-      
-      // Mostra o toast de erro
-      showError(errorMessage, 'error');
+      // Mostra o toast de erro com detecção automática de tipo
+      showError(error);
       
       // Limpa dados em caso de erro
       localStorage.removeItem('@Liderum:token');
