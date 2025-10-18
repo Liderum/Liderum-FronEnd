@@ -54,7 +54,7 @@ const developmentConfig: ApiConfig = {
     BASE_URL: import.meta.env.VITE_BILLING_API_URL || 'https://localhost:3003',
   },
   INVENTORY: {
-    BASE_URL: import.meta.env.VITE_INVENTORY_API_URL || 'https://localhost:7143/Liderum',
+    BASE_URL: import.meta.env.VITE_INVENTORY_API_URL || 'https://localhost:7143/Liderum', 
   },
   USERS: {
     BASE_URL: import.meta.env.VITE_USERS_API_URL || 'https://localhost:7247/liderum/api/user',
