@@ -1,10 +1,10 @@
 import axios, { AxiosInstance } from 'axios';
-import { API_CONFIG, ApiModule } from '@/config/api_config_dsv';
+import { API_CONFIG, ApiModule } from '@/config/api';
 import { ResponseRegisteredUser } from '@/types/auth';
 
 // Instância base para autenticação
 const authApi = axios.create({
-  baseURL: API_CONFIG.AUTH.BASE_URL_DSV,
+  baseURL: API_CONFIG.AUTH.BASE_URL,
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json',
@@ -18,7 +18,7 @@ class ApiFactory {
   static getInstance(module: ApiModule): AxiosInstance {
     if (!this.instances.has(module)) {
       const instance = axios.create({
-        baseURL: API_CONFIG[module].BASE_URL_DSV,
+        baseURL: API_CONFIG[module].BASE_URL,
         timeout: 10000,
         headers: {
           'Content-Type': 'application/json',
