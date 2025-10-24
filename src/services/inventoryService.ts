@@ -1,20 +1,20 @@
 import { inventoryApi } from '../services/api/apiFactory';
-import { ProdutoDashboardDto, ProdutoDto, Product, InventoryStats, ApiResponse, ApiResponseSingle } from '../types/inventory';
+import { ProdutoDashboardDto, ProdutoDto, Product, InventoryStats, ApiResponse, ApiResponseSingle, ApiPaginatedResponse, PaginatedResponse } from '../types/inventory';
 import { ProdutoRequest } from '../types/category';
 
 export class InventoryService {
 
-  static async getProducts(): Promise<ProdutoDashboardDto> {
+  static async getProducts(page: number = 1, pageSize: number = 10): Promise<ProdutoDashboardDto> {
     try {
-      const response = await inventoryApi.get<ApiResponse<ProdutoDashboardDto>>('/Products/GetAll');
+      const response = await inventoryApi.get<ApiPaginatedResponse<ProdutoDto>>(`/Products/GetAll?page=${page}&pageSize=${pageSize}`);
       
       if (!response.data.isSuccess) {
         throw new Error(response.data.message || 'Erro na API');
       }
       
-      const dashboardData = response.data.data[0];
+      const paginatedData = response.data.data;
       
-      if (!dashboardData) {
+      if (!paginatedData) {
         return {
           totalProdutos: 0,
           totalCategorias: 0,
@@ -25,7 +25,15 @@ export class InventoryService {
         };
       }
       
-      return dashboardData;
+      // Converte a estrutura paginada para a estrutura esperada pelo dashboard
+      return {
+        totalProdutos: paginatedData.totalProdutos,
+        totalCategorias: paginatedData.totalCategorias,
+        valorTotalEstoque: paginatedData.valorTotalEstoque,
+        estoqueBaixo: paginatedData.estoqueBaixo,
+        semEstoque: paginatedData.semEstoque,
+        produtos: paginatedData.produtos
+      };
     } catch (error) {
       console.error('Erro ao buscar produtos:', error);
       throw new Error('Falha ao carregar dados do estoque');
@@ -69,13 +77,19 @@ export class InventoryService {
     };
   }
 
-  static async getInventoryData(): Promise<{
+  static async getInventoryData(page: number = 1, pageSize: number = 10): Promise<{
     products: Product[];
     stats: InventoryStats;
+    pagination?: {
+      page: number;
+      pageSize: number;
+      total: number;
+      totalPages: number;
+    };
     message?: string;
   }> {
     try {
-      const dashboardData = await this.getProducts();
+      const dashboardData = await this.getProducts(page, pageSize);
       
       const products = dashboardData.produtos.map(produto => 
         this.convertApiProductToComponent(produto)
@@ -85,7 +99,17 @@ export class InventoryService {
       
       const message = products.length === 0 ? 'Nenhum produto encontrado no estoque.' : undefined;
       
-      return { products, stats, message };
+      return { 
+        products, 
+        stats, 
+        pagination: {
+          page,
+          pageSize,
+          total: dashboardData.totalProdutos,
+          totalPages: Math.ceil(dashboardData.totalProdutos / pageSize)
+        },
+        message 
+      };
     } catch (error) {
       console.error('Erro ao processar dados do estoque:', error);
       throw error;

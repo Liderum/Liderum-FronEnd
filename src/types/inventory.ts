@@ -22,11 +22,34 @@ export interface ProdutoDashboardDto {
   produtos: ProdutoDto[];
 }
 
+// Nova estrutura de resposta com paginação
+export interface PaginatedResponse<T> {
+  page: number;
+  pageSize: number;
+  total: number;
+  totalPages: number;
+  produtos: T[];
+  totalProdutos: number;
+  totalCategorias: number;
+  valorTotalEstoque: number;
+  estoqueBaixo: number;
+  semEstoque: number;
+}
+
 // Resposta completa da API
 export interface ApiResponse<T> {
   statusCode: number;
   message: string;
   data: T[];
+  error: null | string;
+  isSuccess: boolean;
+}
+
+// Nova resposta da API com paginação
+export interface ApiPaginatedResponse<T> {
+  statusCode: number;
+  message: string;
+  data: PaginatedResponse<T>;
   error: null | string;
   isSuccess: boolean;
 }

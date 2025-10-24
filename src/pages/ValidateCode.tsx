@@ -10,6 +10,7 @@ import api from '@/services/api/axios';
 import { Redirecting } from '@/components/Redirecting';
 import { SimpleToast } from '@/components/SimpleToast';
 import { useRedirect } from '@/hooks/useRedirect';
+import { useAuth } from '@/contexts/AuthContext';
 
 const ValidateCode = () => {
   const [code, setCode] = useState(['', '', '', '', '', '']);
@@ -17,6 +18,7 @@ const ValidateCode = () => {
   const [isValidating, setIsValidating] = useState(false);
   const [errors, setErrors] = useState<{code?: string}>({});
   const { toast } = useToast();
+  const { showError, errorToast, hideError } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
@@ -118,28 +120,8 @@ const ValidateCode = () => {
     } catch (error: unknown) {
       console.error('Erro ao validar código:', error);
       
-      let errorMessage = "Código inválido. Tente novamente.";
-      
-      if (error && typeof error === 'object' && 'response' in error) {
-        const axiosError = error as { response?: { data?: { errors?: string | string[], message?: string } } };
-        if (axiosError.response?.data?.errors) {
-          errorMessage = Array.isArray(axiosError.response.data.errors) 
-            ? axiosError.response.data.errors[0] 
-            : axiosError.response.data.errors;
-        } else if (axiosError.response?.data?.message) {
-          errorMessage = axiosError.response.data.message;
-        }
-      } else if (error instanceof Error) {
-        errorMessage = error.message;
-      }
-
-      toast({
-        title: "Código inválido",
-        description: errorMessage,
-        variant: "destructive",
-        duration: 5000,
-        className: "bg-red-50 border-red-200",
-      });
+      // Usa o novo sistema de toast melhorado que detecta automaticamente o tipo de erro
+      showError(error as Error);
 
       // Limpa o código em caso de erro
       setCode(['', '', '', '', '', '']);
@@ -172,13 +154,8 @@ const ValidateCode = () => {
         inputRefs.current[0]?.focus();
       }
     } catch (error) {
-      toast({
-        title: "Erro ao reenviar",
-        description: "Não foi possível reenviar o código. Tente novamente.",
-        variant: "destructive",
-        duration: 5000,
-        className: "bg-red-50 border-red-200",
-      });
+      // Usa o novo sistema de toast melhorado para reenvio
+      showError(error);
     } finally {
       setIsLoading(false);
     }
@@ -301,6 +278,18 @@ const ValidateCode = () => {
           </Button>
         </CardFooter>
       </Card>
+      
+      {/* Toast de erro melhorado */}
+      <SimpleToast
+        isVisible={errorToast.isVisible}
+        message={errorToast.message}
+        type={errorToast.type}
+        onCancel={hideError}
+        showActions={false}
+        details={errorToast.details}
+        errorCode={errorToast.errorCode}
+        timestamp={errorToast.timestamp}
+      />
     </motion.div>
   );
 };
