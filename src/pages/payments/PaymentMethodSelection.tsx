@@ -13,14 +13,14 @@ const paymentMethods: PaymentMethod[] = [
     type: 'pix',
     icon: '📱',
     description: 'Pagamento instantâneo e seguro'
-  },
-  {
-    id: 'credit_card',
-    name: 'Cartão de Crédito',
-    type: 'credit_card',
-    icon: '💳',
-    description: 'Visa, Mastercard, Elo e outros'
   }
+  // {
+  //   id: 'credit_card',
+  //   name: 'Cartão de Crédito',
+  //   type: 'credit_card',
+  //   icon: '💳',
+  //   description: 'Visa, Mastercard, Elo e outros'
+  // }
 ];
 
 export function PaymentMethodSelection() {

@@ -14,6 +14,9 @@ export const API_CONFIG = {
     USERS: {
       BASE_URL_DSV: import.meta.env.DSV_USERS_API_URL || 'https://localhost:7247/liderum/api/user', //ajustar conforme o uso.  
     },
+    MANAGEMENT: {
+      BASE_URL_DSV: import.meta.env.DSV_MANAGEMENT_API_URL || 'https://localhost:7036',
+    },
   } as const;
   
   export type ApiModule = keyof typeof API_CONFIG; 

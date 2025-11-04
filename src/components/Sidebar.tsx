@@ -80,6 +80,7 @@ const secondaryNavigation = [
     name: 'Gestão',
     icon: Building2,
     children: [
+      { name: 'Empresas', href: '/management/companies', icon: Building2 },
       { name: 'Clientes', href: '/management/customers', icon: Users },
       { name: 'Fornecedores', href: '/management/suppliers', icon: Truck },
       { name: 'Usuários', href: '/management/users', icon: UserCheck },

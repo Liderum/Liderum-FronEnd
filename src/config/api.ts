@@ -15,6 +15,9 @@ export interface ApiConfig {
   USERS: {
     BASE_URL: string;
   };
+  MANAGEMENT: {
+    BASE_URL: string;
+  };
 }
 
 // Função para detectar o ambiente atual
@@ -59,6 +62,9 @@ const developmentConfig: ApiConfig = {
   USERS: {
     BASE_URL: import.meta.env.VITE_USERS_API_URL || 'https://localhost:7247/liderum/api/user',
   },
+  MANAGEMENT: {
+    BASE_URL: import.meta.env.VITE_MANAGEMENT_API_URL || 'https://localhost:7036',
+  },
 };
 
 // Configurações de staging (pode usar as mesmas de desenvolvimento ou URLs específicas)
@@ -78,6 +84,9 @@ const stagingConfig: ApiConfig = {
   USERS: {
     BASE_URL: import.meta.env.VITE_USERS_API_URL || 'https://localhost:7247/liderum/api/user',
   },
+  MANAGEMENT: {
+    BASE_URL: import.meta.env.VITE_MANAGEMENT_API_URL || 'https://localhost:7036',
+  },
 };
 
 // Configurações de produção
@@ -96,6 +105,9 @@ const productionConfig: ApiConfig = {
   },
   USERS: {
     BASE_URL: import.meta.env.VITE_USERS_API_URL || '',
+  },
+  MANAGEMENT: {
+    BASE_URL: import.meta.env.VITE_MANAGEMENT_API_URL || '',
   },
 };
 

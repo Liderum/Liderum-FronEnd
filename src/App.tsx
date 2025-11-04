@@ -27,6 +27,9 @@ import ValidateCode from './pages/ValidateCode';
 import ResetPassword from './pages/ResetPassword';
 import Settings from './pages/settings/Settings';
 import { PaymentRoutes } from './pages/payments';
+import { Companies } from './pages/management/Companies';
+import { Customers } from './pages/management/Customers';
+import { Suppliers } from './pages/management/Suppliers';
 
 function AppContent() {
   // Monitora mudanças de rota para segurança
@@ -88,6 +91,9 @@ function AppContent() {
           </PrivateRoute>
         }
       >
+        <Route path="companies" element={<Companies />} />
+        <Route path="customers" element={<Customers />} />
+        <Route path="suppliers" element={<Suppliers />} />
         <Route path="users" element={<Users />} />
       </Route>
       <Route
