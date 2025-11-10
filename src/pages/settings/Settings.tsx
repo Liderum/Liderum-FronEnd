@@ -24,7 +24,9 @@ import {
   QrCode,
   Shield,
   CreditCard as CardIcon,
-  Smartphone
+  Smartphone,
+  Upload,
+  RefreshCw
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -39,6 +41,9 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/components/ui/use-toast";
+import { useSimpleToast } from "@/hooks/useSimpleToast";
+import { ProfileService } from "@/services/managementService";
+import { Profile, UpdateMyProfileDto } from "@/types/management";
 
 interface CreditCard {
   id: string;
@@ -90,6 +95,7 @@ interface UserProfile {
   position: string;
   department: string;
   avatar: string;
+  cnpj?: string;
 }
 
 interface SettingsData {
@@ -257,6 +263,7 @@ export function Settings() {
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('general');
   const { toast } = useToast();
+  const { showToast } = useSimpleToast();
 
   // Estados para modais e formulários
   const [creditCardModalOpen, setCreditCardModalOpen] = useState(false);
@@ -264,6 +271,12 @@ export function Settings() {
   const [editingCard, setEditingCard] = useState<CreditCard | null>(null);
   const [editingPix, setEditingPix] = useState<PixKey | null>(null);
   const [showCardDetails, setShowCardDetails] = useState<Record<string, boolean>>({});
+
+  // Estados para perfil (integração com API)
+  const [profileLoading, setProfileLoading] = useState(false);
+  const [profile, setProfile] = useState<Profile | null>(null);
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
 
   const handleInputChange = (field: keyof SettingsData, value: string | number | boolean) => {
     setSettings(prev => ({ ...prev, [field]: value }));
@@ -293,6 +306,97 @@ export function Settings() {
       userProfile: { ...prev.userProfile, [field]: value }
     }));
   };
+
+  // Funções para gerenciar perfil via API
+  const loadProfile = async () => {
+    setProfileLoading(true);
+    try {
+      const data = await ProfileService.get();
+      setProfile(data);
+      // Atualiza o estado local com os dados da API
+      setSettings(prev => ({
+        ...prev,
+        userProfile: {
+          name: data.name || prev.userProfile.name,
+          email: data.email || prev.userProfile.email,
+          phone: data.phone || prev.userProfile.phone,
+          position: prev.userProfile.position,
+          department: prev.userProfile.department,
+          avatar: prev.userProfile.avatar,
+          cnpj: data.cnpj,
+        }
+      }));
+    } catch (e: unknown) {
+      showToast(e instanceof Error ? e.message : 'Falha ao carregar perfil', 'error');
+    } finally {
+      setProfileLoading(false);
+    }
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setAvatarFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setAvatarPreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleProfileSave = async () => {
+    try {
+      const payload: UpdateMyProfileDto = {
+        name: settings.userProfile.name,
+        email: settings.userProfile.email,
+        phone: settings.userProfile.phone,
+        cnpj: settings.userProfile.cnpj,
+        rowVersion: profile?.rowVersion,
+      };
+      await ProfileService.update(payload);
+
+      // Upload avatar if selected
+      if (avatarFile && profile?.rowVersion) {
+        // Reload profile to get updated rowVersion after profile update
+        const updatedProfile = await ProfileService.get();
+        if (updatedProfile.rowVersion) {
+          await ProfileService.updateAvatar(avatarFile, updatedProfile.rowVersion);
+        }
+      }
+
+      showToast('Perfil atualizado com sucesso', 'success');
+      loadProfile();
+      setAvatarFile(null);
+      setAvatarPreview(null);
+    } catch (e: unknown) {
+      showToast(e instanceof Error ? e.message : 'Erro ao salvar perfil', 'error');
+    }
+  };
+
+  const handleDeleteAvatar = async () => {
+    if (!profile) return;
+
+    const confirmed = window.confirm('Remover foto de perfil?');
+    if (!confirmed) return;
+
+    try {
+      await ProfileService.deleteAvatar();
+      showToast('Foto de perfil removida com sucesso', 'success');
+      loadProfile();
+      setAvatarPreview(null);
+    } catch (e: unknown) {
+      showToast(e instanceof Error ? e.message : 'Erro ao remover foto', 'error');
+    }
+  };
+
+  // Carrega perfil quando a aba de perfil é aberta
+  React.useEffect(() => {
+    if (activeTab === 'profile' && !profile) {
+      loadProfile();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeTab]);
 
   const handleAddressChange = (field: keyof SettingsData['address'], value: string) => {
     setSettings(prev => ({
@@ -1012,38 +1116,86 @@ export function Settings() {
                 <div className="space-y-6">
                   <Card>
                     <CardHeader>
-                      <CardTitle className="flex items-center gap-2">
-                        <User className="h-5 w-5" />
-                        Informações Pessoais
-                      </CardTitle>
-                      <CardDescription>
-                        Gerencie suas informações pessoais e profissionais
-                      </CardDescription>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <CardTitle className="flex items-center gap-2">
+                            <User className="h-5 w-5" />
+                            Informações Pessoais
+                          </CardTitle>
+                          <CardDescription>
+                            Gerencie suas informações pessoais e profissionais
+                          </CardDescription>
+                        </div>
+                        <Button onClick={loadProfile} variant="outline" className="gap-2" disabled={profileLoading}>
+                          <RefreshCw className={`h-4 w-4 ${profileLoading ? 'animate-spin' : ''}`} />
+                          Atualizar
+                        </Button>
+                      </div>
                     </CardHeader>
                     <CardContent className="space-y-6">
+                      {/* Avatar Section */}
                       <div className="flex items-center gap-6">
-                        <div className="w-20 h-20 bg-gradient-to-r from-blue-600 to-blue-800 rounded-full flex items-center justify-center">
-                          <span className="text-white font-bold text-2xl">
-                            {settings.userProfile.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
-                          </span>
+                        <div className="relative">
+                          {avatarPreview ? (
+                            <img
+                              src={avatarPreview}
+                              alt="Preview"
+                              className="w-20 h-20 rounded-full object-cover border-2 border-gray-200"
+                            />
+                          ) : (
+                            <div className="w-20 h-20 bg-gradient-to-r from-blue-600 to-blue-800 rounded-full flex items-center justify-center border-2 border-gray-300">
+                              <span className="text-white font-bold text-2xl">
+                                {settings.userProfile.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
+                              </span>
+                            </div>
+                          )}
                         </div>
                         <div className="flex-1">
                           <h3 className="text-lg font-semibold text-gray-900">{settings.userProfile.name}</h3>
                           <p className="text-gray-600">{settings.userProfile.position}</p>
                           <p className="text-sm text-gray-500">{settings.userProfile.department}</p>
                         </div>
-                        <Button variant="outline">Alterar Foto</Button>
+                        <div className="flex flex-col gap-2">
+                          <Label htmlFor="avatar-upload" className="cursor-pointer">
+                            <Button variant="outline" size="sm" className="gap-2" asChild>
+                              <span>
+                                <Upload className="h-4 w-4" />
+                                Alterar Foto
+                              </span>
+                            </Button>
+                          </Label>
+                          <input
+                            id="avatar-upload"
+                            type="file"
+                            accept="image/*"
+                            onChange={handleFileChange}
+                            className="hidden"
+                            aria-label="Upload de foto de perfil"
+                          />
+                          {profile && (avatarPreview || profile.email) && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="gap-2 text-red-600 hover:text-red-700"
+                              onClick={handleDeleteAvatar}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                              Remover Foto
+                            </Button>
+                          )}
+                        </div>
                       </div>
                       
                       <Separator />
                       
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                          <Label htmlFor="profileName">Nome Completo</Label>
+                          <Label htmlFor="profileName">Nome Completo *</Label>
                           <Input
                             id="profileName"
                             value={settings.userProfile.name}
                             onChange={(e) => handleProfileChange('name', e.target.value)}
+                            placeholder="Seu nome completo"
                           />
                         </div>
                         <div>
@@ -1053,6 +1205,7 @@ export function Settings() {
                             type="email"
                             value={settings.userProfile.email}
                             onChange={(e) => handleProfileChange('email', e.target.value)}
+                            placeholder="email@exemplo.com"
                           />
                         </div>
                         <div>
@@ -1061,6 +1214,16 @@ export function Settings() {
                             id="profilePhone"
                             value={settings.userProfile.phone}
                             onChange={(e) => handleProfileChange('phone', e.target.value)}
+                            placeholder="(00) 00000-0000"
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="profileCnpj">CNPJ</Label>
+                          <Input
+                            id="profileCnpj"
+                            value={settings.userProfile.cnpj || ''}
+                            onChange={(e) => handleProfileChange('cnpj', e.target.value)}
+                            placeholder="00.000.000/0000-00"
                           />
                         </div>
                         <div>
@@ -1069,6 +1232,7 @@ export function Settings() {
                             id="profilePosition"
                             value={settings.userProfile.position}
                             onChange={(e) => handleProfileChange('position', e.target.value)}
+                            disabled
                           />
                         </div>
                         <div>
@@ -1077,8 +1241,20 @@ export function Settings() {
                             id="profileDepartment"
                             value={settings.userProfile.department}
                             onChange={(e) => handleProfileChange('department', e.target.value)}
+                            disabled
                           />
                         </div>
+                      </div>
+
+                      <div className="flex justify-end pt-4">
+                        <Button onClick={handleProfileSave} className="gap-2" disabled={profileLoading}>
+                          {profileLoading ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <Save className="h-4 w-4" />
+                          )}
+                          Salvar Alterações
+                        </Button>
                       </div>
                     </CardContent>
                   </Card>

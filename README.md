@@ -66,6 +66,39 @@ npm run build
 yarn build
 ```
 
+Para builds específicos:
+
+```bash
+npm run build        # Build para produção (production)
+npm run build:dev    # Build para desenvolvimento (development)
+npm run build:staging # Build para staging (staging)
+```
+
+## Deploy
+
+⚠️ **IMPORTANTE:** Após o deploy, certifique-se de configurar o servidor para fazer o fallback para `index.html` em todas as rotas.
+
+Consulte o arquivo [DEPLOYMENT_CONFIG.md](./DEPLOYMENT_CONFIG.md) para instruções detalhadas de deploy em diferentes ambientes.
+
+### Configuração de Servidor
+
+Para que as rotas do frontend funcionem corretamente (ex: `/payments`, `/dashboard`), você precisa configurar o servidor web:
+
+- **Vercel**: Arquivo `vercel.json` já configurado
+- **Nginx**: Use o arquivo `nginx.conf`
+- **Apache**: Use o arquivo `.htaccess`
+- **IIS**: Use o arquivo `web.config`
+
+### Ambientes
+
+O projeto suporta múltiplos ambientes configurados no arquivo `src/config/api.ts`:
+
+- Development (DSV)
+- Staging
+- Production (PRD)
+
+Configure as variáveis de ambiente conforme descrito em [ENVIRONMENT_SETUP.md](./ENVIRONMENT_SETUP.md).
+
 ## Arquitetura
 
 O projeto segue uma arquitetura modular, com separação clara entre:
