@@ -9,10 +9,11 @@ export function useRouteSecurity() {
   const location = useLocation();
 
   useEffect(() => {
-    const publicRoutes = ['/', '/login', '/cadastro', '/cadastros', '/forgot-password', '/validate-code', '/reset-password'];
+    const publicRoutes = ['/', '/cadastro', '/cadastros', '/forgot-password', '/validate-code', '/reset-password'];
     const currentPath = location.pathname;
 
-    // Se está em uma rota pública, limpa dados de autenticação
+    // NÃO limpa sessão em /login - permite que o usuário seja redirecionado após login
+    // Se está em uma rota pública (exceto /login), limpa dados de autenticação
     if (publicRoutes.includes(currentPath)) {
       const hasAuthData = localStorage.getItem('@Liderum:token') || 
                          localStorage.getItem('@Liderum:refreshToken') || 

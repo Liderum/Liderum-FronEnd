@@ -273,7 +273,7 @@ const Cadastro = () => {
         initial={{ y: -100, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.5 }}
-        className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-b border-gray-100"
+        className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-b border-gray-200"
       >
         <div className="container mx-auto px-6 h-16">
           <div className="flex items-center justify-between h-full">
@@ -319,7 +319,7 @@ const Cadastro = () => {
               initial={{ height: 0, opacity: 0 }}
               animate={{ height: "auto", opacity: 1 }}
               exit={{ height: 0, opacity: 0 }}
-              className="lg:hidden bg-white border-t border-gray-100"
+              className="lg:hidden bg-white border-t border-gray-200"
             >
               <nav className="container mx-auto px-6 py-4 space-y-2">
                 <Button
@@ -337,8 +337,7 @@ const Cadastro = () => {
 
       <main className="pt-16 min-h-screen flex items-center">
         {/* Hero Section com gradiente */}
-        <section className="relative w-full py-12 bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/20 overflow-hidden">
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(59,130,246,0.1),transparent_50%)]" />
+        <section className="relative w-full py-20 bg-white overflow-hidden">
           
           <div className="container mx-auto px-6 relative z-10">
             <div className="max-w-2xl mx-auto">
@@ -346,7 +345,7 @@ const Cadastro = () => {
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6 }}
-                className="text-center mb-6"
+                className="text-center mb-8"
               >
                 <motion.div
                   initial={{ opacity: 0, scale: 0.9 }}
@@ -377,9 +376,9 @@ const Cadastro = () => {
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: 0.3, duration: 0.5 }}
               >
-                <Card className="border-2 border-gray-100 shadow-xl bg-white">
-                  <div className="p-6">
-                    <form onSubmit={handleSubmit} className="space-y-4">
+                <Card className="border-2 border-gray-200 shadow-xl bg-white">
+                  <div className="p-8">
+                    <form onSubmit={handleSubmit} className="space-y-5">
                       {/* Nome */}
                       <div className="space-y-2">
                         <Label htmlFor="nome" className="text-sm font-medium text-gray-700">
@@ -653,7 +652,7 @@ const Cadastro = () => {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.5 }}
-                className="flex items-center justify-center gap-6 mt-6 text-xs text-gray-500"
+                className="flex items-center justify-center gap-6 mt-8 text-xs text-gray-500"
               >
                 <div className="flex items-center gap-1.5">
                   <Lock size={14} />

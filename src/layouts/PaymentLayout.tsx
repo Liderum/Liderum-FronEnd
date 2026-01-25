@@ -14,9 +14,9 @@ export function PaymentLayout({ children, showBackButton = true, backTo = '/' }:
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-100">
+    <div className="min-h-screen bg-white">
       {/* Header */}
-      <header className="bg-white/90 backdrop-blur-md border-b border-gray-200/50 shadow-lg">
+      <header className="bg-white/95 backdrop-blur-md border-b border-gray-200 shadow-lg">
         <div className="container mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">

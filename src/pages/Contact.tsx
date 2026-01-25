@@ -24,7 +24,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { useSessionCleanup } from '@/hooks/useSessionCleanup';
 
 interface ContactForm {
@@ -142,7 +142,7 @@ export function Contact() {
         initial={{ y: -100, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.5 }}
-        className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-b border-gray-100"
+        className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-b border-gray-200"
       >
         <div className="container mx-auto px-6 h-16">
           <div className="flex items-center justify-between h-full">
@@ -200,7 +200,7 @@ export function Contact() {
               initial={{ height: 0, opacity: 0 }}
               animate={{ height: "auto", opacity: 1 }}
               exit={{ height: 0, opacity: 0 }}
-              className="lg:hidden bg-white border-t border-gray-100"
+              className="lg:hidden bg-white border-t border-gray-200"
             >
               <nav className="container mx-auto px-6 py-4 space-y-2">
                 <Button
@@ -225,8 +225,7 @@ export function Contact() {
 
       <main className="pt-16">
         {/* Hero Section */}
-        <section className="relative py-20 bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/20 overflow-hidden">
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(59,130,246,0.1),transparent_50%)]" />
+        <section className="relative py-20 bg-white overflow-hidden">
           
           <div className="container mx-auto px-6 relative z-10">
             <motion.div
@@ -287,7 +286,7 @@ export function Contact() {
                     whileHover={{ y: -4 }}
                     transition={{ duration: 0.2 }}
                   >
-                    <Card className="p-6 border-2 border-gray-100 hover:border-blue-300 transition-all">
+                    <Card className="p-6 border-2 border-gray-200 hover:border-blue-300 transition-all">
                       <div className="flex items-start gap-4">
                         <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center flex-shrink-0">
                           <Phone className="h-6 w-6 text-blue-600" />
@@ -305,7 +304,7 @@ export function Contact() {
                     whileHover={{ y: -4 }}
                     transition={{ duration: 0.2 }}
                   >
-                    <Card className="p-6 border-2 border-gray-100 hover:border-green-300 transition-all">
+                    <Card className="p-6 border-2 border-gray-200 hover:border-green-300 transition-all">
                       <div className="flex items-start gap-4">
                         <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center flex-shrink-0">
                           <Mail className="h-6 w-6 text-green-600" />
@@ -323,7 +322,7 @@ export function Contact() {
                     whileHover={{ y: -4 }}
                     transition={{ duration: 0.2 }}
                   >
-                    <Card className="p-6 border-2 border-gray-100 hover:border-purple-300 transition-all">
+                    <Card className="p-6 border-2 border-gray-200 hover:border-purple-300 transition-all">
                       <div className="flex items-start gap-4">
                         <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center flex-shrink-0">
                           <MapPin className="h-6 w-6 text-purple-600" />
@@ -341,7 +340,7 @@ export function Contact() {
                     whileHover={{ y: -4 }}
                     transition={{ duration: 0.2 }}
                   >
-                    <Card className="p-6 border-2 border-gray-100 hover:border-orange-300 transition-all bg-gradient-to-br from-blue-50/50 to-indigo-50/50">
+                    <Card className="p-6 border-2 border-gray-200 hover:border-orange-300 transition-all bg-white">
                       <div className="flex items-start gap-4">
                         <div className="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center flex-shrink-0">
                           <Clock className="h-6 w-6 text-orange-600" />
@@ -364,7 +363,7 @@ export function Contact() {
                 animate={isFormInView ? { opacity: 1, x: 0 } : {}}
                 transition={{ duration: 0.6, delay: 0.3 }}
               >
-                <Card className="p-8 border-2 border-gray-100 shadow-lg">
+                <Card className="p-8 border-2 border-gray-200 shadow-lg">
                   <div className="mb-6">
                     <div className="flex items-center gap-3 mb-2">
                       <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center">
@@ -515,7 +514,7 @@ export function Contact() {
       </main>
 
       {/* Footer */}
-      <footer className="bg-gray-900 text-white border-t border-gray-800 mt-20">
+      <footer className="bg-white text-gray-900 border-t border-gray-200 mt-20">
         <div className="container mx-auto px-6 py-12">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             <div className="flex items-center gap-3">
@@ -524,7 +523,7 @@ export function Contact() {
               </div>
               <span className="text-lg font-bold">Liderum</span>
             </div>
-            <p className="text-gray-400 text-sm">
+            <p className="text-gray-600 text-sm">
               © {new Date().getFullYear()} Liderum. Todos os direitos reservados.
             </p>
           </div>

@@ -118,7 +118,7 @@ const MetricCard = ({ icon: Icon, value, label, trend, delay = 0 }: { icon: Reac
       initial={{ opacity: 0, y: 30 }}
       animate={isInView ? { opacity: 1, y: 0 } : {}}
       transition={{ duration: 0.5, delay }}
-      className="bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-shadow border border-gray-100"
+      className="bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-shadow border border-gray-200"
     >
       <div className="flex items-start justify-between mb-4">
         <div className="p-3 bg-blue-50 rounded-xl">
@@ -195,7 +195,7 @@ export function LandingPage() {
         initial={{ y: -100, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.5 }}
-        className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-b border-gray-100"
+        className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-b border-gray-200"
       >
         <div className="container mx-auto px-6 h-16">
           <div className="flex items-center justify-between h-full">
@@ -261,7 +261,7 @@ export function LandingPage() {
               initial={{ height: 0, opacity: 0 }}
               animate={{ height: "auto", opacity: 1 }}
               exit={{ height: 0, opacity: 0 }}
-              className="lg:hidden bg-white border-t border-gray-100"
+              className="lg:hidden bg-white border-t border-gray-200"
             >
               <nav className="container mx-auto px-6 py-4 space-y-2">
                 {['solucao', 'como-funciona', 'resultados', 'precos'].map((id) => (
@@ -284,8 +284,7 @@ export function LandingPage() {
 
       <main className="pt-16">
         {/* Hero Section - Layout Assimétrico */}
-        <section ref={heroRef} className="relative min-h-[90vh] flex items-center overflow-hidden bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/20">
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(59,130,246,0.1),transparent_50%)]" />
+        <section ref={heroRef} className="relative min-h-[90vh] flex items-center overflow-hidden bg-white">
           
           <motion.div 
             style={{ y: heroY }}
@@ -365,48 +364,74 @@ export function LandingPage() {
                     Ver Demonstração
                   </Button>
                 </motion.div>
+
+                {/* Métricas Rápidas */}
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.7 }}
+                  className="grid grid-cols-3 gap-4 md:gap-6 pt-6 border-t border-gray-200"
+                >
+                  {[
+                    { value: 4, suffix: ' Módulos', label: 'Completos' },
+                    { value: 100, suffix: '%', label: 'Integrado' },
+                    { value: 24, suffix: '/7', label: 'Disponível' }
+                  ].map((stat, i) => (
+                    <div key={i} className="text-center">
+                      <div className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+                        <AnimatedCounter value={stat.value} suffix={stat.suffix} />
+                      </div>
+                      <div className="text-xs text-gray-600 mt-1">{stat.label}</div>
+                    </div>
+                  ))}
+                </motion.div>
               </motion.div>
 
-              {/* Visual Destaque - Foco em Simplicidade */}
+              {/* Visual Destaque */}
               <motion.div
                 initial={{ opacity: 0, x: 50 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.8, delay: 0.3 }}
                 className="relative"
               >
-                <div className="relative bg-white rounded-3xl shadow-2xl p-8 border border-gray-100">
+                <div className="relative bg-white rounded-3xl shadow-2xl p-8 border border-gray-200">
                   <div className="absolute -inset-4 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-3xl blur-2xl opacity-20" />
                   
-                  {/* Ilustração de Facilidade */}
-                  <div className="space-y-6 relative z-10">
-                    <div className="flex items-center justify-center gap-4 mb-6">
-                      <div className="w-16 h-16 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-2xl flex items-center justify-center">
-                        <Zap className="h-8 w-8 text-blue-600" />
+                  {/* Dashboard Preview Simulado */}
+                  <div className="space-y-4 relative z-10">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="w-3 h-3 rounded-full bg-red-500" />
+                        <div className="w-3 h-3 rounded-full bg-yellow-500" />
+                        <div className="w-3 h-3 rounded-full bg-green-500" />
                       </div>
-                      <ArrowRight className="h-6 w-6 text-gray-400" />
-                      <div className="w-16 h-16 bg-gradient-to-br from-green-100 to-emerald-100 rounded-2xl flex items-center justify-center">
-                        <CheckCircle className="h-8 w-8 text-green-600" />
-                      </div>
+                      <Badge className="bg-blue-100 text-blue-700">Dashboard ao Vivo</Badge>
                     </div>
                     
-                    <div className="text-center space-y-3">
-                      <h3 className="text-xl font-bold text-gray-900">Processos Simplificados</h3>
-                      <p className="text-sm text-gray-600 leading-relaxed">
-                        Interface intuitiva que torna a gestão do seu negócio mais fácil e rápida
-                      </p>
-                    </div>
+                    <div className="grid grid-cols-3 gap-4">
+                      {[
+                        { icon: TrendingUp, value: 'R$ 2.4M', label: 'Faturamento', color: 'blue' },
+                        { icon: Users, value: '1.2K', label: 'Clientes', color: 'green' },
+                        { icon: Package, value: '856', label: 'Produtos', color: 'orange' }
+                      ].map((metric, i) => (
+                        <motion.div
+                          key={i}
+                          initial={{ opacity: 0, scale: 0.8 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          transition={{ delay: 0.8 + i * 0.1 }}
+                          className="bg-gradient-to-br from-gray-50 to-white p-4 rounded-xl border border-gray-200"
+                        >
+                          <metric.icon className={`h-5 w-5 text-${metric.color}-600 mb-2`} />
+                          <div className="text-lg font-bold text-gray-900">{metric.value}</div>
+                          <div className="text-xs text-gray-600">{metric.label}</div>
+                        </motion.div>
+                      ))}
+              </div>
 
-                    <div className="grid grid-cols-2 gap-3 mt-6">
-                      <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-4 border border-blue-100 text-center">
-                        <div className="text-2xl font-bold text-blue-600 mb-1">4</div>
-                        <div className="text-xs text-gray-600">Módulos</div>
-                      </div>
-                      <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl p-4 border border-green-100 text-center">
-                        <div className="text-2xl font-bold text-green-600 mb-1">100%</div>
-                        <div className="text-xs text-gray-600">Integrado</div>
-                      </div>
-                    </div>
-                  </div>
+                    <div className="h-48 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl border border-blue-100 flex items-center justify-center">
+                      <BarChart3 className="h-16 w-16 text-blue-400" />
+                </div>
+                </div>
                 </div>
               </motion.div>
             </div>
@@ -431,7 +456,7 @@ export function LandingPage() {
           </motion.div>
         </section>
 
-        {/* Seção: Facilidade e Simplicidade */}
+        {/* Seção: O Problema que Resolvemos */}
         <section id="solucao" className="py-20 bg-white relative overflow-hidden">
           <div className="container mx-auto px-6">
             <motion.div
@@ -440,58 +465,58 @@ export function LandingPage() {
               viewport={{ once: true }}
               className="text-center mb-12 max-w-3xl mx-auto"
             >
-              <Badge className="mb-4 bg-blue-50 text-blue-700 border-blue-200">
-                Simplicidade em Primeiro Lugar
+              <Badge className="mb-4 bg-red-50 text-red-700 border-red-200">
+                O Problema
               </Badge>
               <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-                Gestão Empresarial Feita de Forma Simples
+                Você está perdendo dinheiro e tempo com planilhas?
               </h2>
               <p className="text-lg text-gray-600 leading-relaxed">
-                Nosso objetivo é tornar cada processo mais fácil e rápido. 
-                Interface intuitiva, processos automatizados e tudo integrado em um só lugar.
+                A maioria das empresas ainda gerencia seu negócio em planilhas desconectadas, 
+                perdendo oportunidades e tomando decisões baseadas em dados desatualizados.
               </p>
             </motion.div>
 
-            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
+            <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
               {[
                 {
-                  title: "Interface Intuitiva",
-                  description: "Navegação simples e direta, sem complicações",
-                  icon: Target,
-                  color: "blue"
+                  title: "Dados Desconectados",
+                  description: "Informações espalhadas em múltiplas planilhas, sem integração real",
+                  icon: Database,
+                  color: "red"
                 },
                 {
-                  title: "Processos Automatizados",
-                  description: "Tarefas repetitivas executadas automaticamente",
-                  icon: Zap,
+                  title: "Decisões Atrasadas",
+                  description: "Relatórios demoram dias para serem gerados, perdendo oportunidades",
+                  icon: Clock,
+                  color: "orange"
+                },
+                {
+                  title: "Erros Manuais",
+                  description: "Digitação incorreta e falta de validação causam prejuízos",
+                  icon: AlertCircle,
                   color: "yellow"
                 },
                 {
-                  title: "Tudo Integrado",
-                  description: "Todos os módulos conversam entre si em tempo real",
-                  icon: Layers,
-                  color: "green"
-                },
-                {
-                  title: "Acesso Rápido",
-                  description: "Informações importantes sempre à mão",
-                  icon: Gauge,
-                  color: "purple"
+                  title: "Falta de Visibilidade",
+                  description: "Impossível ter uma visão completa do negócio em tempo real",
+                  icon: Eye,
+                  color: "blue"
                 }
-              ].map((feature, i) => (
+              ].map((problem, i) => (
                 <motion.div
                   key={i}
                   initial={{ opacity: 0, y: 30 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ delay: i * 0.1 }}
-                  className="bg-gradient-to-br from-gray-50 to-white p-6 rounded-2xl border-2 border-gray-100 hover:border-blue-300 transition-colors"
+                  className="bg-gradient-to-br from-gray-50 to-white p-6 rounded-2xl border-2 border-gray-200 hover:border-red-200 transition-colors"
                 >
-                  <div className={`w-12 h-12 bg-${feature.color}-100 rounded-xl flex items-center justify-center mb-4`}>
-                    <feature.icon className={`h-6 w-6 text-${feature.color}-600`} />
-                  </div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">{feature.title}</h3>
-                  <p className="text-gray-600 text-sm">{feature.description}</p>
+                  <div className={`w-12 h-12 bg-${problem.color}-100 rounded-xl flex items-center justify-center mb-4`}>
+                    <problem.icon className={`h-6 w-6 text-${problem.color}-600`} />
+              </div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">{problem.title}</h3>
+                  <p className="text-gray-600 text-sm">{problem.description}</p>
                 </motion.div>
               ))}
             </div>
@@ -525,17 +550,20 @@ export function LandingPage() {
                 {
                   icon: Zap,
                   title: "Automação Inteligente",
-                  description: "Processos repetitivos executados automaticamente, liberando sua equipe para tarefas mais importantes"
+                  description: "Processos repetitivos executados automaticamente, liberando sua equipe",
+                  stat: "85% menos tempo em tarefas manuais"
+                },
+                {
+                  icon: Brain,
+                  title: "IA Preditiva",
+                  description: "Previsões de demanda, sugestões de compra e alertas inteligentes",
+                  stat: "92% de precisão nas previsões"
                 },
                 {
                   icon: Globe,
                   title: "Acesso de Qualquer Lugar",
-                  description: "Trabalhe de onde estiver, com sincronização em tempo real. 100% na nuvem, zero instalação"
-                },
-                {
-                  icon: Shield,
-                  title: "Segurança e Confiabilidade",
-                  description: "Seus dados protegidos com as melhores práticas de segurança e backup automático"
+                  description: "Trabalhe de onde estiver, com sincronização em tempo real",
+                  stat: "100% na nuvem, zero instalação"
                 }
               ].map((feature, i) => (
                 <motion.div
@@ -544,13 +572,14 @@ export function LandingPage() {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ delay: i * 0.15 }}
-                  className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-shadow border border-gray-100"
+                  className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-shadow border border-gray-200"
                 >
                   <div className="w-14 h-14 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-2xl flex items-center justify-center mb-6 shadow-lg">
                     <feature.icon className="h-7 w-7 text-white" />
                   </div>
                   <h3 className="text-xl font-semibold text-gray-900 mb-3">{feature.title}</h3>
-                  <p className="text-gray-600 leading-relaxed">{feature.description}</p>
+                  <p className="text-gray-600 mb-4 leading-relaxed">{feature.description}</p>
+                  <div className="text-sm font-semibold text-blue-600">{feature.stat}</div>
                 </motion.div>
               ))}
                 </div>
@@ -612,7 +641,7 @@ export function LandingPage() {
                     viewport={{ once: true }}
                     transition={{ delay: i * 0.1 }}
                     whileHover={{ y: -4 }}
-                    className="bg-white rounded-xl p-6 border-2 border-gray-100 hover:border-blue-300 transition-all cursor-pointer group h-full flex flex-col"
+                    className="bg-white rounded-xl p-6 border-2 border-gray-200 hover:border-blue-300 transition-all cursor-pointer group h-full flex flex-col"
                   >
                     <div className={`w-14 h-14 ${module.bgColor} ${module.bgHoverColor} rounded-xl flex items-center justify-center mb-4 transition-colors shadow-sm`}>
                       <module.icon className={`h-7 w-7 ${module.iconColor}`} />
@@ -667,16 +696,16 @@ export function LandingPage() {
               />
               <ProcessStep
                 number={4}
-                title="Comece a Usar"
-                description="Tudo pronto para você começar a gerenciar seu negócio de forma mais simples e eficiente"
-                icon={Rocket}
+                title="Veja os Resultados"
+                description="Em menos de 30 dias, você já verá aumento de produtividade e redução de custos"
+                icon={TrendingUp}
                 delay={0.3}
               />
             </div>
                 </div>
         </section>
 
-        {/* Seção: Nossa Missão */}
+        {/* Seção: Resultados Reais */}
         <section id="resultados" className="py-20 bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900 text-white relative overflow-hidden">
           <div 
             className="absolute inset-0 opacity-30" 
@@ -686,47 +715,78 @@ export function LandingPage() {
           />
           
           <div className="container mx-auto px-6 relative z-10">
-            <div className="max-w-4xl mx-auto text-center">
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="text-center mb-16"
+            >
+              <Badge className="mb-4 bg-white/20 text-white border-white/30">
+                Resultados Comprovados
+              </Badge>
+              <h2 className="text-3xl md:text-4xl font-bold mb-4">
+                Números que Falam por Si
+              </h2>
+              <p className="text-lg text-blue-100 max-w-2xl mx-auto">
+                Resultados reais que nossos clientes alcançam com o ERP Liderum
+              </p>
+            </motion.div>
+
+            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
+              <MetricCard
+                icon={TrendingUp}
+                value={<><AnimatedCounter value={45} suffix="%" /> redução</>}
+                label="em custos operacionais"
+                trend="+12% vs mês anterior"
+                delay={0}
+              />
+              <MetricCard
+                icon={Clock}
+                value={<><AnimatedCounter value={67} suffix="%" /> menos tempo</>}
+                label="em processos manuais"
+                trend="Economia de 20h/semana"
+                delay={0.1}
+              />
+              <MetricCard
+                icon={DollarSign}
+                value={<><AnimatedCounter value={38} suffix="%" /> aumento</>}
+                label="na margem de lucro"
+                trend="Decisões mais assertivas"
+                delay={0.2}
+              />
+              <MetricCard
+                icon={Users}
+                value={<><AnimatedCounter value={92} suffix="%" /> satisfação</>}
+                label="dos nossos clientes"
+                trend="NPS: 72"
+                delay={0.3}
+              />
+                </div>
+
+            {/* Nossa Visão */}
+            <div className="max-w-3xl mx-auto text-center">
               <motion.div
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: 0.2 }}
               >
-                <Badge className="mb-6 bg-white/20 text-white border-white/30">
-                  Nossa Missão
-                </Badge>
-                <h2 className="text-3xl md:text-4xl font-bold mb-6">
-                  Simplificar a Gestão Empresarial
-                </h2>
+                <h3 className="text-2xl font-bold mb-6">
+                  Começamos em 2025 com uma Missão
+                </h3>
                 <p className="text-lg text-blue-100 leading-relaxed mb-8">
-                  Acreditamos que a tecnologia deve facilitar, não complicar. Por isso, desenvolvemos 
-                  um ERP focado em simplicidade e facilidade de uso. Cada processo foi pensado para 
-                  ser intuitivo e rápido, permitindo que você foque no que realmente importa: 
-                  fazer seu negócio crescer.
+                  Nascemos para ser o ERP mais completo e acessível do Brasil. 
+                  Queremos crescer junto com nossos clientes, oferecendo soluções que realmente 
+                  transformam a gestão empresarial.
                 </p>
-                
-                <div className="grid md:grid-cols-3 gap-6 mt-12">
-                  <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20">
-                    <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center mb-4 mx-auto">
-                      <Target className="h-6 w-6 text-white" />
-                    </div>
-                    <h3 className="text-lg font-semibold mb-2">Foco em Facilidade</h3>
-                    <p className="text-sm text-blue-200">Interface simples e processos diretos</p>
+                <div className="flex flex-wrap justify-center gap-6">
+                  <div className="bg-white/10 backdrop-blur-sm rounded-xl px-6 py-4 border border-white/20">
+                    <div className="text-3xl font-bold mb-1">2025</div>
+                    <div className="text-sm text-blue-200">Ano de Lançamento</div>
                   </div>
-                  <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20">
-                    <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center mb-4 mx-auto">
-                      <Zap className="h-6 w-6 text-white" />
-                    </div>
-                    <h3 className="text-lg font-semibold mb-2">Automação Inteligente</h3>
-                    <p className="text-sm text-blue-200">Processos que funcionam sozinhos</p>
-                  </div>
-                  <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20">
-                    <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center mb-4 mx-auto">
-                      <Layers className="h-6 w-6 text-white" />
-                    </div>
-                    <h3 className="text-lg font-semibold mb-2">Tudo Integrado</h3>
-                    <p className="text-sm text-blue-200">Módulos que conversam entre si</p>
+                  <div className="bg-white/10 backdrop-blur-sm rounded-xl px-6 py-4 border border-white/20">
+                    <div className="text-3xl font-bold mb-1">Crescimento</div>
+                    <div className="text-sm text-blue-200">Contínuo e Sustentável</div>
                   </div>
                 </div>
               </motion.div>
@@ -800,7 +860,7 @@ export function LandingPage() {
       </main>
 
       {/* Footer */}
-      <footer className="bg-gray-900 text-white border-t border-gray-800">
+      <footer className="bg-white text-gray-900 border-t border-gray-200">
         <div className="container mx-auto px-6 py-16">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
             <div>
@@ -810,13 +870,13 @@ export function LandingPage() {
                 </div>
                 <span className="text-xl font-bold">Liderum</span>
               </div>
-              <p className="text-gray-400 text-sm leading-relaxed mb-4">
+              <p className="text-gray-600 text-sm leading-relaxed mb-4">
                 A plataforma completa de gestão empresarial que conecta todas as áreas do seu negócio.
               </p>
               <div className="flex gap-3">
                 {[Globe, Mail, Phone].map((Icon, i) => (
-                  <div key={i} className="w-10 h-10 bg-gray-800 rounded-lg flex items-center justify-center hover:bg-gray-700 transition-colors cursor-pointer">
-                    <Icon className="h-5 w-5" />
+                  <div key={i} className="w-10 h-10 bg-white/80 border border-gray-200 rounded-lg flex items-center justify-center hover:bg-blue-50 hover:border-blue-300 transition-colors cursor-pointer">
+                    <Icon className="h-5 w-5 text-gray-700" />
             </div>
                 ))}
             </div>
@@ -840,7 +900,7 @@ export function LandingPage() {
                 <h4 className="font-semibold mb-4">{section.title}</h4>
                 <ul className="space-y-3">
                   {section.items.map((item, j) => (
-                    <li key={j} className="text-gray-400 hover:text-white transition-colors cursor-pointer text-sm">
+                    <li key={j} className="text-gray-600 hover:text-blue-600 transition-colors cursor-pointer text-sm">
                       {item}
                     </li>
                   ))}
@@ -849,14 +909,14 @@ export function LandingPage() {
             ))}
           </div>
           
-          <div className="border-t border-gray-800 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
-            <p className="text-gray-400 text-sm">
+          <div className="border-t border-gray-200 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
+            <p className="text-gray-600 text-sm">
               © {new Date().getFullYear()} Liderum. Todos os direitos reservados.
             </p>
-            <div className="flex gap-6 text-sm text-gray-400">
-              <span className="hover:text-white cursor-pointer transition-colors">Termos</span>
-              <span className="hover:text-white cursor-pointer transition-colors">Privacidade</span>
-              <span className="hover:text-white cursor-pointer transition-colors">Cookies</span>
+            <div className="flex gap-6 text-sm text-gray-600">
+              <span className="hover:text-blue-600 cursor-pointer transition-colors">Termos</span>
+              <span className="hover:text-blue-600 cursor-pointer transition-colors">Privacidade</span>
+              <span className="hover:text-blue-600 cursor-pointer transition-colors">Cookies</span>
             </div>
           </div>
         </div>

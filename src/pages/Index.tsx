@@ -10,7 +10,6 @@ import Footer from '../components/Footer';
 import { useSessionCleanup } from '@/hooks/useSessionCleanup';
 
 const Index = () => {
-  // Limpa sessão ao acessar página pública
   useSessionCleanup();
 
   return (

@@ -54,16 +54,29 @@ class ApiFactory {
       async (error) => {
         const originalRequest = error.config;
         
-        // Log detalhado do erro para debug
-        console.error('Erro na API:', {
-          message: error.message,
-          code: error.code,
-          status: error.response?.status,
-          url: originalRequest?.url,
-          method: originalRequest?.method,
-          timeout: error.code === 'ECONNABORTED'
-        });
+        // Não faz refresh token se a requisição original já foi para /refresh
+        // Isso evita loops infinitos
+        if (originalRequest?.url?.includes('/refresh')) {
+          return Promise.reject(error);
+        }
         
+        // Só loga erros que não são 401 (401 será tratado abaixo)
+        // Isso reduz logs desnecessários
+        if (error.response?.status !== 401) {
+          console.error('Erro na API:', {
+            message: error.message,
+            code: error.code,
+            status: error.response?.status,
+            url: originalRequest?.url,
+            method: originalRequest?.method,
+            timeout: error.code === 'ECONNABORTED'
+          });
+        }
+        
+        // Só tenta refresh token se:
+        // 1. Recebeu 401 (não autorizado)
+        // 2. A requisição ainda não foi tentada novamente (_retry)
+        // 3. Não é uma requisição de refresh token
         if (error.response?.status === 401 && !originalRequest._retry) {
           originalRequest._retry = true;
           
@@ -71,6 +84,7 @@ class ApiFactory {
             const refreshToken = localStorage.getItem('@Liderum:refreshToken');
             
             if (refreshToken) {
+              console.log('Tentando renovar token automaticamente...');
               const response = await authApi.post('/refresh', {
                 refreshToken: refreshToken
               });

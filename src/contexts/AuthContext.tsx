@@ -81,11 +81,14 @@ export function AuthProvider({ children }: AuthProviderProps) {
       localStorage.setItem('@Liderum:refreshToken', tokens.refreshToken);
       localStorage.setItem('@Liderum:user', JSON.stringify(userData));
 
+      // Atualiza o estado do usuário ANTES de qualquer outra coisa
+      // Isso garante que isAuthenticated seja true imediatamente
       setUser(userData);
       
       console.log('Login realizado com sucesso:', {
         user: userData,
-        token: tokens.accessToken
+        token: tokens.accessToken,
+        isAuthenticated: true
       });
     } catch (error) {
       console.error('Erro no login:', error);
