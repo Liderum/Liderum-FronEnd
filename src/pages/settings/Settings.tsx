@@ -1,261 +1,141 @@
 import React, { useState } from 'react';
 import { motion } from "framer-motion";
-import { 
-  Settings as SettingsIcon,
-  Save,
-  Bell,
-  CreditCard,
-  User,
-  AlertTriangle,
-  CheckCircle,
-  Loader2,
-  Plus,
-  Edit,
-  Trash2,
-  Eye,
-  EyeOff,
-  Calendar,
-  DollarSign,
-  Clock,
-  TrendingUp,
-  TrendingDown,
-  Minus,
-  Copy,
-  QrCode,
-  Shield,
-  CreditCard as CardIcon,
-  Smartphone,
-  Upload,
-  RefreshCw
+import {
+  Settings as SettingsIcon, Save, Bell, CreditCard, User, AlertTriangle,
+  CheckCircle, Loader2, Plus, Edit, Trash2, Eye, EyeOff, Clock,
+  TrendingUp, TrendingDown, Minus, Copy, Smartphone, Upload, RefreshCw,
+  Shield, BarChart3
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { useSimpleToast } from "@/hooks/useSimpleToast";
 import { ProfileService } from "@/services/managementService";
 import { Profile, UpdateMyProfileDto } from "@/types/management";
 
+const LDCSS = `
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,700;1,400;1,700&family=DM+Sans:wght@300;400;500&display=swap');
+:root{--cream:#F7F4EF;--cream2:#EDE9E1;--ink:#1A1814;--ink2:#3D3A34;--ink3:#7A7670;--gold:#B8922A;--gold2:#D4A843;--gold-light:#F0E4C4;--bdr:rgba(26,24,20,0.11);}
+.ld{font-family:'DM Sans',sans-serif;color:var(--ink);}
+.ld-tag{font-size:10.5px;font-weight:500;letter-spacing:1.8px;text-transform:uppercase;color:var(--gold);display:block;margin-bottom:6px;}
+.ld-h1{font-family:'Cormorant Garamond',serif;font-size:clamp(22px,3vw,32px);font-weight:700;line-height:1.1;letter-spacing:-0.5px;color:var(--ink);}
+.ld-h2{font-family:'Cormorant Garamond',serif;font-size:17px;font-weight:700;color:var(--ink);display:flex;align-items:center;gap:8px;margin-bottom:16px;}
+.ld-sub{font-size:13px;color:var(--ink3);font-weight:300;}
+.ld-card{background:#fff;border-radius:12px;border:1px solid var(--bdr);box-shadow:0 2px 16px rgba(26,24,20,0.05);position:relative;overflow:hidden;}
+.ld-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--gold),var(--gold2));}
+.ld-card-body{padding:20px 24px;}
+.ld-layout{display:grid;grid-template-columns:220px 1fr;gap:20px;}
+.ld-sidebar{background:#fff;border-radius:12px;border:1px solid var(--bdr);box-shadow:0 2px 16px rgba(26,24,20,0.05);overflow:hidden;position:relative;}
+.ld-sidebar::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--gold),var(--gold2));}
+.ld-sidebar-header{padding:16px 18px 12px;border-bottom:1px solid var(--bdr);}
+.ld-sidebar-title{font-family:'Cormorant Garamond',serif;font-size:14px;font-weight:700;color:var(--ink3);}
+.ld-nav-item{display:flex;align-items:center;gap:10px;padding:11px 18px;cursor:pointer;font-size:13px;color:var(--ink2);transition:all 0.18s;border-right:2px solid transparent;width:100%;background:none;border-left:none;border-top:none;border-bottom:none;text-align:left;font-family:'DM Sans',sans-serif;}
+.ld-nav-item:hover{background:rgba(247,244,239,0.6);color:var(--ink);}
+.ld-nav-item.active{background:rgba(184,146,42,0.06);color:var(--gold);border-right-color:var(--gold);font-weight:500;}
+.ld-section{display:flex;flex-direction:column;gap:16px;}
+.ld-form-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.ld-form-grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;}
+.ld-field{display:flex;flex-direction:column;gap:5px;}
+.ld-lbl{font-size:11.5px;font-weight:500;color:var(--ink2);}
+.ld-divider{border:none;border-top:1px solid var(--bdr);margin:16px 0;}
+.ld-notif-row{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--bdr);}
+.ld-notif-row:last-child{border-bottom:none;}
+.ld-notif-label{font-size:13.5px;font-weight:500;color:var(--ink);}
+.ld-notif-desc{font-size:12px;color:var(--ink3);margin-top:2px;}
+.ld-payment-card{background:#fff;border:1px solid var(--bdr);border-radius:10px;padding:16px;transition:box-shadow 0.2s;}
+.ld-payment-card:hover{box-shadow:0 3px 16px rgba(26,24,20,0.08);}
+.ld-tx-item{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid rgba(26,24,20,0.05);}
+.ld-tx-item:last-child{border-bottom:none;}
+.ld-tx-ico{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.ld-avatar{width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,var(--gold-light),var(--cream2));border:2px solid rgba(184,146,42,0.2);display:flex;align-items:center;justify-content:center;font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:700;color:var(--gold);}
+.ld-badge{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:500;}
+.ld-badge-gold{background:var(--gold-light);color:var(--gold);}
+.ld-badge-green{background:#E8F5E9;color:#1E8449;}
+.ld-badge-red{background:#FDEDEC;color:#C0392B;}
+.ld-badge-yellow{background:#FFF8E1;color:#B7770D;}
+.ld-badge-gray{background:#F2F2F2;color:var(--ink3);}
+.ld-badge-blue{background:#EBF5FB;color:#1A5276;}
+.ld-badge-outline{background:transparent;color:var(--ink3);border:1px solid var(--bdr);}
+.ld-btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:7px;font-size:12.5px;font-weight:500;font-family:'DM Sans',sans-serif;border:none;cursor:pointer;transition:all 0.2s;}
+.ld-btn-dark{background:var(--ink);color:#fff;}
+.ld-btn-dark:hover:not(:disabled){background:var(--gold);}
+.ld-btn-outline{background:#fff;color:var(--ink);border:1px solid var(--bdr);}
+.ld-btn-outline:hover:not(:disabled){border-color:var(--gold);color:var(--gold);}
+.ld-btn-danger{background:#fff;color:#C0392B;border:1px solid rgba(192,57,43,0.2);}
+.ld-btn-danger:hover{background:#FDEDEC;}
+.ld-btn-sm{padding:5px 10px;font-size:11.5px;}
+.ld-btn:disabled{opacity:0.5;cursor:not-allowed;}
+.ld-card-logo{width:44px;height:30px;background:linear-gradient(135deg,#2563EB,#1d4ed8);border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;letter-spacing:0.5px;}
+@keyframes ld-in{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.ld-a1{animation:ld-in 0.4s cubic-bezier(0.22,1,0.36,1) both;}
+.ld-a2{animation:ld-in 0.4s cubic-bezier(0.22,1,0.36,1) 0.07s both;}
+@media(max-width:768px){.ld-layout{grid-template-columns:1fr;}.ld-form-grid-2,.ld-form-grid-3{grid-template-columns:1fr;}}
+`;
+
 interface CreditCard {
-  id: string;
-  cardNumber: string;
-  cardholderName: string;
-  expiryDate: string;
-  cvv: string;
-  brand: 'visa' | 'mastercard' | 'amex' | 'elo';
-  isDefault: boolean;
-  isActive: boolean;
+  id: string; cardNumber: string; cardholderName: string; expiryDate: string;
+  cvv: string; brand: 'visa' | 'mastercard' | 'amex' | 'elo'; isDefault: boolean; isActive: boolean;
 }
-
 interface PixKey {
-  id: string;
-  keyType: 'cpf' | 'cnpj' | 'email' | 'phone' | 'random';
-  keyValue: string;
-  bankName: string;
-  accountHolder: string;
-  isActive: boolean;
+  id: string; keyType: 'cpf' | 'cnpj' | 'email' | 'phone' | 'random';
+  keyValue: string; bankName: string; accountHolder: string; isActive: boolean;
 }
-
 interface PaymentTransaction {
-  id: string;
-  method: 'credit_card' | 'pix';
-  amount: number;
-  status: 'pending' | 'approved' | 'rejected' | 'cancelled';
-  date: string;
-  customer: string;
-  description: string;
-  reference: string;
+  id: string; method: 'credit_card' | 'pix'; amount: number;
+  status: 'pending' | 'approved' | 'rejected' | 'cancelled'; date: string;
+  customer: string; description: string; reference: string;
 }
-
 interface PaymentMethod {
-  id: string;
-  name: string;
-  type: 'credit_card' | 'pix';
-  isActive: boolean;
-  fee: number;
-  processingTime: string;
-  creditCards?: CreditCard[];
-  pixKeys?: PixKey[];
-  transactions?: PaymentTransaction[];
+  id: string; name: string; type: 'credit_card' | 'pix'; isActive: boolean;
+  fee: number; processingTime: string; creditCards?: CreditCard[];
+  pixKeys?: PixKey[]; transactions?: PaymentTransaction[];
 }
-
 interface UserProfile {
-  name: string;
-  email: string;
-  phone: string;
-  position: string;
-  department: string;
-  avatar: string;
-  cnpj?: string;
+  name: string; email: string; phone: string; position: string;
+  department: string; avatar: string; cnpj?: string;
 }
-
 interface SettingsData {
-  // Configurações Gerais
-  companyName: string;
-  companyEmail: string;
-  companyPhone: string;
-  address: {
-    street: string;
-    number: string;
-    neighborhood: string;
-    city: string;
-    state: string;
-    zipCode: string;
-  };
-  
-  // Configurações de Notificações
-  emailNotifications: boolean;
-  pushNotifications: boolean;
-  lowStockAlerts: boolean;
-  salesAlerts: boolean;
-  systemAlerts: boolean;
-  
-  // Métodos de Pagamento
-  paymentMethods: PaymentMethod[];
-  
-  // Perfil do Usuário
-  userProfile: UserProfile;
+  companyName: string; companyEmail: string; companyPhone: string;
+  address: { street: string; number: string; neighborhood: string; city: string; state: string; zipCode: string; };
+  emailNotifications: boolean; pushNotifications: boolean; lowStockAlerts: boolean;
+  salesAlerts: boolean; systemAlerts: boolean; paymentMethods: PaymentMethod[]; userProfile: UserProfile;
 }
 
 const initialSettings: SettingsData = {
-  companyName: "Liderum ERP",
-  companyEmail: "contato@liderum.com",
-  companyPhone: "(11) 99999-9999",
-  address: {
-    street: "Rua das Empresas",
-    number: "123",
-    neighborhood: "Centro",
-    city: "São Paulo",
-    state: "SP",
-    zipCode: "01000-000"
-  },
-  
-  emailNotifications: true,
-  pushNotifications: true,
-  lowStockAlerts: true,
-  salesAlerts: true,
-  systemAlerts: false,
-  
+  companyName: "Liderum ERP", companyEmail: "contato@liderum.com", companyPhone: "(11) 99999-9999",
+  address: { street: "Rua das Empresas", number: "123", neighborhood: "Centro", city: "São Paulo", state: "SP", zipCode: "01000-000" },
+  emailNotifications: true, pushNotifications: true, lowStockAlerts: true, salesAlerts: true, systemAlerts: false,
   paymentMethods: [
     {
-      id: "1",
-      name: "Cartão de Crédito",
-      type: "credit_card",
-      isActive: true,
-      fee: 3.5,
-      processingTime: "Imediato",
+      id: "1", name: "Cartão de Crédito", type: "credit_card", isActive: true, fee: 3.5, processingTime: "Imediato",
       creditCards: [
-        {
-          id: "cc1",
-          cardNumber: "**** **** **** 1234",
-          cardholderName: "João Silva",
-          expiryDate: "12/25",
-          cvv: "***",
-          brand: "visa",
-          isDefault: true,
-          isActive: true
-        },
-        {
-          id: "cc2",
-          cardNumber: "**** **** **** 5678",
-          cardholderName: "João Silva",
-          expiryDate: "08/26",
-          cvv: "***",
-          brand: "mastercard",
-          isDefault: false,
-          isActive: true
-        }
+        { id: "cc1", cardNumber: "**** **** **** 1234", cardholderName: "João Silva", expiryDate: "12/25", cvv: "***", brand: "visa", isDefault: true, isActive: true },
+        { id: "cc2", cardNumber: "**** **** **** 5678", cardholderName: "João Silva", expiryDate: "08/26", cvv: "***", brand: "mastercard", isDefault: false, isActive: true }
       ],
       transactions: [
-        {
-          id: "t1",
-          method: "credit_card",
-          amount: 150.00,
-          status: "approved",
-          date: "2025-01-15T10:30:00Z",
-          customer: "Maria Santos",
-          description: "Venda de produto",
-          reference: "V001"
-        },
-        {
-          id: "t2",
-          method: "credit_card",
-          amount: 89.90,
-          status: "pending",
-          date: "2025-01-15T14:20:00Z",
-          customer: "Pedro Costa",
-          description: "Serviço prestado",
-          reference: "S002"
-        }
+        { id: "t1", method: "credit_card", amount: 150.00, status: "approved", date: "2025-01-15T10:30:00Z", customer: "Maria Santos", description: "Venda de produto", reference: "V001" },
+        { id: "t2", method: "credit_card", amount: 89.90, status: "pending", date: "2025-01-15T14:20:00Z", customer: "Pedro Costa", description: "Serviço prestado", reference: "S002" }
       ]
     },
     {
-      id: "2",
-      name: "PIX",
-      type: "pix",
-      isActive: true,
-      fee: 0.0,
-      processingTime: "Imediato",
+      id: "2", name: "PIX", type: "pix", isActive: true, fee: 0.0, processingTime: "Imediato",
       pixKeys: [
-        {
-          id: "pix1",
-          keyType: "email",
-          keyValue: "contato@liderum.com",
-          bankName: "Banco do Brasil",
-          accountHolder: "Liderum ERP Ltda",
-          isActive: true
-        },
-        {
-          id: "pix2",
-          keyType: "cpf",
-          keyValue: "123.456.789-00",
-          bankName: "Banco do Brasil",
-          accountHolder: "Liderum ERP Ltda",
-          isActive: false
-        }
+        { id: "pix1", keyType: "email", keyValue: "contato@liderum.com", bankName: "Banco do Brasil", accountHolder: "Liderum ERP Ltda", isActive: true },
+        { id: "pix2", keyType: "cpf", keyValue: "123.456.789-00", bankName: "Banco do Brasil", accountHolder: "Liderum ERP Ltda", isActive: false }
       ],
       transactions: [
-        {
-          id: "t3",
-          method: "pix",
-          amount: 250.00,
-          status: "approved",
-          date: "2025-01-15T09:15:00Z",
-          customer: "Ana Lima",
-          description: "Pagamento de fatura",
-          reference: "F001"
-        },
-        {
-          id: "t4",
-          method: "pix",
-          amount: 75.50,
-          status: "rejected",
-          date: "2025-01-15T16:45:00Z",
-          customer: "Carlos Oliveira",
-          description: "Transferência",
-          reference: "T001"
-        }
+        { id: "t3", method: "pix", amount: 250.00, status: "approved", date: "2025-01-15T09:15:00Z", customer: "Ana Lima", description: "Pagamento de fatura", reference: "F001" },
+        { id: "t4", method: "pix", amount: 75.50, status: "rejected", date: "2025-01-15T16:45:00Z", customer: "Carlos Oliveira", description: "Transferência", reference: "T001" }
       ]
     }
   ],
-  
-  userProfile: {
-    name: "João Silva",
-    email: "joao.silva@liderum.com",
-    phone: "(11) 99999-9999",
-    position: "Gerente de Vendas",
-    department: "Vendas",
-    avatar: ""
-  }
+  userProfile: { name: "João Silva", email: "joao.silva@liderum.com", phone: "(11) 99999-9999", position: "Gerente de Vendas", department: "Vendas", avatar: "" }
 };
 
 export function Settings() {
@@ -265,14 +145,11 @@ export function Settings() {
   const { toast } = useToast();
   const { showToast } = useSimpleToast();
 
-  // Estados para modais e formulários
   const [creditCardModalOpen, setCreditCardModalOpen] = useState(false);
   const [pixModalOpen, setPixModalOpen] = useState(false);
   const [editingCard, setEditingCard] = useState<CreditCard | null>(null);
   const [editingPix, setEditingPix] = useState<PixKey | null>(null);
-  const [showCardDetails, setShowCardDetails] = useState<Record<string, boolean>>({});
 
-  // Estados para perfil (integração com API)
   const [profileLoading, setProfileLoading] = useState(false);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
@@ -282,55 +159,32 @@ export function Settings() {
     setSettings(prev => ({ ...prev, [field]: value }));
   };
 
-  const handlePaymentMethodToggle = (id: string) => {
-    setSettings(prev => ({
-      ...prev,
-      paymentMethods: prev.paymentMethods.map(method =>
-        method.id === id ? { ...method, isActive: !method.isActive } : method
-      )
-    }));
-  };
-
-  const handlePaymentMethodEdit = (id: string, field: keyof PaymentMethod, value: string | number | boolean) => {
-    setSettings(prev => ({
-      ...prev,
-      paymentMethods: prev.paymentMethods.map(method =>
-        method.id === id ? { ...method, [field]: value } : method
-      )
-    }));
+  const handleAddressChange = (field: keyof SettingsData['address'], value: string) => {
+    setSettings(prev => ({ ...prev, address: { ...prev.address, [field]: value } }));
   };
 
   const handleProfileChange = (field: keyof UserProfile, value: string) => {
-    setSettings(prev => ({
-      ...prev,
-      userProfile: { ...prev.userProfile, [field]: value }
-    }));
+    setSettings(prev => ({ ...prev, userProfile: { ...prev.userProfile, [field]: value } }));
   };
 
-  // Funções para gerenciar perfil via API
+  const formatPhone = (value: string): string => {
+    const n = value.replace(/\D/g, '');
+    return n.length <= 10 ? n.replace(/(\d{2})(\d{4})(\d{4})/, '($1) $2-$3') : n.replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3');
+  };
+  const formatZipCode = (v: string) => v.replace(/\D/g, '').replace(/(\d{5})(\d{3})/, '$1-$2');
+
   const loadProfile = async () => {
     setProfileLoading(true);
     try {
       const data = await ProfileService.get();
       setProfile(data);
-      // Atualiza o estado local com os dados da API
       setSettings(prev => ({
         ...prev,
-        userProfile: {
-          name: data.name || prev.userProfile.name,
-          email: data.email || prev.userProfile.email,
-          phone: data.phone || prev.userProfile.phone,
-          position: prev.userProfile.position,
-          department: prev.userProfile.department,
-          avatar: prev.userProfile.avatar,
-          cnpj: data.cnpj,
-        }
+        userProfile: { name: data.name || prev.userProfile.name, email: data.email || prev.userProfile.email, phone: data.phone || prev.userProfile.phone, position: prev.userProfile.position, department: prev.userProfile.department, avatar: prev.userProfile.avatar, cnpj: data.cnpj }
       }));
     } catch (e: unknown) {
       showToast(e instanceof Error ? e.message : 'Falha ao carregar perfil', 'error');
-    } finally {
-      setProfileLoading(false);
-    }
+    } finally { setProfileLoading(false); }
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -338,33 +192,19 @@ export function Settings() {
     if (file) {
       setAvatarFile(file);
       const reader = new FileReader();
-      reader.onloadend = () => {
-        setAvatarPreview(reader.result as string);
-      };
+      reader.onloadend = () => setAvatarPreview(reader.result as string);
       reader.readAsDataURL(file);
     }
   };
 
   const handleProfileSave = async () => {
     try {
-      const payload: UpdateMyProfileDto = {
-        name: settings.userProfile.name,
-        email: settings.userProfile.email,
-        phone: settings.userProfile.phone,
-        cnpj: settings.userProfile.cnpj,
-        rowVersion: profile?.rowVersion,
-      };
+      const payload: UpdateMyProfileDto = { name: settings.userProfile.name, email: settings.userProfile.email, phone: settings.userProfile.phone, cnpj: settings.userProfile.cnpj, rowVersion: profile?.rowVersion };
       await ProfileService.update(payload);
-
-      // Upload avatar if selected
       if (avatarFile && profile?.rowVersion) {
-        // Reload profile to get updated rowVersion after profile update
-        const updatedProfile = await ProfileService.get();
-        if (updatedProfile.rowVersion) {
-          await ProfileService.updateAvatar(avatarFile, updatedProfile.rowVersion);
-        }
+        const updated = await ProfileService.get();
+        if (updated.rowVersion) await ProfileService.updateAvatar(avatarFile, updated.rowVersion);
       }
-
       showToast('Perfil atualizado com sucesso', 'success');
       loadProfile();
       setAvatarFile(null);
@@ -376,13 +216,10 @@ export function Settings() {
 
   const handleDeleteAvatar = async () => {
     if (!profile) return;
-
-    const confirmed = window.confirm('Remover foto de perfil?');
-    if (!confirmed) return;
-
+    if (!window.confirm('Remover foto de perfil?')) return;
     try {
       await ProfileService.deleteAvatar();
-      showToast('Foto de perfil removida com sucesso', 'success');
+      showToast('Foto removida com sucesso', 'success');
       loadProfile();
       setAvatarPreview(null);
     } catch (e: unknown) {
@@ -390,1025 +227,480 @@ export function Settings() {
     }
   };
 
-  // Carrega perfil quando a aba de perfil é aberta
   React.useEffect(() => {
-    if (activeTab === 'profile' && !profile) {
-      loadProfile();
-    }
+    if (activeTab === 'profile' && !profile) loadProfile();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTab]);
-
-  const handleAddressChange = (field: keyof SettingsData['address'], value: string) => {
-    setSettings(prev => ({
-      ...prev,
-      address: { ...prev.address, [field]: value }
-    }));
-  };
-
-  const formatPhone = (value: string): string => {
-    const numbers = value.replace(/\D/g, '');
-    if (numbers.length <= 10) {
-      return numbers.replace(/(\d{2})(\d{4})(\d{4})/, '($1) $2-$3');
-    } else {
-      return numbers.replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3');
-    }
-  };
-
-  const formatZipCode = (value: string): string => {
-    const numbers = value.replace(/\D/g, '');
-    return numbers.replace(/(\d{5})(\d{3})/, '$1-$2');
-  };
-
-  const handlePhoneChange = (value: string) => {
-    const formatted = formatPhone(value);
-    setSettings(prev => ({ ...prev, companyPhone: formatted }));
-  };
-
-  const handleZipCodeChange = (value: string) => {
-    const formatted = formatZipCode(value);
-    handleAddressChange('zipCode', formatted);
-  };
-
-  // Funções para gerenciar cartões de crédito
-  const addCreditCard = (cardData: Omit<CreditCard, 'id'>) => {
-    const newCard: CreditCard = {
-      ...cardData,
-      id: `cc${Date.now()}`
-    };
-    
-    setSettings(prev => ({
-      ...prev,
-      paymentMethods: prev.paymentMethods.map(method =>
-        method.type === 'credit_card'
-          ? {
-              ...method,
-              creditCards: [...(method.creditCards || []), newCard]
-            }
-          : method
-      )
-    }));
-    
-    toast({
-      title: "Cartão adicionado",
-      description: "Cartão de crédito cadastrado com sucesso.",
-    });
-  };
-
-  const updateCreditCard = (cardId: string, cardData: Partial<CreditCard>) => {
-    setSettings(prev => ({
-      ...prev,
-      paymentMethods: prev.paymentMethods.map(method =>
-        method.type === 'credit_card'
-          ? {
-              ...method,
-              creditCards: method.creditCards?.map(card =>
-                card.id === cardId ? { ...card, ...cardData } : card
-              )
-            }
-          : method
-      )
-    }));
-    
-    toast({
-      title: "Cartão atualizado",
-      description: "Cartão de crédito atualizado com sucesso.",
-    });
-  };
 
   const deleteCreditCard = (cardId: string) => {
     setSettings(prev => ({
       ...prev,
-      paymentMethods: prev.paymentMethods.map(method =>
-        method.type === 'credit_card'
-          ? {
-              ...method,
-              creditCards: method.creditCards?.filter(card => card.id !== cardId)
-            }
-          : method
-      )
+      paymentMethods: prev.paymentMethods.map(m => m.type === 'credit_card' ? { ...m, creditCards: m.creditCards?.filter(c => c.id !== cardId) } : m)
     }));
-    
-    toast({
-      title: "Cartão removido",
-      description: "Cartão de crédito removido com sucesso.",
-    });
-  };
-
-  // Funções para gerenciar chaves PIX
-  const addPixKey = (pixData: Omit<PixKey, 'id'>) => {
-    const newPix: PixKey = {
-      ...pixData,
-      id: `pix${Date.now()}`
-    };
-    
-    setSettings(prev => ({
-      ...prev,
-      paymentMethods: prev.paymentMethods.map(method =>
-        method.type === 'pix'
-          ? {
-              ...method,
-              pixKeys: [...(method.pixKeys || []), newPix]
-            }
-          : method
-      )
-    }));
-    
-    toast({
-      title: "Chave PIX adicionada",
-      description: "Chave PIX cadastrada com sucesso.",
-    });
-  };
-
-  const updatePixKey = (pixId: string, pixData: Partial<PixKey>) => {
-    setSettings(prev => ({
-      ...prev,
-      paymentMethods: prev.paymentMethods.map(method =>
-        method.type === 'pix'
-          ? {
-              ...method,
-              pixKeys: method.pixKeys?.map(pix =>
-                pix.id === pixId ? { ...pix, ...pixData } : pix
-              )
-            }
-          : method
-      )
-    }));
-    
-    toast({
-      title: "Chave PIX atualizada",
-      description: "Chave PIX atualizada com sucesso.",
-    });
+    toast({ title: "Cartão removido", description: "Cartão de crédito removido com sucesso." });
   };
 
   const deletePixKey = (pixId: string) => {
     setSettings(prev => ({
       ...prev,
-      paymentMethods: prev.paymentMethods.map(method =>
-        method.type === 'pix'
-          ? {
-              ...method,
-              pixKeys: method.pixKeys?.filter(pix => pix.id !== pixId)
-            }
-          : method
-      )
+      paymentMethods: prev.paymentMethods.map(m => m.type === 'pix' ? { ...m, pixKeys: m.pixKeys?.filter(p => p.id !== pixId) } : m)
     }));
-    
-    toast({
-      title: "Chave PIX removida",
-      description: "Chave PIX removida com sucesso.",
-    });
-  };
-
-  // Funções auxiliares
-  const getCardBrand = (cardNumber: string): CreditCard['brand'] => {
-    const number = cardNumber.replace(/\D/g, '');
-    if (number.startsWith('4')) return 'visa';
-    if (number.startsWith('5') || number.startsWith('2')) return 'mastercard';
-    if (number.startsWith('3')) return 'amex';
-    return 'elo';
-  };
-
-  const formatCardNumber = (cardNumber: string): string => {
-    const cleaned = cardNumber.replace(/\D/g, '');
-    return cleaned.replace(/(\d{4})(?=\d)/g, '$1 ');
-  };
-
-  const getStatusBadge = (status: PaymentTransaction['status']) => {
-    const variants = {
-      pending: { variant: 'secondary' as const, text: 'Pendente', icon: Clock },
-      approved: { variant: 'default' as const, text: 'Aprovado', icon: CheckCircle },
-      rejected: { variant: 'destructive' as const, text: 'Rejeitado', icon: AlertTriangle },
-      cancelled: { variant: 'outline' as const, text: 'Cancelado', icon: Minus }
-    };
-    
-    const config = variants[status];
-    const Icon = config.icon;
-    
-    return (
-      <Badge variant={config.variant} className="flex items-center gap-1">
-        <Icon className="h-3 w-3" />
-        {config.text}
-      </Badge>
-    );
+    toast({ title: "Chave PIX removida", description: "Chave PIX removida com sucesso." });
   };
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
-    toast({
-      title: "Copiado!",
-      description: "Texto copiado para a área de transferência.",
-    });
+    toast({ title: "Copiado!", description: "Texto copiado para a área de transferência." });
   };
 
   const handleSave = async () => {
     setLoading(true);
     try {
-      // Simular salvamento
       await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      toast({
-        title: "Configurações salvas",
-        description: "Suas configurações foram atualizadas com sucesso.",
-        variant: "default",
-      });
-    } catch (error) {
-      toast({
-        title: "Erro ao salvar",
-        description: "Não foi possível salvar as configurações.",
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
-    }
+      toast({ title: "Configurações salvas", description: "Suas configurações foram atualizadas com sucesso." });
+    } catch {
+      toast({ title: "Erro ao salvar", description: "Não foi possível salvar as configurações.", variant: "destructive" });
+    } finally { setLoading(false); }
   };
 
+  const getStatusBadge = (status: PaymentTransaction['status']) => {
+    const map = { pending: 'ld-badge ld-badge-yellow', approved: 'ld-badge ld-badge-green', rejected: 'ld-badge ld-badge-red', cancelled: 'ld-badge ld-badge-gray' };
+    const labels = { pending: 'Pendente', approved: 'Aprovado', rejected: 'Rejeitado', cancelled: 'Cancelado' };
+    return <span className={map[status]}>{labels[status]}</span>;
+  };
 
   const tabs = [
     { id: 'general', label: 'Geral', icon: SettingsIcon },
     { id: 'notifications', label: 'Notificações', icon: Bell },
-    { id: 'payments', label: 'Métodos de Pagamento', icon: CreditCard },
+    { id: 'payments', label: 'Pagamentos', icon: CreditCard },
     { id: 'profile', label: 'Meu Perfil', icon: User },
   ];
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <>
+      <style>{LDCSS}</style>
+      <div className="ld" style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+
         {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-xs uppercase tracking-[0.16em] text-muted-foreground">Preferencias</p>
-              <h1 className="mt-1 text-3xl font-semibold tracking-tight flex items-center gap-3">
-                <BarChart3 className="h-7 w-7 text-primary" />
-                Configurações
-              </h1>
-              <p className="text-muted-foreground mt-2">
-                Gerencie as configurações do sistema e personalize sua experiência
-              </p>
-            </div>
-            <div className="flex items-center space-x-3">
-              <Button
-                onClick={handleSave}
-                disabled={loading}
-                className="gap-2"
-              >
-                {loading ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <Save className="h-4 w-4" />
-                )}
-                {loading ? 'Salvando...' : 'Salvar Configurações'}
-              </Button>
-            </div>
+        <div className="ld-a1" style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
+          <div>
+            <span className="ld-tag">Preferências</span>
+            <h1 className="ld-h1" style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <SettingsIcon size={22} color="var(--gold)" />
+              Configurações
+            </h1>
+            <p className="ld-sub" style={{ marginTop: 4 }}>Gerencie configurações do sistema e sua conta</p>
           </div>
+          <button className="ld-btn ld-btn-dark" onClick={handleSave} disabled={loading}>
+            {loading ? <><Loader2 size={13} className="animate-spin" />Salvando...</> : <><Save size={13} />Salvar</>}
+          </button>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-          {/* Sidebar de Navegação */}
-          <div className="lg:col-span-1">
-            <Card className="border-border shadow-none">
-              <CardHeader>
-                <CardTitle className="text-lg">Categorias</CardTitle>
-              </CardHeader>
-              <CardContent className="p-0">
-                <nav className="space-y-1">
-                  {tabs.map((tab) => {
-                    const Icon = tab.icon;
-                    return (
-                      <button
-                        key={tab.id}
-                        onClick={() => setActiveTab(tab.id)}
-                        className={`w-full flex items-center gap-3 px-4 py-3 text-left transition-colors ${
-                          activeTab === tab.id
-                            ? 'bg-primary/10 text-primary border-r-2 border-primary'
-                            : 'text-muted-foreground hover:bg-muted/40 hover:text-foreground'
-                        }`}
-                      >
-                        <Icon className="h-4 w-4" />
-                        <span className="text-sm font-medium">{tab.label}</span>
+        {/* Layout */}
+        <div className="ld-layout ld-a2">
+
+          {/* Sidebar */}
+          <div className="ld-sidebar">
+            <div className="ld-sidebar-header">
+              <div className="ld-sidebar-title">Categorias</div>
+            </div>
+            {tabs.map((tab) => {
+              const Icon = tab.icon;
+              return (
+                <button
+                  key={tab.id}
+                  className={`ld-nav-item${activeTab === tab.id ? ' active' : ''}`}
+                  onClick={() => setActiveTab(tab.id)}
+                >
+                  <Icon size={14} />
+                  {tab.label}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Content */}
+          <motion.div key={activeTab} initial={{ opacity: 0, x: 16 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.25 }}>
+
+            {/* GERAL */}
+            {activeTab === 'general' && (
+              <div className="ld-section">
+                <div className="ld-card">
+                  <div className="ld-card-body">
+                    <h2 className="ld-h2"><SettingsIcon size={15} color="var(--gold)" /> Informações da Empresa</h2>
+                    <div className="ld-form-grid-2">
+                      <div className="ld-field">
+                        <label className="ld-lbl">Nome da Empresa</label>
+                        <Input value={settings.companyName} onChange={(e) => handleInputChange('companyName', e.target.value)} />
+                      </div>
+                      <div className="ld-field">
+                        <label className="ld-lbl">E-mail da Empresa</label>
+                        <Input type="email" value={settings.companyEmail} onChange={(e) => handleInputChange('companyEmail', e.target.value)} />
+                      </div>
+                      <div className="ld-field">
+                        <label className="ld-lbl">Telefone</label>
+                        <Input value={settings.companyPhone} onChange={(e) => handleInputChange('companyPhone', formatPhone(e.target.value))} placeholder="(11) 99999-9999" />
+                      </div>
+                    </div>
+
+                    <div className="ld-divider" />
+                    <h2 className="ld-h2" style={{ fontSize: 14 }}>Endereço</h2>
+                    <div className="ld-form-grid-3">
+                      <div className="ld-field" style={{ gridColumn: '1/-1' }}>
+                        <label className="ld-lbl">Rua</label>
+                        <Input value={settings.address.street} onChange={(e) => handleAddressChange('street', e.target.value)} />
+                      </div>
+                      <div className="ld-field">
+                        <label className="ld-lbl">Número</label>
+                        <Input value={settings.address.number} onChange={(e) => handleAddressChange('number', e.target.value)} />
+                      </div>
+                      <div className="ld-field">
+                        <label className="ld-lbl">Bairro</label>
+                        <Input value={settings.address.neighborhood} onChange={(e) => handleAddressChange('neighborhood', e.target.value)} />
+                      </div>
+                      <div className="ld-field">
+                        <label className="ld-lbl">Cidade</label>
+                        <Input value={settings.address.city} onChange={(e) => handleAddressChange('city', e.target.value)} />
+                      </div>
+                      <div className="ld-field">
+                        <label className="ld-lbl">Estado</label>
+                        <Input value={settings.address.state} onChange={(e) => handleAddressChange('state', e.target.value)} maxLength={2} />
+                      </div>
+                      <div className="ld-field">
+                        <label className="ld-lbl">CEP</label>
+                        <Input value={settings.address.zipCode} onChange={(e) => handleAddressChange('zipCode', formatZipCode(e.target.value))} placeholder="00000-000" />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* NOTIFICAÇÕES */}
+            {activeTab === 'notifications' && (
+              <div className="ld-section">
+                <div className="ld-card">
+                  <div className="ld-card-body">
+                    <h2 className="ld-h2"><Bell size={15} color="var(--gold)" /> Canais de Notificação</h2>
+                    {[
+                      { id: 'emailNotifications', field: 'emailNotifications' as keyof SettingsData, label: 'Notificações por E-mail', desc: 'Receber notificações importantes por e-mail' },
+                      { id: 'pushNotifications', field: 'pushNotifications' as keyof SettingsData, label: 'Notificações Push', desc: 'Receber notificações em tempo real no navegador' },
+                    ].map(item => (
+                      <div key={item.id} className="ld-notif-row">
+                        <div>
+                          <div className="ld-notif-label">{item.label}</div>
+                          <div className="ld-notif-desc">{item.desc}</div>
+                        </div>
+                        <Switch checked={settings[item.field] as boolean} onCheckedChange={(v) => handleInputChange(item.field, v)} />
+                      </div>
+                    ))}
+
+                    <div className="ld-divider" style={{ margin: '4px 0 12px' }} />
+                    <h2 className="ld-h2" style={{ fontSize: 14, marginBottom: 0 }}>Tipos de Alerta</h2>
+                    {[
+                      { id: 'lowStockAlerts', field: 'lowStockAlerts' as keyof SettingsData, label: 'Estoque Baixo', desc: 'Notificar quando produtos estão com estoque baixo' },
+                      { id: 'salesAlerts', field: 'salesAlerts' as keyof SettingsData, label: 'Alertas de Vendas', desc: 'Notificar sobre vendas importantes e metas' },
+                      { id: 'systemAlerts', field: 'systemAlerts' as keyof SettingsData, label: 'Alertas do Sistema', desc: 'Notificar sobre atualizações e manutenções' },
+                    ].map(item => (
+                      <div key={item.id} className="ld-notif-row">
+                        <div>
+                          <div className="ld-notif-label">{item.label}</div>
+                          <div className="ld-notif-desc">{item.desc}</div>
+                        </div>
+                        <Switch checked={settings[item.field] as boolean} onCheckedChange={(v) => handleInputChange(item.field, v)} />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* PAGAMENTOS */}
+            {activeTab === 'payments' && (
+              <div className="ld-section">
+                <div className="ld-card">
+                  <div className="ld-card-body">
+                    <h2 className="ld-h2"><CreditCard size={15} color="var(--gold)" /> Métodos de Pagamento</h2>
+                    <Tabs defaultValue="credit-card" className="w-full">
+                      <TabsList style={{ background: 'rgba(247,244,239,0.6)', border: '1px solid var(--bdr)' }}>
+                        <TabsTrigger value="credit-card">Cartão de Crédito</TabsTrigger>
+                        <TabsTrigger value="pix">PIX</TabsTrigger>
+                      </TabsList>
+
+                      <TabsContent value="credit-card" style={{ marginTop: 16 }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14, flexWrap: 'wrap', gap: 8 }}>
+                          <div>
+                            <div style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: 15, fontWeight: 700, color: 'var(--ink)' }}>Cartões Cadastrados</div>
+                            <div style={{ fontSize: 12, color: 'var(--ink3)' }}>Gerencie seus cartões de crédito</div>
+                          </div>
+                          <button className="ld-btn ld-btn-dark ld-btn-sm" onClick={() => { setEditingCard(null); setCreditCardModalOpen(true); }}>
+                            <Plus size={12} /> Adicionar Cartão
+                          </button>
+                        </div>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                          {settings.paymentMethods.find(m => m.type === 'credit_card')?.creditCards?.map((card) => (
+                            <div key={card.id} className="ld-payment-card">
+                              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                                  <div className="ld-card-logo">{card.brand.toUpperCase().slice(0, 2)}</div>
+                                  <div>
+                                    <div style={{ fontWeight: 600, fontSize: 13.5, color: 'var(--ink)', display: 'flex', alignItems: 'center', gap: 8 }}>
+                                      {card.cardNumber}
+                                      {card.isDefault && <span className="ld-badge ld-badge-gold">Padrão</span>}
+                                    </div>
+                                    <div style={{ fontSize: 12, color: 'var(--ink3)' }}>{card.cardholderName} · Expira {card.expiryDate}</div>
+                                  </div>
+                                </div>
+                                <div style={{ display: 'flex', gap: 6 }}>
+                                  <button className="ld-btn ld-btn-outline ld-btn-sm" onClick={() => { setEditingCard(card); setCreditCardModalOpen(true); }}>
+                                    <Edit size={11} />
+                                  </button>
+                                  <button className="ld-btn ld-btn-danger ld-btn-sm" onClick={() => deleteCreditCard(card.id)}>
+                                    <Trash2 size={11} />
+                                  </button>
+                                </div>
+                              </div>
+                            </div>
+                          )) || []}
+                        </div>
+                      </TabsContent>
+
+                      <TabsContent value="pix" style={{ marginTop: 16 }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14, flexWrap: 'wrap', gap: 8 }}>
+                          <div>
+                            <div style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: 15, fontWeight: 700, color: 'var(--ink)' }}>Chaves PIX</div>
+                            <div style={{ fontSize: 12, color: 'var(--ink3)' }}>Gerencie suas chaves PIX</div>
+                          </div>
+                          <button className="ld-btn ld-btn-dark ld-btn-sm" onClick={() => { setEditingPix(null); setPixModalOpen(true); }}>
+                            <Plus size={12} /> Adicionar Chave
+                          </button>
+                        </div>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                          {settings.paymentMethods.find(m => m.type === 'pix')?.pixKeys?.map((pix) => (
+                            <div key={pix.id} className="ld-payment-card">
+                              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                <div style={{ flex: 1 }}>
+                                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+                                    <span className="ld-badge ld-badge-outline" style={{ textTransform: 'capitalize' }}>{pix.keyType}</span>
+                                    <span className={pix.isActive ? 'ld-badge ld-badge-green' : 'ld-badge ld-badge-gray'}>
+                                      {pix.isActive ? 'Ativa' : 'Inativa'}
+                                    </span>
+                                  </div>
+                                  <div style={{ fontWeight: 600, fontSize: 14, color: 'var(--ink)' }}>{pix.keyValue}</div>
+                                  <div style={{ fontSize: 12, color: 'var(--ink3)' }}>{pix.bankName} · {pix.accountHolder}</div>
+                                </div>
+                                <div style={{ display: 'flex', gap: 6 }}>
+                                  <button className="ld-btn ld-btn-outline ld-btn-sm" onClick={() => copyToClipboard(pix.keyValue)}>
+                                    <Copy size={11} />
+                                  </button>
+                                  <button className="ld-btn ld-btn-outline ld-btn-sm" onClick={() => { setEditingPix(pix); setPixModalOpen(true); }}>
+                                    <Edit size={11} />
+                                  </button>
+                                  <button className="ld-btn ld-btn-danger ld-btn-sm" onClick={() => deletePixKey(pix.id)}>
+                                    <Trash2 size={11} />
+                                  </button>
+                                </div>
+                              </div>
+                            </div>
+                          )) || []}
+                        </div>
+                      </TabsContent>
+                    </Tabs>
+                  </div>
+                </div>
+
+                {/* Histórico de Transações */}
+                <div className="ld-card">
+                  <div className="ld-card-body">
+                    <h2 className="ld-h2"><TrendingUp size={15} color="var(--gold)" /> Histórico de Transações</h2>
+                    {settings.paymentMethods.flatMap(m => m.transactions || [])
+                      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+                      .slice(0, 10)
+                      .map((tx) => (
+                        <div key={tx.id} className="ld-tx-item">
+                          <div className="ld-tx-ico" style={{ background: tx.method === 'credit_card' ? '#EBF5FB' : '#E8F5E9' }}>
+                            {tx.method === 'credit_card' ? <CreditCard size={15} color="#2980B9" /> : <Smartphone size={15} color="#27AE60" />}
+                          </div>
+                          <div style={{ flex: 1, minWidth: 0 }}>
+                            <div style={{ fontWeight: 500, fontSize: 13, color: 'var(--ink)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                              {tx.customer}
+                            </div>
+                            <div style={{ fontSize: 11.5, color: 'var(--ink3)' }}>{tx.description} · {tx.reference}</div>
+                          </div>
+                          <div style={{ textAlign: 'right' }}>
+                            <div style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: 15, fontWeight: 700, color: 'var(--ink)' }}>
+                              R$ {tx.amount.toFixed(2).replace('.', ',')}
+                            </div>
+                            <div style={{ marginTop: 2 }}>{getStatusBadge(tx.status)}</div>
+                            <div style={{ fontSize: 10.5, color: 'var(--ink3)', marginTop: 2 }}>
+                              {new Date(tx.date).toLocaleDateString('pt-BR')}
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* PERFIL */}
+            {activeTab === 'profile' && (
+              <div className="ld-section">
+                <div className="ld-card">
+                  <div className="ld-card-body">
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 20, flexWrap: 'wrap', gap: 10 }}>
+                      <h2 className="ld-h2" style={{ marginBottom: 0 }}><User size={15} color="var(--gold)" /> Informações Pessoais</h2>
+                      <button className="ld-btn ld-btn-outline ld-btn-sm" onClick={loadProfile} disabled={profileLoading}>
+                        <RefreshCw size={12} className={profileLoading ? 'animate-spin' : ''} /> Atualizar
                       </button>
-                    );
-                  })}
-                </nav>
-              </CardContent>
-            </Card>
-          </div>
+                    </div>
 
-          {/* Conteúdo Principal */}
-          <div className="lg:col-span-3">
-            <motion.div
-              key={activeTab}
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.3 }}
-            >
-              {/* Configurações Gerais */}
-              {activeTab === 'general' && (
-                <div className="space-y-6">
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="flex items-center gap-2">
-                        <SettingsIcon className="h-5 w-5" />
-                        Informações da Empresa
-                      </CardTitle>
-                      <CardDescription>
-                        Configure as informações básicas da sua empresa
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                          <Label htmlFor="companyName">Nome da Empresa</Label>
-                          <Input
-                            id="companyName"
-                            value={settings.companyName}
-                            onChange={(e) => handleInputChange('companyName', e.target.value)}
-                          />
-                        </div>
-                        <div>
-                          <Label htmlFor="companyEmail">E-mail da Empresa</Label>
-                          <Input
-                            id="companyEmail"
-                            type="email"
-                            value={settings.companyEmail}
-                            onChange={(e) => handleInputChange('companyEmail', e.target.value)}
-                          />
-                        </div>
-                        <div>
-                          <Label htmlFor="companyPhone">Telefone</Label>
-                          <Input
-                            id="companyPhone"
-                            value={settings.companyPhone}
-                            onChange={(e) => handlePhoneChange(e.target.value)}
-                            placeholder="(11) 99999-9999"
-                          />
-                        </div>
-                      </div>
-                      
-                      <Separator />
-                      
+                    {/* Avatar */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 20, marginBottom: 20 }}>
                       <div>
-                          <h4 className="text-lg font-medium text-foreground mb-4">Endereço</h4>
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                          <div className="md:col-span-2">
-                            <Label htmlFor="street">Rua</Label>
-                            <Input
-                              id="street"
-                              value={settings.address.street}
-                              onChange={(e) => handleAddressChange('street', e.target.value)}
-                            />
+                        {avatarPreview ? (
+                          <img src={avatarPreview} alt="Preview" style={{ width: 64, height: 64, borderRadius: '50%', objectFit: 'cover', border: '2px solid var(--bdr)' }} />
+                        ) : (
+                          <div className="ld-avatar">
+                            {settings.userProfile.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
                           </div>
-                          <div>
-                            <Label htmlFor="number">Número</Label>
-                            <Input
-                              id="number"
-                              value={settings.address.number}
-                              onChange={(e) => handleAddressChange('number', e.target.value)}
-                            />
-                          </div>
-                          <div>
-                            <Label htmlFor="neighborhood">Bairro</Label>
-                            <Input
-                              id="neighborhood"
-                              value={settings.address.neighborhood}
-                              onChange={(e) => handleAddressChange('neighborhood', e.target.value)}
-                            />
-                          </div>
-                          <div>
-                            <Label htmlFor="city">Cidade</Label>
-                            <Input
-                              id="city"
-                              value={settings.address.city}
-                              onChange={(e) => handleAddressChange('city', e.target.value)}
-                            />
-                          </div>
-                          <div>
-                            <Label htmlFor="state">Estado</Label>
-                            <Input
-                              id="state"
-                              value={settings.address.state}
-                              onChange={(e) => handleAddressChange('state', e.target.value)}
-                              maxLength={2}
-                            />
-                          </div>
-                          <div>
-                            <Label htmlFor="zipCode">CEP</Label>
-                            <Input
-                              id="zipCode"
-                              value={settings.address.zipCode}
-                              onChange={(e) => handleZipCodeChange(e.target.value)}
-                              placeholder="00000-000"
-                            />
-                          </div>
-                        </div>
+                        )}
                       </div>
-                    </CardContent>
-                  </Card>
-                </div>
-              )}
+                      <div style={{ flex: 1 }}>
+                        <div style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: 18, fontWeight: 700, color: 'var(--ink)' }}>
+                          {settings.userProfile.name}
+                        </div>
+                        <div style={{ fontSize: 13, color: 'var(--ink3)' }}>{settings.userProfile.position} · {settings.userProfile.department}</div>
+                      </div>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                        <Label htmlFor="avatar-upload" style={{ cursor: 'pointer' }}>
+                          <span className="ld-btn ld-btn-outline ld-btn-sm" style={{ display: 'inline-flex' }}>
+                            <Upload size={11} /> Alterar Foto
+                          </span>
+                        </Label>
+                        <input id="avatar-upload" type="file" accept="image/*" onChange={handleFileChange} className="hidden" aria-label="Upload de foto" style={{ display: 'none' }} />
+                        {profile && (avatarPreview || profile.email) && (
+                          <button className="ld-btn ld-btn-danger ld-btn-sm" onClick={handleDeleteAvatar}>
+                            <Trash2 size={11} /> Remover
+                          </button>
+                        )}
+                      </div>
+                    </div>
 
-              {/* Configurações de Notificações */}
-              {activeTab === 'notifications' && (
-                <div className="space-y-6">
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="flex items-center gap-2">
-                        <Bell className="h-5 w-5" />
-                        Preferências de Notificação
-                      </CardTitle>
-                      <CardDescription>
-                        Configure como e quando você deseja receber notificações
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-6">
-                      <div className="space-y-4">
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <Label htmlFor="emailNotifications">Notificações por E-mail</Label>
-                            <p className="text-sm text-gray-500">Receber notificações importantes por e-mail</p>
-                          </div>
-                          <Switch
-                            id="emailNotifications"
-                            checked={settings.emailNotifications}
-                            onCheckedChange={(checked) => handleInputChange('emailNotifications', checked)}
-                          />
-                        </div>
-                        
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <Label htmlFor="pushNotifications">Notificações Push</Label>
-                            <p className="text-sm text-gray-500">Receber notificações em tempo real no navegador</p>
-                          </div>
-                          <Switch
-                            id="pushNotifications"
-                            checked={settings.pushNotifications}
-                            onCheckedChange={(checked) => handleInputChange('pushNotifications', checked)}
-                          />
-                        </div>
-                        
-                        <Separator />
-                        
-                        <div className="space-y-4">
-                          <h4 className="font-medium text-gray-900">Tipos de Notificação</h4>
-                          
-                          <div className="flex items-center justify-between">
-                            <div>
-                              <Label htmlFor="lowStockAlerts">Alertas de Estoque Baixo</Label>
-                              <p className="text-sm text-gray-500">Notificar quando produtos estão com estoque baixo</p>
-                            </div>
-                            <Switch
-                              id="lowStockAlerts"
-                              checked={settings.lowStockAlerts}
-                              onCheckedChange={(checked) => handleInputChange('lowStockAlerts', checked)}
-                            />
-                          </div>
-                          
-                          <div className="flex items-center justify-between">
-                            <div>
-                              <Label htmlFor="salesAlerts">Alertas de Vendas</Label>
-                              <p className="text-sm text-gray-500">Notificar sobre vendas importantes e metas</p>
-                            </div>
-                            <Switch
-                              id="salesAlerts"
-                              checked={settings.salesAlerts}
-                              onCheckedChange={(checked) => handleInputChange('salesAlerts', checked)}
-                            />
-                          </div>
-                          
-                          <div className="flex items-center justify-between">
-                            <div>
-                              <Label htmlFor="systemAlerts">Alertas do Sistema</Label>
-                              <p className="text-sm text-gray-500">Notificar sobre atualizações e manutenções</p>
-                            </div>
-                            <Switch
-                              id="systemAlerts"
-                              checked={settings.systemAlerts}
-                              onCheckedChange={(checked) => handleInputChange('systemAlerts', checked)}
-                            />
-                          </div>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </div>
-              )}
+                    <div className="ld-divider" />
 
-              {/* Métodos de Pagamento */}
-              {activeTab === 'payments' && (
-                <div className="space-y-6">
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="flex items-center gap-2">
-                        <CreditCard className="h-5 w-5" />
-                        Métodos de Pagamento
-                      </CardTitle>
-                      <CardDescription>
-                        Gerencie cartões de crédito e chaves PIX
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <Tabs defaultValue="credit-card" className="w-full">
-                        <TabsList className="grid w-full grid-cols-2">
-                          <TabsTrigger value="credit-card" className="flex items-center gap-2">
-                            <CardIcon className="h-4 w-4" />
-                            Cartão de Crédito
-                          </TabsTrigger>
-                          <TabsTrigger value="pix" className="flex items-center gap-2">
-                            <Smartphone className="h-4 w-4" />
-                            PIX
-                          </TabsTrigger>
-                        </TabsList>
-                        
-                        <TabsContent value="credit-card" className="space-y-4">
-                          <div className="flex items-center justify-between">
-                            <div>
-                              <h3 className="text-lg font-semibold">Cartões Cadastrados</h3>
-                              <p className="text-sm text-gray-500">Gerencie seus cartões de crédito</p>
-                            </div>
-                            <Button 
-                              onClick={() => {
-                                setEditingCard(null);
-                                setCreditCardModalOpen(true);
-                              }}
-                              className="gap-2"
-                            >
-                              <Plus className="h-4 w-4" />
-                              Adicionar Cartão
-                            </Button>
-                          </div>
-                          
-                          <div className="grid gap-4">
-                            {settings.paymentMethods
-                              .find(m => m.type === 'credit_card')?.creditCards?.map((card) => (
-                              <Card key={card.id} className="relative">
-                                <CardContent className="p-4">
-                                  <div className="flex items-center justify-between">
-                                    <div className="flex items-center gap-4">
-                                      <div className="w-12 h-8 bg-gradient-to-r from-blue-600 to-blue-800 rounded flex items-center justify-center">
-                                        <span className="text-white text-xs font-bold">
-                                          {card.brand.toUpperCase().slice(0, 2)}
-                                        </span>
-                                      </div>
-                                      <div>
-                                        <p className="font-medium">{card.cardNumber}</p>
-                                        <p className="text-sm text-gray-500">{card.cardholderName}</p>
-                                        <p className="text-sm text-gray-500">Expira em {card.expiryDate}</p>
-                                      </div>
-                                    </div>
-                                    <div className="flex items-center gap-2">
-                                      {card.isDefault && (
-                                        <Badge variant="default">Padrão</Badge>
-                                      )}
-                                      <Button 
-                                        variant="outline" 
-                                        size="sm"
-                                        onClick={() => {
-                                          setEditingCard(card);
-                                          setCreditCardModalOpen(true);
-                                        }}
-                                      >
-                                        <Edit className="h-4 w-4" />
-                                      </Button>
-                                      <Button 
-                                        variant="outline" 
-                                        size="sm" 
-                                        className="text-red-600"
-                                        onClick={() => deleteCreditCard(card.id)}
-                                      >
-                                        <Trash2 className="h-4 w-4" />
-                                      </Button>
-                                    </div>
-                                  </div>
-                                </CardContent>
-                              </Card>
-                            )) || []}
-                          </div>
-                        </TabsContent>
-                        
-                        <TabsContent value="pix" className="space-y-4">
-                          <div className="flex items-center justify-between">
-                            <div>
-                              <h3 className="text-lg font-semibold">Chaves PIX</h3>
-                              <p className="text-sm text-gray-500">Gerencie suas chaves PIX</p>
-                            </div>
-                            <Button 
-                              onClick={() => {
-                                setEditingPix(null);
-                                setPixModalOpen(true);
-                              }}
-                              className="gap-2"
-                            >
-                              <Plus className="h-4 w-4" />
-                              Adicionar Chave
-                            </Button>
-                          </div>
-                          
-                          <div className="grid gap-4">
-                            {settings.paymentMethods
-                              .find(m => m.type === 'pix')?.pixKeys?.map((pix) => (
-                              <Card key={pix.id} className="relative">
-                                <CardContent className="p-4">
-                                  <div className="flex items-center justify-between">
-                                    <div className="flex-1">
-                                      <div className="flex items-center gap-2 mb-2">
-                                        <Badge variant="outline" className="capitalize">
-                                          {pix.keyType}
-                                        </Badge>
-                                        {pix.isActive ? (
-                                          <Badge variant="default">Ativa</Badge>
-                                        ) : (
-                                          <Badge variant="secondary">Inativa</Badge>
-                                        )}
-                                      </div>
-                                      <p className="font-medium text-lg">{pix.keyValue}</p>
-                                      <p className="text-sm text-gray-500">{pix.bankName}</p>
-                                      <p className="text-sm text-gray-500">{pix.accountHolder}</p>
-                                    </div>
-                                    <div className="flex items-center gap-2">
-                                      <Button 
-                                        variant="outline" 
-                                        size="sm"
-                                        onClick={() => copyToClipboard(pix.keyValue)}
-                                      >
-                                        <Copy className="h-4 w-4" />
-                                      </Button>
-                                      <Button 
-                                        variant="outline" 
-                                        size="sm"
-                                        onClick={() => {
-                                          setEditingPix(pix);
-                                          setPixModalOpen(true);
-                                        }}
-                                      >
-                                        <Edit className="h-4 w-4" />
-                                      </Button>
-                                      <Button 
-                                        variant="outline" 
-                                        size="sm" 
-                                        className="text-red-600"
-                                        onClick={() => deletePixKey(pix.id)}
-                                      >
-                                        <Trash2 className="h-4 w-4" />
-                                      </Button>
-                                    </div>
-                                  </div>
-                                </CardContent>
-                              </Card>
-                            )) || []}
-                          </div>
-                        </TabsContent>
-                      </Tabs>
-                    </CardContent>
-                  </Card>
-                  
-                  {/* Histórico de Transações */}
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="flex items-center gap-2">
-                        <TrendingUp className="h-5 w-5" />
-                        Histórico de Transações
-                      </CardTitle>
-                      <CardDescription>
-                        Últimas transações realizadas
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="space-y-4">
-                        {settings.paymentMethods.flatMap(method => method.transactions || [])
-                          .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-                          .slice(0, 10)
-                          .map((transaction) => (
-                          <div key={transaction.id} className="flex items-center justify-between p-4 border rounded-lg">
-                            <div className="flex items-center gap-4">
-                              <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center">
-                                {transaction.method === 'credit_card' ? (
-                                  <CardIcon className="h-5 w-5 text-gray-600" />
-                                ) : (
-                                  <Smartphone className="h-5 w-5 text-gray-600" />
-                                )}
-                              </div>
-                              <div>
-                                <p className="font-medium">{transaction.customer}</p>
-                                <p className="text-sm text-gray-500">{transaction.description}</p>
-                                <p className="text-xs text-gray-400">{transaction.reference}</p>
-                              </div>
-                            </div>
-                            <div className="text-right">
-                              <p className="font-semibold text-lg">
-                                R$ {transaction.amount.toFixed(2).replace('.', ',')}
-                              </p>
-                              <div className="mt-1">
-                                {getStatusBadge(transaction.status)}
-                              </div>
-                              <p className="text-xs text-gray-400 mt-1">
-                                {new Date(transaction.date).toLocaleDateString('pt-BR')}
-                              </p>
-                            </div>
-                          </div>
-                        ))}
+                    <div className="ld-form-grid-2">
+                      <div className="ld-field">
+                        <label className="ld-lbl">Nome Completo *</label>
+                        <Input value={settings.userProfile.name} onChange={(e) => handleProfileChange('name', e.target.value)} />
                       </div>
-                    </CardContent>
-                  </Card>
-                </div>
-              )}
+                      <div className="ld-field">
+                        <label className="ld-lbl">E-mail</label>
+                        <Input type="email" value={settings.userProfile.email} onChange={(e) => handleProfileChange('email', e.target.value)} />
+                      </div>
+                      <div className="ld-field">
+                        <label className="ld-lbl">Telefone</label>
+                        <Input value={settings.userProfile.phone} onChange={(e) => handleProfileChange('phone', e.target.value)} placeholder="(00) 00000-0000" />
+                      </div>
+                      <div className="ld-field">
+                        <label className="ld-lbl">CNPJ</label>
+                        <Input value={settings.userProfile.cnpj || ''} onChange={(e) => handleProfileChange('cnpj', e.target.value)} placeholder="00.000.000/0000-00" />
+                      </div>
+                      <div className="ld-field">
+                        <label className="ld-lbl">Cargo</label>
+                        <Input value={settings.userProfile.position} disabled style={{ opacity: 0.6 }} />
+                      </div>
+                      <div className="ld-field">
+                        <label className="ld-lbl">Departamento</label>
+                        <Input value={settings.userProfile.department} disabled style={{ opacity: 0.6 }} />
+                      </div>
+                    </div>
 
-              {/* Meu Perfil */}
-              {activeTab === 'profile' && (
-                <div className="space-y-6">
-                  <Card>
-                    <CardHeader>
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <CardTitle className="flex items-center gap-2">
-                            <User className="h-5 w-5" />
-                            Informações Pessoais
-                          </CardTitle>
-                          <CardDescription>
-                            Gerencie suas informações pessoais e profissionais
-                          </CardDescription>
-                        </div>
-                        <Button onClick={loadProfile} variant="outline" className="gap-2" disabled={profileLoading}>
-                          <RefreshCw className={`h-4 w-4 ${profileLoading ? 'animate-spin' : ''}`} />
-                          Atualizar
-                        </Button>
-                      </div>
-                    </CardHeader>
-                    <CardContent className="space-y-6">
-                      {/* Avatar Section */}
-                      <div className="flex items-center gap-6">
-                        <div className="relative">
-                          {avatarPreview ? (
-                            <img
-                              src={avatarPreview}
-                              alt="Preview"
-                              className="w-20 h-20 rounded-full object-cover border-2 border-gray-200"
-                            />
-                          ) : (
-                            <div className="w-20 h-20 bg-gradient-to-r from-blue-600 to-blue-800 rounded-full flex items-center justify-center border-2 border-gray-300">
-                              <span className="text-white font-bold text-2xl">
-                                {settings.userProfile.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
-                              </span>
-                            </div>
-                          )}
-                        </div>
-                        <div className="flex-1">
-                          <h3 className="text-lg font-semibold text-gray-900">{settings.userProfile.name}</h3>
-                          <p className="text-gray-600">{settings.userProfile.position}</p>
-                          <p className="text-sm text-gray-500">{settings.userProfile.department}</p>
-                        </div>
-                        <div className="flex flex-col gap-2">
-                          <Label htmlFor="avatar-upload" className="cursor-pointer">
-                            <Button variant="outline" size="sm" className="gap-2" asChild>
-                              <span>
-                                <Upload className="h-4 w-4" />
-                                Alterar Foto
-                              </span>
-                            </Button>
-                          </Label>
-                          <input
-                            id="avatar-upload"
-                            type="file"
-                            accept="image/*"
-                            onChange={handleFileChange}
-                            className="hidden"
-                            aria-label="Upload de foto de perfil"
-                          />
-                          {profile && (avatarPreview || profile.email) && (
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="gap-2 text-red-600 hover:text-red-700"
-                              onClick={handleDeleteAvatar}
-                            >
-                              <Trash2 className="h-4 w-4" />
-                              Remover Foto
-                            </Button>
-                          )}
-                        </div>
-                      </div>
-                      
-                      <Separator />
-                      
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                          <Label htmlFor="profileName">Nome Completo *</Label>
-                          <Input
-                            id="profileName"
-                            value={settings.userProfile.name}
-                            onChange={(e) => handleProfileChange('name', e.target.value)}
-                            placeholder="Seu nome completo"
-                          />
-                        </div>
-                        <div>
-                          <Label htmlFor="profileEmail">E-mail</Label>
-                          <Input
-                            id="profileEmail"
-                            type="email"
-                            value={settings.userProfile.email}
-                            onChange={(e) => handleProfileChange('email', e.target.value)}
-                            placeholder="email@exemplo.com"
-                          />
-                        </div>
-                        <div>
-                          <Label htmlFor="profilePhone">Telefone</Label>
-                          <Input
-                            id="profilePhone"
-                            value={settings.userProfile.phone}
-                            onChange={(e) => handleProfileChange('phone', e.target.value)}
-                            placeholder="(00) 00000-0000"
-                          />
-                        </div>
-                        <div>
-                          <Label htmlFor="profileCnpj">CNPJ</Label>
-                          <Input
-                            id="profileCnpj"
-                            value={settings.userProfile.cnpj || ''}
-                            onChange={(e) => handleProfileChange('cnpj', e.target.value)}
-                            placeholder="00.000.000/0000-00"
-                          />
-                        </div>
-                        <div>
-                          <Label htmlFor="profilePosition">Cargo</Label>
-                          <Input
-                            id="profilePosition"
-                            value={settings.userProfile.position}
-                            onChange={(e) => handleProfileChange('position', e.target.value)}
-                            disabled
-                          />
-                        </div>
-                        <div>
-                          <Label htmlFor="profileDepartment">Departamento</Label>
-                          <Input
-                            id="profileDepartment"
-                            value={settings.userProfile.department}
-                            onChange={(e) => handleProfileChange('department', e.target.value)}
-                            disabled
-                          />
-                        </div>
-                      </div>
-
-                      <div className="flex justify-end pt-4">
-                        <Button onClick={handleProfileSave} className="gap-2" disabled={profileLoading}>
-                          {profileLoading ? (
-                            <Loader2 className="h-4 w-4 animate-spin" />
-                          ) : (
-                            <Save className="h-4 w-4" />
-                          )}
-                          Salvar Alterações
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
+                    <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 16 }}>
+                      <button className="ld-btn ld-btn-dark" onClick={handleProfileSave} disabled={profileLoading}>
+                        {profileLoading ? <><Loader2 size={13} className="animate-spin" />Salvando...</> : <><Save size={13} />Salvar Alterações</>}
+                      </button>
+                    </div>
+                  </div>
                 </div>
-              )}
-            </motion.div>
-          </div>
+              </div>
+            )}
+
+          </motion.div>
         </div>
+
+        {/* Modal Cartão */}
+        <Dialog open={creditCardModalOpen} onOpenChange={setCreditCardModalOpen}>
+          <DialogContent style={{ fontFamily: "'DM Sans',sans-serif" }}>
+            <DialogHeader>
+              <DialogTitle style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: 20 }}>
+                {editingCard ? 'Editar Cartão' : 'Adicionar Cartão de Crédito'}
+              </DialogTitle>
+              <DialogDescription>{editingCard ? 'Atualize as informações do cartão' : 'Cadastre um novo cartão de crédito'}</DialogDescription>
+            </DialogHeader>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              <div className="ld-field"><label className="ld-lbl">Número do Cartão</label><Input placeholder="1234 5678 9012 3456" defaultValue={editingCard?.cardNumber || ''} /></div>
+              <div className="ld-field"><label className="ld-lbl">Nome no Cartão</label><Input placeholder="João Silva" defaultValue={editingCard?.cardholderName || ''} /></div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                <div className="ld-field"><label className="ld-lbl">Validade</label><Input placeholder="MM/AA" defaultValue={editingCard?.expiryDate || ''} /></div>
+                <div className="ld-field"><label className="ld-lbl">CVV</label><Input placeholder="123" defaultValue={editingCard?.cvv || ''} /></div>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <Switch id="isDefault" defaultChecked={editingCard?.isDefault} />
+                <Label htmlFor="isDefault" style={{ fontSize: 13 }}>Cartão padrão</Label>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 4 }}>
+                <button className="ld-btn ld-btn-outline" onClick={() => setCreditCardModalOpen(false)}>Cancelar</button>
+                <button className="ld-btn ld-btn-dark" onClick={() => { setCreditCardModalOpen(false); toast({ title: "Sucesso", description: editingCard ? "Cartão atualizado!" : "Cartão adicionado!" }); }}>
+                  {editingCard ? 'Atualizar' : 'Adicionar'}
+                </button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Modal PIX */}
+        <Dialog open={pixModalOpen} onOpenChange={setPixModalOpen}>
+          <DialogContent style={{ fontFamily: "'DM Sans',sans-serif" }}>
+            <DialogHeader>
+              <DialogTitle style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: 20 }}>
+                {editingPix ? 'Editar Chave PIX' : 'Adicionar Chave PIX'}
+              </DialogTitle>
+              <DialogDescription>{editingPix ? 'Atualize as informações da chave PIX' : 'Cadastre uma nova chave PIX'}</DialogDescription>
+            </DialogHeader>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              <div className="ld-field">
+                <label className="ld-lbl">Tipo de Chave</label>
+                <Select defaultValue={editingPix?.keyType || 'email'}>
+                  <SelectTrigger><SelectValue placeholder="Selecione o tipo" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="email">E-mail</SelectItem>
+                    <SelectItem value="cpf">CPF</SelectItem>
+                    <SelectItem value="cnpj">CNPJ</SelectItem>
+                    <SelectItem value="phone">Telefone</SelectItem>
+                    <SelectItem value="random">Chave Aleatória</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="ld-field"><label className="ld-lbl">Chave PIX</label><Input placeholder="Digite a chave PIX" defaultValue={editingPix?.keyValue || ''} /></div>
+              <div className="ld-field"><label className="ld-lbl">Banco</label><Input placeholder="Nome do banco" defaultValue={editingPix?.bankName || ''} /></div>
+              <div className="ld-field"><label className="ld-lbl">Titular da Conta</label><Input placeholder="Nome do titular" defaultValue={editingPix?.accountHolder || ''} /></div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <Switch id="isActive" defaultChecked={editingPix?.isActive} />
+                <Label htmlFor="isActive" style={{ fontSize: 13 }}>Chave ativa</Label>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 4 }}>
+                <button className="ld-btn ld-btn-outline" onClick={() => setPixModalOpen(false)}>Cancelar</button>
+                <button className="ld-btn ld-btn-dark" onClick={() => { setPixModalOpen(false); toast({ title: "Sucesso", description: editingPix ? "Chave PIX atualizada!" : "Chave PIX adicionada!" }); }}>
+                  {editingPix ? 'Atualizar' : 'Adicionar'}
+                </button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
       </div>
-
-      {/* Modal para Cartão de Crédito */}
-      <Dialog open={creditCardModalOpen} onOpenChange={setCreditCardModalOpen}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle>
-              {editingCard ? 'Editar Cartão' : 'Adicionar Cartão de Crédito'}
-            </DialogTitle>
-            <DialogDescription>
-              {editingCard ? 'Atualize as informações do cartão' : 'Cadastre um novo cartão de crédito'}
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div>
-              <Label htmlFor="cardNumber">Número do Cartão</Label>
-              <Input
-                id="cardNumber"
-                placeholder="1234 5678 9012 3456"
-                defaultValue={editingCard?.cardNumber || ''}
-              />
-            </div>
-            <div>
-              <Label htmlFor="cardholderName">Nome no Cartão</Label>
-              <Input
-                id="cardholderName"
-                placeholder="João Silva"
-                defaultValue={editingCard?.cardholderName || ''}
-              />
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="expiryDate">Validade</Label>
-                <Input
-                  id="expiryDate"
-                  placeholder="MM/AA"
-                  defaultValue={editingCard?.expiryDate || ''}
-                />
-              </div>
-              <div>
-                <Label htmlFor="cvv">CVV</Label>
-                <Input
-                  id="cvv"
-                  placeholder="123"
-                  defaultValue={editingCard?.cvv || ''}
-                />
-              </div>
-            </div>
-            <div className="flex items-center space-x-2">
-              <Switch id="isDefault" defaultChecked={editingCard?.isDefault} />
-              <Label htmlFor="isDefault">Cartão padrão</Label>
-            </div>
-            <div className="flex justify-end space-x-2">
-              <Button variant="outline" onClick={() => setCreditCardModalOpen(false)}>
-                Cancelar
-              </Button>
-              <Button onClick={() => {
-                // Aqui seria implementada a lógica de salvar
-                setCreditCardModalOpen(false);
-                toast({
-                  title: "Sucesso",
-                  description: editingCard ? "Cartão atualizado!" : "Cartão adicionado!",
-                });
-              }}>
-                {editingCard ? 'Atualizar' : 'Adicionar'}
-              </Button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
-
-      {/* Modal para Chave PIX */}
-      <Dialog open={pixModalOpen} onOpenChange={setPixModalOpen}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle>
-              {editingPix ? 'Editar Chave PIX' : 'Adicionar Chave PIX'}
-            </DialogTitle>
-            <DialogDescription>
-              {editingPix ? 'Atualize as informações da chave PIX' : 'Cadastre uma nova chave PIX'}
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div>
-              <Label htmlFor="keyType">Tipo de Chave</Label>
-              <Select defaultValue={editingPix?.keyType || 'email'}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione o tipo" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="email">E-mail</SelectItem>
-                  <SelectItem value="cpf">CPF</SelectItem>
-                  <SelectItem value="cnpj">CNPJ</SelectItem>
-                  <SelectItem value="phone">Telefone</SelectItem>
-                  <SelectItem value="random">Chave Aleatória</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <Label htmlFor="keyValue">Chave PIX</Label>
-              <Input
-                id="keyValue"
-                placeholder="Digite a chave PIX"
-                defaultValue={editingPix?.keyValue || ''}
-              />
-            </div>
-            <div>
-              <Label htmlFor="bankName">Banco</Label>
-              <Input
-                id="bankName"
-                placeholder="Nome do banco"
-                defaultValue={editingPix?.bankName || ''}
-              />
-            </div>
-            <div>
-              <Label htmlFor="accountHolder">Titular da Conta</Label>
-              <Input
-                id="accountHolder"
-                placeholder="Nome do titular"
-                defaultValue={editingPix?.accountHolder || ''}
-              />
-            </div>
-            <div className="flex items-center space-x-2">
-              <Switch id="isActive" defaultChecked={editingPix?.isActive} />
-              <Label htmlFor="isActive">Chave ativa</Label>
-            </div>
-            <div className="flex justify-end space-x-2">
-              <Button variant="outline" onClick={() => setPixModalOpen(false)}>
-                Cancelar
-              </Button>
-              <Button onClick={() => {
-                // Aqui seria implementada a lógica de salvar
-                setPixModalOpen(false);
-                toast({
-                  title: "Sucesso",
-                  description: editingPix ? "Chave PIX atualizada!" : "Chave PIX adicionada!",
-                });
-              }}>
-                {editingPix ? 'Atualizar' : 'Adicionar'}
-              </Button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
-    </div>
+    </>
   );
 }
 

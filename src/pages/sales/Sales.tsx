@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react';
-import { motion } from "framer-motion";
 import {
-  ShoppingCart, 
-  TrendingUp, 
+  ShoppingCart,
+  TrendingUp,
   DollarSign,
   Package,
   ExternalLink,
@@ -17,18 +16,76 @@ import {
   AlertTriangle,
   XCircle,
   Plus,
-  Filter,
   Search
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useToast } from "@/hooks/use-toast";
 import { DEFAULT_LOAD_ERROR_MESSAGE } from '@/lib/errorMessages';
+
+const LDCSS = `
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,700;1,400;1,700&family=DM+Sans:wght@300;400;500&display=swap');
+:root{--cream:#F7F4EF;--cream2:#EDE9E1;--ink:#1A1814;--ink2:#3D3A34;--ink3:#7A7670;--gold:#B8922A;--gold2:#D4A843;--gold-light:#F0E4C4;--bdr:rgba(26,24,20,0.11);}
+.ld{font-family:'DM Sans',sans-serif;color:var(--ink);}
+.ld-tag{font-size:10.5px;font-weight:500;letter-spacing:1.8px;text-transform:uppercase;color:var(--gold);display:block;margin-bottom:6px;}
+.ld-h1{font-family:'Cormorant Garamond',serif;font-size:clamp(22px,3vw,32px);font-weight:700;line-height:1.1;letter-spacing:-0.5px;color:var(--ink);}
+.ld-sub{font-size:13px;color:var(--ink3);font-weight:300;}
+.ld-card{background:#fff;border-radius:12px;border:1px solid var(--bdr);box-shadow:0 2px 16px rgba(26,24,20,0.05);position:relative;overflow:hidden;}
+.ld-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--gold),var(--gold2));}
+.ld-card-body{padding:20px 24px;}
+.ld-section-title{font-family:'Cormorant Garamond',serif;font-size:17px;font-weight:700;color:var(--ink);display:flex;align-items:center;gap:8px;}
+.ld-stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;}
+.ld-stat-card{background:#fff;border-radius:12px;border:1px solid var(--bdr);box-shadow:0 2px 10px rgba(26,24,20,0.04);padding:18px 20px;position:relative;overflow:hidden;}
+.ld-stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--gold),var(--gold2));}
+.ld-stat-ico{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;margin-bottom:12px;}
+.ld-stat-val{font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:700;color:var(--ink);line-height:1.1;}
+.ld-stat-lbl{font-size:11px;font-weight:500;letter-spacing:0.8px;text-transform:uppercase;color:var(--ink3);margin-top:5px;}
+.ld-stat-sub{font-size:11px;color:var(--ink3);margin-top:4px;}
+.ld-status-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
+.ld-status-card{background:#fff;border-radius:10px;border:1px solid var(--bdr);padding:16px 18px;display:flex;align-items:center;justify-content:space-between;}
+.ld-table{width:100%;border-collapse:collapse;}
+.ld-table th{font-size:10.5px;font-weight:500;letter-spacing:1.2px;text-transform:uppercase;color:var(--ink3);padding:11px 14px;text-align:left;border-bottom:1px solid var(--bdr);background:rgba(247,244,239,0.45);}
+.ld-table td{font-size:13px;color:var(--ink2);padding:13px 14px;border-bottom:1px solid rgba(26,24,20,0.05);transition:background 0.15s;}
+.ld-table tbody tr:hover td{background:rgba(247,244,239,0.5);}
+.ld-table tbody tr:last-child td{border-bottom:none;}
+.ld-badge{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:500;white-space:nowrap;}
+.ld-badge-green{background:#E8F5E9;color:#1E8449;}
+.ld-badge-yellow{background:#FFF8E1;color:#B7770D;}
+.ld-badge-red{background:#FDEDEC;color:#C0392B;}
+.ld-badge-blue{background:#EBF5FB;color:#1A5276;}
+.ld-badge-purple{background:#F3E5F5;color:#7D3C98;}
+.ld-badge-gray{background:#F2F2F2;color:var(--ink3);}
+.ld-badge-ml{background:#FFF9C4;color:#B7770D;}
+.ld-badge-az{background:#FFF3E0;color:#E67E22;}
+.ld-badge-sh{background:#FDEDEC;color:#C0392B;}
+.ld-btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:7px;font-size:12.5px;font-weight:500;font-family:'DM Sans',sans-serif;border:none;cursor:pointer;transition:all 0.2s;}
+.ld-btn-dark{background:var(--ink);color:#fff;}
+.ld-btn-dark:hover{background:var(--gold);}
+.ld-btn-outline{background:#fff;color:var(--ink);border:1px solid var(--bdr);}
+.ld-btn-outline:hover{border-color:var(--gold);color:var(--gold);}
+.ld-btn-sm{padding:5px 12px;font-size:12px;}
+.ld-filter-row{background:rgba(247,244,239,0.4);border:1px solid var(--bdr);border-radius:10px;padding:16px 20px;}
+.ld-filter-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:12px;align-items:end;}
+.ld-lbl{font-size:11.5px;font-weight:500;color:var(--ink2);display:block;margin-bottom:5px;}
+.ld-inp-ico-wrap{position:relative;}
+.ld-inp-ico{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--ink3);pointer-events:none;}
+.ld-pagination{display:flex;align-items:center;gap:6px;}
+.ld-pg-btn{height:30px;min-width:30px;padding:0 8px;border-radius:6px;border:1px solid var(--bdr);background:#fff;cursor:pointer;font-size:12px;color:var(--ink2);font-family:'DM Sans',sans-serif;display:inline-flex;align-items:center;justify-content:center;transition:all 0.2s;}
+.ld-pg-btn:hover:not(:disabled){border-color:var(--gold);color:var(--gold);}
+.ld-pg-btn.active{background:var(--ink);color:#fff;border-color:var(--ink);}
+.ld-pg-btn:disabled{opacity:0.35;cursor:not-allowed;}
+.ld-loading{display:flex;align-items:center;justify-content:center;min-height:300px;gap:10px;color:var(--ink3);font-size:14px;}
+.ld-error{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:300px;gap:12px;text-align:center;}
+@keyframes ld-in{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.ld-a1{animation:ld-in 0.4s cubic-bezier(0.22,1,0.36,1) both;}
+.ld-a2{animation:ld-in 0.4s cubic-bezier(0.22,1,0.36,1) 0.07s both;}
+.ld-a3{animation:ld-in 0.4s cubic-bezier(0.22,1,0.36,1) 0.14s both;}
+.ld-a4{animation:ld-in 0.4s cubic-bezier(0.22,1,0.36,1) 0.21s both;}
+.ld-a5{animation:ld-in 0.4s cubic-bezier(0.22,1,0.36,1) 0.28s both;}
+@media(max-width:900px){.ld-stat-grid{grid-template-columns:repeat(2,1fr);}.ld-status-grid{grid-template-columns:1fr 1fr;}.ld-filter-grid{grid-template-columns:1fr 1fr;}}
+@media(max-width:640px){.ld-stat-grid{grid-template-columns:1fr 1fr;}.ld-filter-grid{grid-template-columns:1fr;}.ld-status-grid{grid-template-columns:1fr;}}
+`;
 
 interface Sale {
   id: string;
@@ -79,522 +136,238 @@ export function Sales() {
   });
   const { toast } = useToast();
 
-  // Dados mockados para demonstração
   const mockSales: Sale[] = [
-    {
-      id: '1',
-      orderId: 'ML123456789',
-      marketplace: 'mercadolivre',
-      productName: 'Smartphone Samsung Galaxy S23',
-      customerName: 'João Silva',
-      quantity: 1,
-      price: 2999.99,
-      totalValue: 2999.99,
-      status: 'delivered',
-      orderDate: '2024-01-15',
-      shippingDate: '2024-01-16',
-      deliveryDate: '2024-01-18',
-      trackingCode: 'BR123456789BR'
-    },
-    {
-      id: '2',
-      orderId: 'AMZ987654321',
-      marketplace: 'amazon',
-      productName: 'Notebook Dell Inspiron 15',
-      customerName: 'Maria Santos',
-      quantity: 1,
-      price: 4599.99,
-      totalValue: 4599.99,
-      status: 'shipped',
-      orderDate: '2024-01-14',
-      shippingDate: '2024-01-15',
-      trackingCode: 'AMZ987654321'
-    },
-    {
-      id: '3',
-      orderId: 'ML987654321',
-      marketplace: 'mercadolivre',
-      productName: 'Cadeira Gamer RGB',
-      customerName: 'Pedro Costa',
-      quantity: 1,
-      price: 899.99,
-      totalValue: 899.99,
-      status: 'processing',
-      orderDate: '2024-01-13'
-    },
-    {
-      id: '4',
-      orderId: 'SHOP123456789',
-      marketplace: 'shopee',
-      productName: 'Monitor LG 24" Full HD',
-      customerName: 'Ana Oliveira',
-      quantity: 2,
-      price: 799.99,
-      totalValue: 1599.98,
-      status: 'pending',
-      orderDate: '2024-01-12'
-    },
-    {
-      id: '5',
-      orderId: 'ML555666777',
-      marketplace: 'mercadolivre',
-      productName: 'Mesa Escritório Branca',
-      customerName: 'Carlos Lima',
-      quantity: 1,
-      price: 599.99,
-      totalValue: 599.99,
-      status: 'delivered',
-      orderDate: '2024-01-10',
-      shippingDate: '2024-01-11',
-      deliveryDate: '2024-01-13',
-      trackingCode: 'BR555666777BR'
-    }
+    { id: '1', orderId: 'ML123456789', marketplace: 'mercadolivre', productName: 'Smartphone Samsung Galaxy S23', customerName: 'João Silva', quantity: 1, price: 2999.99, totalValue: 2999.99, status: 'delivered', orderDate: '2024-01-15', shippingDate: '2024-01-16', deliveryDate: '2024-01-18', trackingCode: 'BR123456789BR' },
+    { id: '2', orderId: 'AMZ987654321', marketplace: 'amazon', productName: 'Notebook Dell Inspiron 15', customerName: 'Maria Santos', quantity: 1, price: 4599.99, totalValue: 4599.99, status: 'shipped', orderDate: '2024-01-14', shippingDate: '2024-01-15', trackingCode: 'AMZ987654321' },
+    { id: '3', orderId: 'ML987654321', marketplace: 'mercadolivre', productName: 'Cadeira Gamer RGB', customerName: 'Pedro Costa', quantity: 1, price: 899.99, totalValue: 899.99, status: 'processing', orderDate: '2024-01-13' },
+    { id: '4', orderId: 'SHOP123456789', marketplace: 'shopee', productName: 'Monitor LG 24" Full HD', customerName: 'Ana Oliveira', quantity: 2, price: 799.99, totalValue: 1599.98, status: 'pending', orderDate: '2024-01-12' },
+    { id: '5', orderId: 'ML555666777', marketplace: 'mercadolivre', productName: 'Mesa Escritório Branca', customerName: 'Carlos Lima', quantity: 1, price: 599.99, totalValue: 599.99, status: 'delivered', orderDate: '2024-01-10', shippingDate: '2024-01-11', deliveryDate: '2024-01-13', trackingCode: 'BR555666777BR' },
   ];
 
   const marketplaces = ['Mercado Livre', 'Amazon', 'Shopee'];
   const statusOptions = ['Pendente', 'Processando', 'Enviado', 'Entregue', 'Cancelado'];
 
-  useEffect(() => {
-    loadSales();
-  }, []);
+  useEffect(() => { loadSales(); }, []);
 
   const loadSales = async () => {
     try {
       setLoading(true);
-      // Simulando chamada da API
       await new Promise(resolve => setTimeout(resolve, 1000));
       setSales(mockSales);
       setFilteredSales(mockSales);
-      
-      // Calculando estatísticas
-      const totalRevenue = mockSales.reduce((sum, sale) => sum + sale.totalValue, 0);
-      const averageOrderValue = totalRevenue / mockSales.length;
-      const pendingOrders = mockSales.filter(s => s.status === 'pending').length;
-      const shippedOrders = mockSales.filter(s => s.status === 'shipped').length;
-      const deliveredOrders = mockSales.filter(s => s.status === 'delivered').length;
-      
+      const totalRevenue = mockSales.reduce((sum, s) => sum + s.totalValue, 0);
       setStats({
         totalSales: mockSales.length,
         totalRevenue,
-        averageOrderValue,
-        conversionRate: 3.2, // Mock
-        pendingOrders,
-        shippedOrders,
-        deliveredOrders
+        averageOrderValue: totalRevenue / mockSales.length,
+        conversionRate: 3.2,
+        pendingOrders: mockSales.filter(s => s.status === 'pending').length,
+        shippedOrders: mockSales.filter(s => s.status === 'shipped').length,
+        deliveredOrders: mockSales.filter(s => s.status === 'delivered').length,
       });
-    } catch (err) {
+    } catch {
       setError(DEFAULT_LOAD_ERROR_MESSAGE);
-      toast({
-        title: "Erro",
-        description: DEFAULT_LOAD_ERROR_MESSAGE,
-        variant: "destructive",
-      });
+      toast({ title: "Erro", description: DEFAULT_LOAD_ERROR_MESSAGE, variant: "destructive" });
     } finally {
       setLoading(false);
     }
   };
 
-  // Filtros e busca
   useEffect(() => {
     let filtered = [...sales];
-
-    // Busca por texto
     if (searchTerm) {
-      filtered = filtered.filter(sale =>
-        sale.orderId.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        sale.productName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        sale.customerName.toLowerCase().includes(searchTerm.toLowerCase())
+      filtered = filtered.filter(s =>
+        s.orderId.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        s.productName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        s.customerName.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
-
-    // Filtro por marketplace
     if (selectedMarketplace !== 'all') {
-      const marketplaceMap: { [key: string]: string } = {
-        'Mercado Livre': 'mercadolivre',
-        'Amazon': 'amazon',
-        'Shopee': 'shopee'
-      };
-      filtered = filtered.filter(sale => sale.marketplace === marketplaceMap[selectedMarketplace]);
+      const mp: Record<string, string> = { 'Mercado Livre': 'mercadolivre', 'Amazon': 'amazon', 'Shopee': 'shopee' };
+      filtered = filtered.filter(s => s.marketplace === mp[selectedMarketplace]);
     }
-
-    // Filtro por status
     if (selectedStatus !== 'all') {
-      const statusMap: { [key: string]: string } = {
-        'Pendente': 'pending',
-        'Processando': 'processing',
-        'Enviado': 'shipped',
-        'Entregue': 'delivered',
-        'Cancelado': 'cancelled'
-      };
-      filtered = filtered.filter(sale => sale.status === statusMap[selectedStatus]);
+      const st: Record<string, string> = { 'Pendente': 'pending', 'Processando': 'processing', 'Enviado': 'shipped', 'Entregue': 'delivered', 'Cancelado': 'cancelled' };
+      filtered = filtered.filter(s => s.status === st[selectedStatus]);
     }
-
-    // Ordenação
     filtered.sort((a, b) => {
-      let aValue, bValue;
-      
-      switch (sortBy) {
-        case 'orderDate':
-          aValue = new Date(a.orderDate);
-          bValue = new Date(b.orderDate);
-          break;
-        case 'totalValue':
-          aValue = a.totalValue;
-          bValue = b.totalValue;
-          break;
-        case 'customerName':
-          aValue = a.customerName;
-          bValue = b.customerName;
-          break;
-        case 'status':
-          aValue = a.status;
-          bValue = b.status;
-          break;
-        default:
-          aValue = new Date(a.orderDate);
-          bValue = new Date(b.orderDate);
-      }
-
-      if (sortOrder === 'asc') {
-        return aValue > bValue ? 1 : -1;
-      } else {
-        return aValue < bValue ? 1 : -1;
-      }
+      let aV: string | number | Date = sortBy === 'orderDate' ? new Date(a.orderDate) : sortBy === 'totalValue' ? a.totalValue : sortBy === 'customerName' ? a.customerName : new Date(a.orderDate);
+      let bV: string | number | Date = sortBy === 'orderDate' ? new Date(b.orderDate) : sortBy === 'totalValue' ? b.totalValue : sortBy === 'customerName' ? b.customerName : new Date(b.orderDate);
+      return sortOrder === 'asc' ? (aV > bV ? 1 : -1) : (aV < bV ? 1 : -1);
     });
-
     setFilteredSales(filtered);
     setCurrentPage(1);
   }, [sales, searchTerm, selectedMarketplace, selectedStatus, sortBy, sortOrder]);
 
-  // Paginação
   const totalPages = Math.ceil(filteredSales.length / itemsPerPage);
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const endIndex = startIndex + itemsPerPage;
-  const currentSales = filteredSales.slice(startIndex, endIndex);
+  const currentSales = filteredSales.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
-  const getStatusInfo = (status: string) => {
-    switch (status) {
-      case 'pending':
-        return {
-          text: 'Pendente',
-          color: 'bg-yellow-100 text-yellow-800 border-yellow-200',
-          icon: AlertTriangle
-        };
-      case 'processing':
-        return {
-          text: 'Processando',
-          color: 'bg-blue-100 text-blue-800 border-blue-200',
-          icon: RefreshCw
-        };
-      case 'shipped':
-        return {
-          text: 'Enviado',
-          color: 'bg-purple-100 text-purple-800 border-purple-200',
-          icon: Package
-        };
-      case 'delivered':
-        return {
-          text: 'Entregue',
-          color: 'bg-green-100 text-green-800 border-green-200',
-          icon: CheckCircle
-        };
-      case 'cancelled':
-        return {
-          text: 'Cancelado',
-          color: 'bg-red-100 text-red-800 border-red-200',
-          icon: XCircle
-        };
-      default:
-        return {
-          text: 'Desconhecido',
-          color: 'bg-gray-100 text-gray-800 border-gray-200',
-          icon: AlertTriangle
-        };
-    }
+  const getStatusBadge = (status: string) => {
+    const map: Record<string, { cls: string; label: string }> = {
+      pending: { cls: 'ld-badge ld-badge-yellow', label: '⏳ Pendente' },
+      processing: { cls: 'ld-badge ld-badge-blue', label: '⚡ Processando' },
+      shipped: { cls: 'ld-badge ld-badge-purple', label: '📦 Enviado' },
+      delivered: { cls: 'ld-badge ld-badge-green', label: '✓ Entregue' },
+      cancelled: { cls: 'ld-badge ld-badge-red', label: '✕ Cancelado' },
+    };
+    const s = map[status] || { cls: 'ld-badge ld-badge-gray', label: status };
+    return <span className={s.cls}>{s.label}</span>;
   };
 
-  const getMarketplaceInfo = (marketplace: string) => {
-    switch (marketplace) {
-      case 'mercadolivre':
-        return {
-          name: 'Mercado Livre',
-          color: 'bg-yellow-100 text-yellow-800',
-          icon: 'ML'
-        };
-      case 'amazon':
-        return {
-          name: 'Amazon',
-          color: 'bg-orange-100 text-orange-800',
-          icon: 'AZ'
-        };
-      case 'shopee':
-        return {
-          name: 'Shopee',
-          color: 'bg-red-100 text-red-800',
-          icon: 'SH'
-        };
-      default:
-        return {
-          name: 'Desconhecido',
-          color: 'bg-gray-100 text-gray-800',
-          icon: '?'
-        };
-    }
+  const getMpBadge = (mp: string) => {
+    const map: Record<string, { cls: string; label: string }> = {
+      mercadolivre: { cls: 'ld-badge ld-badge-ml', label: 'ML' },
+      amazon: { cls: 'ld-badge ld-badge-az', label: 'AZ' },
+      shopee: { cls: 'ld-badge ld-badge-sh', label: 'SH' },
+    };
+    const m = map[mp] || { cls: 'ld-badge ld-badge-gray', label: mp };
+    return <span className={m.cls}>{m.label}</span>;
   };
 
-  const handleSort = (field: string) => {
-    if (sortBy === field) {
-      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
-    } else {
-      setSortBy(field);
-      setSortOrder('asc');
-    }
-  };
-
-  const syncMarketplace = (marketplace: string) => {
-    toast({
-      title: "Sincronizando vendas",
-      description: `Buscando novas vendas do ${marketplace}...`,
-    });
+  const syncMarketplace = (mp: string) => {
+    toast({ title: "Sincronizando vendas", description: `Buscando novas vendas do ${mp}...` });
   };
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="flex items-center space-x-2">
-          <RefreshCw className="h-6 w-6 animate-spin text-primary" />
-          <span className="text-lg">Carregando vendas...</span>
+      <>
+        <style>{LDCSS}</style>
+        <div className="ld ld-loading">
+          <RefreshCw size={18} className="animate-spin" style={{ color: 'var(--gold)' }} />
+          <span>Carregando vendas...</span>
         </div>
-      </div>
+      </>
     );
   }
 
   if (error) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="text-center">
-          <XCircle className="h-10 w-10 text-destructive mx-auto mb-3" />
-          <h3 className="text-lg font-semibold mb-2">Nao foi possivel carregar</h3>
-          <p className="text-muted-foreground mb-4">{error}</p>
-          <Button onClick={loadSales}>
-            <RefreshCw className="h-4 w-4 mr-2" />
-            Tentar novamente
-          </Button>
+      <>
+        <style>{LDCSS}</style>
+        <div className="ld ld-error">
+          <XCircle size={40} style={{ color: '#C0392B' }} />
+          <h3 style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: 20, fontWeight: 700 }}>Não foi possível carregar</h3>
+          <p style={{ color: 'var(--ink3)', fontSize: 13 }}>{error}</p>
+          <button className="ld-btn ld-btn-outline" onClick={loadSales}>
+            <RefreshCw size={13} /> Tentar novamente
+          </button>
         </div>
-      </div>
+      </>
     );
   }
 
   return (
-    <div className="space-y-6 text-foreground">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-          <p className="text-xs uppercase tracking-[0.16em] text-muted-foreground">Comercial</p>
-          <h1 className="mt-1 flex items-center gap-2 text-3xl font-semibold tracking-tight">
-            <BarChart3 className="h-6 w-6 text-primary" />
-            Gestão de Vendas
-          </h1>
-          <p className="mt-1 text-muted-foreground">Gerencie suas vendas em todos os marketplaces</p>
+    <>
+      <style>{LDCSS}</style>
+      <div className="ld" style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+
+        {/* Header */}
+        <div className="ld-a1" style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
+          <div>
+            <span className="ld-tag">Comercial</span>
+            <h1 className="ld-h1" style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <BarChart3 size={22} color="var(--gold)" />
+              Gestão de Vendas
+            </h1>
+            <p className="ld-sub" style={{ marginTop: 4 }}>Gerencie suas vendas em todos os marketplaces</p>
+          </div>
+          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+            <button className="ld-btn ld-btn-outline" onClick={() => syncMarketplace('Mercado Livre')}>
+              <Zap size={13} /> Sincronizar ML
+            </button>
+            <button className="ld-btn ld-btn-outline" onClick={() => syncMarketplace('Amazon')}>
+              <Zap size={13} /> Sincronizar Amazon
+            </button>
+            <button className="ld-btn ld-btn-dark">
+              <Plus size={13} /> Nova Venda
+            </button>
+          </div>
         </div>
-        <div className="flex flex-wrap gap-2">
-          <Button variant="outline" onClick={() => syncMarketplace('Mercado Livre')}>
-            <Zap className="h-4 w-4 mr-2" />
-            Sincronizar ML
-          </Button>
-          <Button variant="outline" onClick={() => syncMarketplace('Amazon')}>
-            <Zap className="h-4 w-4 mr-2" />
-            Sincronizar Amazon
-          </Button>
-          <Button>
-            <Plus className="h-4 w-4 mr-2" />
-            Nova Venda
-          </Button>
+
+        {/* Stat Cards */}
+        <div className="ld-stat-grid ld-a2">
+          {[
+            { label: 'Total de Vendas', value: String(stats.totalSales), sub: '+12% vs mês anterior', ico: ShoppingCart, icoStyle: { background: 'var(--gold-light)' }, icoColor: 'var(--gold)' },
+            { label: 'Receita Total', value: `R$ ${stats.totalRevenue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`, sub: '+8% vs mês anterior', ico: TrendingUp, icoStyle: { background: '#E8F5E9' }, icoColor: '#27AE60' },
+            { label: 'Ticket Médio', value: `R$ ${stats.averageOrderValue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`, sub: 'Valor médio por pedido', ico: DollarSign, icoStyle: { background: '#EBF5FB' }, icoColor: '#2980B9' },
+            { label: 'Taxa de Conversão', value: `${stats.conversionRate}%`, sub: '+2% vs mês anterior', ico: BarChart3, icoStyle: { background: '#F3E5F5' }, icoColor: '#8E44AD' },
+          ].map((s) => {
+            const Icon = s.ico;
+            return (
+              <div key={s.label} className="ld-stat-card">
+                <div className="ld-stat-ico" style={s.icoStyle}><Icon size={18} color={s.icoColor} /></div>
+                <div className="ld-stat-val">{s.value}</div>
+                <div className="ld-stat-lbl">{s.label}</div>
+                <div className="ld-stat-sub">{s.sub}</div>
+              </div>
+            );
+          })}
         </div>
-      </div>
 
-      {/* Cards de Estatísticas */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-        >
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total de Vendas</CardTitle>
-              <ShoppingCart className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stats.totalSales}</div>
-              <p className="text-xs text-muted-foreground">
-                <span className="text-green-600">+12%</span> vs mês anterior
-              </p>
-            </CardContent>
-          </Card>
-        </motion.div>
-
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-        >
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Receita Total</CardTitle>
-              <TrendingUp className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">
-                R$ {stats.totalRevenue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-              </div>
-              <p className="text-xs text-muted-foreground">
-                <span className="text-green-600">+8%</span> vs mês anterior
-              </p>
-            </CardContent>
-          </Card>
-        </motion.div>
-
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-        >
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Ticket Médio</CardTitle>
-              <DollarSign className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">
-                R$ {stats.averageOrderValue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-              </div>
-              <p className="text-xs text-muted-foreground">
-                Valor médio por pedido
-              </p>
-            </CardContent>
-          </Card>
-        </motion.div>
-
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4 }}
-        >
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Taxa de Conversão</CardTitle>
-              <BarChart3 className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stats.conversionRate}%</div>
-              <p className="text-xs text-muted-foreground">
-                <span className="text-green-600">+2%</span> vs mês anterior
-              </p>
-            </CardContent>
-          </Card>
-        </motion.div>
-      </div>
-
-      {/* Status Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Pedidos Pendentes</p>
-                <p className="text-2xl font-bold text-yellow-600">{stats.pendingOrders}</p>
-              </div>
-              <AlertTriangle className="h-8 w-8 text-yellow-500" />
+        {/* Status Cards */}
+        <div className="ld-status-grid ld-a3">
+          <div className="ld-status-card">
+            <div>
+              <div style={{ fontSize: 11, fontWeight: 500, letterSpacing: '0.8px', textTransform: 'uppercase', color: 'var(--ink3)' }}>Pedidos Pendentes</div>
+              <div style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: 28, fontWeight: 700, color: '#B7770D', marginTop: 4 }}>{stats.pendingOrders}</div>
             </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Enviados</p>
-                <p className="text-2xl font-bold text-purple-600">{stats.shippedOrders}</p>
-              </div>
-              <Package className="h-8 w-8 text-purple-500" />
+            <AlertTriangle size={28} color="#F0C050" />
+          </div>
+          <div className="ld-status-card">
+            <div>
+              <div style={{ fontSize: 11, fontWeight: 500, letterSpacing: '0.8px', textTransform: 'uppercase', color: 'var(--ink3)' }}>Enviados</div>
+              <div style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: 28, fontWeight: 700, color: '#7D3C98', marginTop: 4 }}>{stats.shippedOrders}</div>
             </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Entregues</p>
-                <p className="text-2xl font-bold text-green-600">{stats.deliveredOrders}</p>
-              </div>
-              <CheckCircle className="h-8 w-8 text-green-500" />
+            <Package size={28} color="#C39BD3" />
+          </div>
+          <div className="ld-status-card">
+            <div>
+              <div style={{ fontSize: 11, fontWeight: 500, letterSpacing: '0.8px', textTransform: 'uppercase', color: 'var(--ink3)' }}>Entregues</div>
+              <div style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: 28, fontWeight: 700, color: '#1E8449', marginTop: 4 }}>{stats.deliveredOrders}</div>
             </div>
-          </CardContent>
-        </Card>
-      </div>
+            <CheckCircle size={28} color="#82E0AA" />
+          </div>
+        </div>
 
-      {/* Filtros e Busca */}
-      <Card className="border-border shadow-none">
-        <CardHeader>
-          <CardTitle className="flex items-center">
-            <Filter className="h-5 w-5 mr-2" />
-            Filtros e Busca
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
-            <div className="space-y-2">
-              <Label htmlFor="search">Buscar</Label>
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        {/* Filtros */}
+        <div className="ld-filter-row ld-a4">
+          <div className="ld-filter-grid">
+            <div>
+              <label className="ld-lbl">Buscar</label>
+              <div className="ld-inp-ico-wrap">
+                <Search size={14} className="ld-inp-ico" />
                 <Input
-                  id="search"
                   placeholder="ID do pedido, produto, cliente..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
+                  style={{ paddingLeft: 32 }}
                 />
               </div>
             </div>
-
-            <div className="space-y-2">
-              <Label>Marketplace</Label>
+            <div>
+              <label className="ld-lbl">Marketplace</label>
               <Select value={selectedMarketplace} onValueChange={setSelectedMarketplace}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Todos os marketplaces" />
-                </SelectTrigger>
+                <SelectTrigger><SelectValue placeholder="Todos" /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">Todos os marketplaces</SelectItem>
-                  {marketplaces.map(marketplace => (
-                    <SelectItem key={marketplace} value={marketplace}>{marketplace}</SelectItem>
-                  ))}
+                  {marketplaces.map(m => <SelectItem key={m} value={m}>{m}</SelectItem>)}
                 </SelectContent>
               </Select>
             </div>
-
-            <div className="space-y-2">
-              <Label>Status</Label>
+            <div>
+              <label className="ld-lbl">Status</label>
               <Select value={selectedStatus} onValueChange={setSelectedStatus}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Todos os status" />
-                </SelectTrigger>
+                <SelectTrigger><SelectValue placeholder="Todos" /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">Todos os status</SelectItem>
-                  {statusOptions.map(status => (
-                    <SelectItem key={status} value={status}>{status}</SelectItem>
-                  ))}
+                  {statusOptions.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
                 </SelectContent>
               </Select>
             </div>
-
-            <div className="space-y-2">
-              <Label>Ordenar por</Label>
+            <div>
+              <label className="ld-lbl">Ordenar</label>
               <Select value={sortBy} onValueChange={setSortBy}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
+                <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="orderDate">Data do pedido</SelectItem>
                   <SelectItem value="totalValue">Valor total</SelectItem>
@@ -604,173 +377,103 @@ export function Sales() {
               </Select>
             </div>
           </div>
-
-          <div className="flex items-center space-x-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => {
-                setSearchTerm('');
-                setSelectedMarketplace('all');
-                setSelectedStatus('all');
-              }}
-            >
+          <div style={{ marginTop: 12, display: 'flex', gap: 8 }}>
+            <button className="ld-btn ld-btn-outline ld-btn-sm" onClick={() => { setSearchTerm(''); setSelectedMarketplace('all'); setSelectedStatus('all'); }}>
               Limpar filtros
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
-            >
-              <ArrowUpDown className="h-4 w-4 mr-2" />
-              {sortOrder === 'asc' ? 'Crescente' : 'Decrescente'}
-            </Button>
+            </button>
+            <button className="ld-btn ld-btn-outline ld-btn-sm" onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}>
+              <ArrowUpDown size={12} /> {sortOrder === 'asc' ? 'Crescente' : 'Decrescente'}
+            </button>
           </div>
-        </CardContent>
-      </Card>
+        </div>
 
-      {/* Tabela de Vendas */}
-      <Card className="border-border shadow-none">
-        <CardHeader>
-          <div className="flex justify-between items-center">
-            <CardTitle>
-              Vendas ({filteredSales.length} de {sales.length})
-            </CardTitle>
+        {/* Tabela */}
+        <div className="ld-card ld-a5">
+          <div className="ld-card-body" style={{ paddingBottom: 0 }}>
+            <div style={{ marginBottom: 16 }}>
+              <span className="ld-section-title">
+                <ShoppingCart size={16} color="var(--gold)" />
+                Vendas ({filteredSales.length} de {sales.length})
+              </span>
+            </div>
           </div>
-        </CardHeader>
-        <CardContent>
-          <div className="overflow-x-auto">
-            <table className="w-full">
+          <div style={{ overflowX: 'auto' }}>
+            <table className="ld-table">
               <thead>
-                <tr className="border-b">
-                  <th className="text-left py-3 px-2 font-semibold">Pedido</th>
-                  <th className="text-left py-3 px-2 font-semibold">Marketplace</th>
-                  <th className="text-left py-3 px-2 font-semibold">Produto</th>
-                  <th className="text-left py-3 px-2 font-semibold">Cliente</th>
-                  <th className="text-left py-3 px-2 font-semibold">Valor</th>
-                  <th className="text-left py-3 px-2 font-semibold">Status</th>
-                  <th className="text-left py-3 px-2 font-semibold">Data</th>
-                  <th className="text-left py-3 px-2 font-semibold">Ações</th>
+                <tr>
+                  <th>Pedido</th>
+                  <th>Marketplace</th>
+                  <th>Produto</th>
+                  <th>Cliente</th>
+                  <th>Valor</th>
+                  <th>Status</th>
+                  <th>Data</th>
+                  <th style={{ textAlign: 'right' }}>Ações</th>
                 </tr>
               </thead>
               <tbody>
-                {currentSales.map((sale) => {
-                  const statusInfo = getStatusInfo(sale.status);
-                  const marketplaceInfo = getMarketplaceInfo(sale.marketplace);
-                  const StatusIcon = statusInfo.icon;
-                  
-                  return (
-                    <motion.tr
-                      key={sale.id}
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      className="border-b hover:bg-muted/30"
-                    >
-                      <td className="py-3 px-2">
-                        <div>
-                          <div className="font-medium">{sale.orderId}</div>
-                          <div className="text-sm text-muted-foreground">#{sale.id}</div>
-                        </div>
-                      </td>
-                      <td className="py-3 px-2">
-                        <Badge variant="outline" className={marketplaceInfo.color}>
-                          {marketplaceInfo.icon}
-                        </Badge>
-                      </td>
-                      <td className="py-3 px-2">
-                        <div>
-                          <div className="font-medium">{sale.productName}</div>
-                          <div className="text-sm text-gray-500">Qtd: {sale.quantity}</div>
-                        </div>
-                      </td>
-                      <td className="py-3 px-2 text-sm text-muted-foreground">{sale.customerName}</td>
-                      <td className="py-3 px-2 text-sm">
-                        <div className="font-medium">R$ {sale.totalValue.toFixed(2)}</div>
-                        <div className="text-muted-foreground">R$ {sale.price.toFixed(2)} cada</div>
-                      </td>
-                      <td className="py-3 px-2">
-                        <Badge variant="outline" className={statusInfo.color}>
-                          <StatusIcon className="h-3 w-3 mr-1" />
-                          {statusInfo.text}
-                        </Badge>
-                      </td>
-                      <td className="py-3 px-2 text-sm">
-                        <div>{new Date(sale.orderDate).toLocaleDateString('pt-BR')}</div>
-                        {sale.trackingCode && (
-                          <div className="text-xs text-muted-foreground">Rastreamento: {sale.trackingCode}</div>
-                        )}
-                      </td>
-                      <td className="py-3 px-2">
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="sm">
-                              <MoreHorizontal className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem>
-                              <Eye className="h-4 w-4 mr-2" />
-                              Ver detalhes
-                            </DropdownMenuItem>
-                            <DropdownMenuItem>
-                              <Edit className="h-4 w-4 mr-2" />
-                              Editar status
-                            </DropdownMenuItem>
-                            <DropdownMenuItem>
-                              <ExternalLink className="h-4 w-4 mr-2" />
-                              Ver no marketplace
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </td>
-                    </motion.tr>
-                  );
-                })}
+                {currentSales.map((sale) => (
+                  <tr key={sale.id}>
+                    <td>
+                      <div style={{ fontWeight: 600, color: 'var(--ink)', fontSize: 13 }}>{sale.orderId}</div>
+                      <div style={{ fontSize: 11, color: 'var(--ink3)' }}>#{sale.id}</div>
+                    </td>
+                    <td>{getMpBadge(sale.marketplace)}</td>
+                    <td>
+                      <div style={{ fontWeight: 500, color: 'var(--ink)' }}>{sale.productName}</div>
+                      <div style={{ fontSize: 11, color: 'var(--ink3)' }}>Qtd: {sale.quantity}</div>
+                    </td>
+                    <td>{sale.customerName}</td>
+                    <td>
+                      <div style={{ fontWeight: 600, color: 'var(--ink)' }}>R$ {sale.totalValue.toFixed(2)}</div>
+                      <div style={{ fontSize: 11, color: 'var(--ink3)' }}>R$ {sale.price.toFixed(2)} cada</div>
+                    </td>
+                    <td>{getStatusBadge(sale.status)}</td>
+                    <td>
+                      <div style={{ fontSize: 12 }}>{new Date(sale.orderDate).toLocaleDateString('pt-BR')}</div>
+                      {sale.trackingCode && (
+                        <div style={{ fontSize: 11, color: 'var(--ink3)' }}>{sale.trackingCode}</div>
+                      )}
+                    </td>
+                    <td style={{ textAlign: 'right' }}>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <button className="ld-btn ld-btn-outline ld-btn-sm" style={{ padding: '5px 8px' }}>
+                            <MoreHorizontal size={14} />
+                          </button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem><Eye size={13} style={{ marginRight: 8 }} />Ver detalhes</DropdownMenuItem>
+                          <DropdownMenuItem><Edit size={13} style={{ marginRight: 8 }} />Editar status</DropdownMenuItem>
+                          <DropdownMenuItem><ExternalLink size={13} style={{ marginRight: 8 }} />Ver no marketplace</DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </td>
+                  </tr>
+                ))}
               </tbody>
             </table>
           </div>
 
-          {/* Paginação */}
           {totalPages > 1 && (
-            <div className="flex items-center justify-between mt-4">
-              <div className="text-sm text-muted-foreground">
-                Mostrando {startIndex + 1} a {Math.min(endIndex, filteredSales.length)} de {filteredSales.length} vendas
-              </div>
-              <div className="flex items-center space-x-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setCurrentPage(currentPage - 1)}
-                  disabled={currentPage === 1}
-                >
-                  Anterior
-                </Button>
-                <div className="flex items-center space-x-1">
-                  {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
-                    <Button
-                      key={page}
-                      variant={currentPage === page ? "default" : "outline"}
-                      size="sm"
-                      onClick={() => setCurrentPage(page)}
-                      className="w-8 h-8 p-0"
-                    >
-                      {page}
-                    </Button>
+            <div className="ld-card-body" style={{ paddingTop: 14, borderTop: '1px solid var(--bdr)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 10 }}>
+                <span style={{ fontSize: 12, color: 'var(--ink3)' }}>
+                  Mostrando {(currentPage - 1) * itemsPerPage + 1} a {Math.min(currentPage * itemsPerPage, filteredSales.length)} de {filteredSales.length}
+                </span>
+                <div className="ld-pagination">
+                  <button className="ld-pg-btn" disabled={currentPage === 1} onClick={() => setCurrentPage(p => p - 1)}>←</button>
+                  {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => i + 1).map(p => (
+                    <button key={p} className={`ld-pg-btn${currentPage === p ? ' active' : ''}`} onClick={() => setCurrentPage(p)}>{p}</button>
                   ))}
+                  <button className="ld-pg-btn" disabled={currentPage === totalPages} onClick={() => setCurrentPage(p => p + 1)}>→</button>
                 </div>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setCurrentPage(currentPage + 1)}
-                  disabled={currentPage === totalPages}
-                >
-                  Próximo
-                </Button>
               </div>
             </div>
           )}
-        </CardContent>
-      </Card>
-    </div>
+        </div>
+
+      </div>
+    </>
   );
 }

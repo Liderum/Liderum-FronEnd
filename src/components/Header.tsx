@@ -1,168 +1,168 @@
 import { useAuth } from '../contexts/AuthContext';
-import { useNavigate } from 'react-router-dom';
-import { 
-  Bell, 
-  Settings, 
-  LogOut, 
-  User, 
-  ChevronDown,
-  HelpCircle
-} from 'lucide-react';
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useNavigate, useLocation } from 'react-router-dom';
+import { Bell, Settings, LogOut, User, ChevronDown, HelpCircle, Package, AlertTriangle, TrendingUp, CheckCircle } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useToast } from "@/hooks/use-toast";
+
+const CSS = `
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;700&family=DM+Sans:wght@300;400;500&display=swap');
+.hd{font-family:'DM Sans',sans-serif;background:#fff;border-bottom:1px solid rgba(26,24,20,0.09);height:46px;display:flex;align-items:center;justify-content:space-between;padding:0 20px;position:sticky;top:0;z-index:40;}
+.hd-breadcrumb{display:flex;align-items:center;gap:6px;}
+.hd-bc-item{font-size:12px;color:var(--ink3,#7A7670);font-weight:400;}
+.hd-bc-sep{font-size:11px;color:rgba(26,24,20,0.25);}
+.hd-bc-current{font-size:12.5px;font-weight:500;color:var(--ink,#1A1814);}
+.hd-right{display:flex;align-items:center;gap:6px;}
+.hd-icon-btn{width:30px;height:30px;border-radius:7px;display:flex;align-items:center;justify-content:center;background:none;border:1px solid transparent;color:var(--ink3,#7A7670);cursor:pointer;transition:all 0.16s;position:relative;}
+.hd-icon-btn:hover{background:var(--cream,#F7F4EF);border-color:rgba(26,24,20,0.09);color:var(--ink,#1A1814);}
+.hd-badge{position:absolute;top:-3px;right:-3px;width:14px;height:14px;border-radius:50%;background:var(--gold,#B8922A);color:#fff;font-size:8.5px;font-weight:700;display:flex;align-items:center;justify-content:center;border:1.5px solid #fff;}
+.hd-sep{width:1px;height:18px;background:rgba(26,24,20,0.09);margin:0 2px;}
+.hd-user-btn{display:flex;align-items:center;gap:8px;padding:4px 8px 4px 4px;border-radius:8px;background:none;border:1px solid transparent;cursor:pointer;transition:all 0.16s;font-family:'DM Sans',sans-serif;}
+.hd-user-btn:hover{background:var(--cream,#F7F4EF);border-color:rgba(26,24,20,0.09);}
+.hd-avatar{width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,#F0E4C4,#EDE9E1);display:flex;align-items:center;justify-content:center;font-family:'Cormorant Garamond',serif;font-size:10.5px;font-weight:700;color:var(--gold,#B8922A);flex-shrink:0;border:1px solid rgba(184,146,42,0.2);}
+.hd-user-name{font-size:12px;font-weight:500;color:var(--ink,#1A1814);max-width:120px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.hd-chevron{color:var(--ink3,#7A7670);}
+.hd-notif-wrap{width:300px;padding:0;}
+.hd-notif-header{padding:12px 14px 8px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(26,24,20,0.08);}
+.hd-notif-title{font-family:'Cormorant Garamond',serif;font-size:15px;font-weight:700;color:var(--ink,#1A1814);}
+.hd-notif-clear{font-size:11px;color:var(--gold,#B8922A);cursor:pointer;background:none;border:none;font-family:'DM Sans',sans-serif;}
+.hd-notif-item{display:flex;align-items:flex-start;gap:10px;padding:10px 14px;cursor:pointer;transition:background 0.14s;}
+.hd-notif-item:hover{background:var(--cream,#F7F4EF);}
+.hd-notif-ico{width:28px;height:28px;border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;}
+.hd-notif-body{flex:1;min-width:0;}
+.hd-notif-label{font-size:12.5px;font-weight:500;color:var(--ink,#1A1814);line-height:1.3;}
+.hd-notif-desc{font-size:11.5px;color:var(--ink3,#7A7670);margin-top:1px;line-height:1.4;}
+.hd-notif-time{font-size:10.5px;color:rgba(26,24,20,0.4);margin-top:3px;}
+.hd-notif-footer{padding:8px 14px;border-top:1px solid rgba(26,24,20,0.08);text-align:center;}
+.hd-notif-all{font-size:12px;color:var(--gold,#B8922A);cursor:pointer;background:none;border:none;font-family:'DM Sans',sans-serif;font-weight:500;}
+.hd-menu-header{padding:10px 12px;border-bottom:1px solid rgba(26,24,20,0.08);}
+.hd-menu-user{display:flex;align-items:center;gap:8px;}
+.hd-menu-avatar{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#F0E4C4,#EDE9E1);display:flex;align-items:center;justify-content:center;font-family:'Cormorant Garamond',serif;font-size:13px;font-weight:700;color:var(--gold,#B8922A);border:1.5px solid rgba(184,146,42,0.2);}
+.hd-menu-name{font-size:13px;font-weight:500;color:var(--ink,#1A1814);}
+.hd-menu-email{font-size:11px;color:var(--ink3,#7A7670);}
+`;
+
+const routeLabels: Record<string, string> = {
+  '/home': 'Início',
+  '/sales': 'Vendas',
+  '/billing': 'Faturamento',
+  '/financial': 'Financeiro',
+  '/inventory': 'Estoque',
+  '/settings': 'Configurações',
+  '/management/users': 'Usuários',
+  '/contact': 'Suporte',
+};
+
+const notifications = [
+  { id: 1, icon: Package, color: '#FDEDEC', iconColor: '#C0392B', label: 'Estoque baixo', desc: 'Notebook Dell abaixo do mínimo', time: 'Há 2h' },
+  { id: 2, icon: TrendingUp, color: '#E8F5E9', iconColor: '#1E8449', label: 'Nova venda', desc: 'Venda de R$ 2.999,99 no Mercado Livre', time: 'Há 4h' },
+  { id: 3, icon: CheckCircle, color: '#EBF5FB', iconColor: '#1A5276', label: 'Pedido entregue', desc: 'Pedido #1234 confirmado', time: 'Ontem' },
+];
 
 export function Header() {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const { toast } = useToast();
 
   const handleSignOut = () => {
     signOut();
-    toast({
-      title: "Logout realizado",
-      description: "Você foi desconectado com sucesso",
-    });
+    toast({ title: "Logout realizado", description: "Você foi desconectado com sucesso" });
   };
 
-  const handleSettings = () => {
-    navigate('/settings');
-  };
+  const getInitials = (name: string) => name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
 
-  const handleHelp = () => {
-    navigate('/contact');
-  };
-
-  const getInitials = (name: string) => {
-    return name
-      .split(' ')
-      .map(word => word.charAt(0))
-      .join('')
-      .toUpperCase()
-      .slice(0, 2);
-  };
+  const currentLabel = routeLabels[location.pathname] || routeLabels[Object.keys(routeLabels).find(k => location.pathname.startsWith(k + '/')) || ''] || 'Painel';
 
   return (
-    <header className="bg-white sticky top-0 z-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-end items-center h-16">
-          {/* Ações do Usuário */}
-          <div className="flex items-center space-x-2">
-            {/* Notificações */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="sm" className="relative">
-                  <Bell className="h-5 w-5" />
-                  <Badge 
-                    variant="destructive" 
-                    className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs"
-                  >
-                    3
-                  </Badge>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-80">
-                <div className="p-2">
-                  <h4 className="font-semibold text-sm mb-2">Notificações</h4>
-                  <div className="space-y-2">
-                    <div className="p-2 hover:bg-gray-50 rounded cursor-pointer">
-                      <div className="flex items-start space-x-2">
-                        <div className="w-2 h-2 bg-red-500 rounded-full mt-2"></div>
-                        <div className="flex-1">
-                          <p className="text-sm font-medium">Estoque baixo</p>
-                          <p className="text-xs text-gray-500">Notebook Dell está com estoque baixo</p>
-                          <p className="text-xs text-gray-400">Há 2 horas</p>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="p-2 hover:bg-gray-50 rounded cursor-pointer">
-                      <div className="flex items-start space-x-2">
-                        <div className="w-2 h-2 bg-blue-500 rounded-full mt-2"></div>
-                        <div className="flex-1">
-                          <p className="text-sm font-medium">Nova venda</p>
-                          <p className="text-xs text-gray-500">Venda de R$ 2.999,99 realizada</p>
-                          <p className="text-xs text-gray-400">Há 4 horas</p>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="p-2 hover:bg-gray-50 rounded cursor-pointer">
-                      <div className="flex items-start space-x-2">
-                        <div className="w-2 h-2 bg-green-500 rounded-full mt-2"></div>
-                        <div className="flex-1">
-                          <p className="text-sm font-medium">Pedido entregue</p>
-                          <p className="text-xs text-gray-500">Pedido #1234 foi entregue</p>
-                          <p className="text-xs text-gray-400">Ontem</p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="border-t mt-2 pt-2">
-                    <Button variant="ghost" size="sm" className="w-full">
-                      Ver todas as notificações
-                    </Button>
-                  </div>
-                </div>
-              </DropdownMenuContent>
-            </DropdownMenu>
+    <>
+      <style>{CSS}</style>
+      <header className="hd">
 
-
-            {/* Menu do Usuário */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="flex items-center space-x-2 px-2">
-                  <Avatar className="h-8 w-8">
-                    <AvatarImage src="" />
-                    <AvatarFallback className="bg-gradient-to-r from-blue-600 to-blue-800 text-white text-sm">
-                      {getInitials(user?.name || 'U')}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="hidden sm:block text-left">
-                    <p className="text-sm font-medium text-gray-900">{user?.name}</p>
-                    <p className="text-xs text-gray-500">{user?.email}</p>
-                  </div>
-                  <ChevronDown className="h-4 w-4 text-gray-400" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56">
-                <div className="p-2">
-                  <div className="flex items-center space-x-2">
-                    <Avatar className="h-8 w-8">
-                      <AvatarImage src="" />
-                      <AvatarFallback className="bg-gradient-to-r from-blue-600 to-blue-800 text-white text-sm">
-                        {getInitials(user?.name || 'U')}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div>
-                      <p className="text-sm font-medium">{user?.name}</p>
-                      <p className="text-xs text-gray-500">{user?.email}</p>
-                    </div>
-                  </div>
-                </div>
-                <DropdownMenuSeparator />
-                    <DropdownMenuItem>
-                      <User className="h-4 w-4 mr-2" />
-                      Meu Perfil
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={handleSettings}>
-                      <Settings className="h-4 w-4 mr-2" />
-                      Configurações
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={handleHelp}>
-                      <HelpCircle className="h-4 w-4 mr-2" />
-                      Ajuda
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={handleSignOut} className="text-red-600">
-                      <LogOut className="h-4 w-4 mr-2" />
-                      Sair
-                    </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
+        {/* Breadcrumb */}
+        <div className="hd-breadcrumb">
+          <span className="hd-bc-item">Liderum ERP</span>
+          <span className="hd-bc-sep">/</span>
+          <span className="hd-bc-current">{currentLabel}</span>
         </div>
-      </div>
-    </header>
+
+        {/* Direita */}
+        <div className="hd-right">
+
+          {/* Notificações */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button className="hd-icon-btn" aria-label="Notificações">
+                <Bell size={14} />
+                <span className="hd-badge">3</span>
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" style={{ padding: 0, borderRadius: 10, border: '1px solid rgba(26,24,20,0.09)', boxShadow: '0 8px 30px rgba(26,24,20,0.10)' }}>
+              <div className="hd-notif-wrap">
+                <div className="hd-notif-header">
+                  <span className="hd-notif-title">Notificações</span>
+                  <button className="hd-notif-clear">Marcar como lidas</button>
+                </div>
+                {notifications.map(n => {
+                  const Icon = n.icon;
+                  return (
+                    <div key={n.id} className="hd-notif-item">
+                      <div className="hd-notif-ico" style={{ background: n.color }}>
+                        <Icon size={13} color={n.iconColor} />
+                      </div>
+                      <div className="hd-notif-body">
+                        <div className="hd-notif-label">{n.label}</div>
+                        <div className="hd-notif-desc">{n.desc}</div>
+                        <div className="hd-notif-time">{n.time}</div>
+                      </div>
+                    </div>
+                  );
+                })}
+                <div className="hd-notif-footer">
+                  <button className="hd-notif-all">Ver todas as notificações →</button>
+                </div>
+              </div>
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          <div className="hd-sep" />
+
+          {/* Usuário */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button className="hd-user-btn">
+                <div className="hd-avatar">{getInitials(user?.name || 'U')}</div>
+                <span className="hd-user-name">{user?.name || 'Usuário'}</span>
+                <ChevronDown size={11} className="hd-chevron" />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" style={{ borderRadius: 10, border: '1px solid rgba(26,24,20,0.09)', boxShadow: '0 8px 30px rgba(26,24,20,0.10)', minWidth: 200 }}>
+              <div className="hd-menu-header">
+                <div className="hd-menu-user">
+                  <div className="hd-menu-avatar">{getInitials(user?.name || 'U')}</div>
+                  <div>
+                    <div className="hd-menu-name">{user?.name}</div>
+                    <div className="hd-menu-email">{user?.email}</div>
+                  </div>
+                </div>
+              </div>
+              <DropdownMenuItem onClick={() => navigate('/settings')} style={{ fontSize: 12.5, gap: 8, cursor: 'pointer' }}>
+                <User size={13} /> Meu Perfil
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => navigate('/settings')} style={{ fontSize: 12.5, gap: 8, cursor: 'pointer' }}>
+                <Settings size={13} /> Configurações
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => navigate('/contact')} style={{ fontSize: 12.5, gap: 8, cursor: 'pointer' }}>
+                <HelpCircle size={13} /> Suporte
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={handleSignOut} style={{ fontSize: 12.5, gap: 8, color: '#C0392B', cursor: 'pointer' }}>
+                <LogOut size={13} /> Sair
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+        </div>
+      </header>
+    </>
   );
-} 
+}
