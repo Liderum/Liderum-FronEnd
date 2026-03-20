@@ -631,17 +631,18 @@ export function Settings() {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background text-foreground">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
-                <SettingsIcon className="h-8 w-8 text-blue-600" />
+              <p className="text-xs uppercase tracking-[0.16em] text-muted-foreground">Preferencias</p>
+              <h1 className="mt-1 text-3xl font-semibold tracking-tight flex items-center gap-3">
+                <BarChart3 className="h-7 w-7 text-primary" />
                 Configurações
               </h1>
-              <p className="text-gray-600 mt-2">
+              <p className="text-muted-foreground mt-2">
                 Gerencie as configurações do sistema e personalize sua experiência
               </p>
             </div>
@@ -665,7 +666,7 @@ export function Settings() {
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
           {/* Sidebar de Navegação */}
           <div className="lg:col-span-1">
-            <Card>
+            <Card className="border-border shadow-none">
               <CardHeader>
                 <CardTitle className="text-lg">Categorias</CardTitle>
               </CardHeader>
@@ -679,8 +680,8 @@ export function Settings() {
                         onClick={() => setActiveTab(tab.id)}
                         className={`w-full flex items-center gap-3 px-4 py-3 text-left transition-colors ${
                           activeTab === tab.id
-                            ? 'bg-blue-50 text-blue-700 border-r-2 border-blue-600'
-                            : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                            ? 'bg-primary/10 text-primary border-r-2 border-primary'
+                            : 'text-muted-foreground hover:bg-muted/40 hover:text-foreground'
                         }`}
                       >
                         <Icon className="h-4 w-4" />
@@ -747,7 +748,7 @@ export function Settings() {
                       <Separator />
                       
                       <div>
-                        <h4 className="text-lg font-medium text-gray-900 mb-4">Endereço</h4>
+                          <h4 className="text-lg font-medium text-foreground mb-4">Endereço</h4>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                           <div className="md:col-span-2">
                             <Label htmlFor="street">Rua</Label>

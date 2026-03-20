@@ -8,7 +8,7 @@ interface UseRedirectOptions {
 }
 
 export function useRedirect(options: UseRedirectOptions = {}) {
-  const { delay = 3000, destination = '/dashboard', onRedirect } = options;
+  const { delay = 3000, destination = '/home', onRedirect } = options;
   const navigate = useNavigate();
   const [isRedirecting, setIsRedirecting] = useState(false);
   const [countdown, setCountdown] = useState(Math.ceil(delay / 1000));

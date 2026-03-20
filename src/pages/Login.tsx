@@ -1,24 +1,74 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Mail, Lock, ArrowRight, AlertCircle, ArrowLeft, Loader2, Eye, EyeOff, BarChart, Menu, X, Shield, Sparkles } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+import { Mail, Lock, Eye, EyeOff, AlertCircle, Loader2, ArrowRight } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
-import { motion, AnimatePresence } from "framer-motion";
 import { validateEmail } from '@/lib/emailValidation';
 import { Redirecting } from '@/components/Redirecting';
+
+const CSS = `
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,700;1,400;1,700&family=DM+Sans:wght@300;400;500&display=swap');
+:root{--cream:#F7F4EF;--cream2:#EDE9E1;--ink:#1A1814;--ink2:#3D3A34;--ink3:#7A7670;--gold:#B8922A;--gold2:#D4A843;--gold-light:#F0E4C4;--bdr:rgba(26,24,20,0.1);}
+.la-root{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--ink);min-height:100vh;line-height:1.6;}
+.la-root*,.la-root *::before,.la-root *::after{box-sizing:border-box;}
+.la-nav{position:fixed;top:0;left:0;right:0;z-index:100;height:64px;display:flex;align-items:center;justify-content:space-between;padding:0 48px;background:rgba(247,244,239,0.97);backdrop-filter:blur(14px);border-bottom:1px solid var(--bdr);}
+.la-logo{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:700;color:var(--ink);background:none;border:none;cursor:pointer;letter-spacing:-0.5px;}
+.la-logo span{color:var(--gold);}
+.la-btn{padding:9px 20px;border-radius:6px;font-size:13px;font-weight:500;border:none;cursor:pointer;transition:all 0.2s;font-family:'DM Sans',sans-serif;display:inline-flex;align-items:center;gap:6px;}
+.la-btn-dark{background:var(--ink);color:#fff;}
+.la-btn-dark:hover:not(:disabled){background:var(--gold);}
+.la-btn-ghost{background:transparent;color:var(--ink);border:1px solid var(--bdr);}
+.la-btn-ghost:hover:not(:disabled){border-color:var(--ink);}
+.la-btn:disabled{opacity:0.55;cursor:not-allowed;}
+.la-btn-full{width:100%;height:44px;justify-content:center;font-size:14px;}
+.la-main{padding-top:64px;min-height:100vh;}
+.la-centered{display:flex;align-items:center;min-height:calc(100vh - 64px);}
+.la-wrap{max-width:1100px;margin:0 auto;width:100%;padding:60px 48px;}
+.la-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center;}
+.la-tag{font-size:11px;font-weight:500;letter-spacing:1.5px;text-transform:uppercase;color:var(--gold);margin-bottom:16px;}
+.la-h1{font-family:'Cormorant Garamond',serif;font-size:clamp(36px,4vw,52px);font-weight:700;line-height:1.1;letter-spacing:-1px;margin-bottom:16px;}
+.la-h1 em{font-style:italic;color:var(--gold);}
+.la-sub{font-size:15px;color:var(--ink3);line-height:1.75;font-weight:300;margin-bottom:28px;max-width:400px;}
+.la-trust{display:flex;flex-direction:column;gap:12px;}
+.la-trust-item{display:flex;align-items:flex-start;gap:10px;font-size:13px;color:var(--ink2);line-height:1.5;}
+.la-trust-check{width:20px;height:20px;border-radius:50%;background:var(--gold-light);border:1px solid rgba(184,146,42,0.3);display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--gold);flex-shrink:0;margin-top:1px;}
+.la-card{background:#fff;border-radius:16px;padding:40px;border:1px solid var(--bdr);box-shadow:0 4px 40px rgba(26,24,20,0.07);position:relative;overflow:hidden;}
+.la-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--gold),var(--gold2));}
+.la-card-title{font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:700;color:var(--ink);margin-bottom:4px;}
+.la-card-sub{font-size:13px;color:var(--ink3);margin-bottom:28px;}
+.la-field{margin-bottom:16px;}
+.la-lbl{display:block;font-size:12px;font-weight:500;color:var(--ink2);margin-bottom:5px;letter-spacing:0.2px;}
+.la-lbl-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;}
+.la-inp-wrap{position:relative;}
+.la-inp-ico{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--ink3);pointer-events:none;}
+.la-inp{width:100%;height:44px;padding:0 12px 0 36px;border:1px solid rgba(26,24,20,0.14);border-radius:8px;font-size:13px;font-family:'DM Sans',sans-serif;color:var(--ink);background:#fff;outline:none;transition:border 0.2s,box-shadow 0.2s;}
+.la-inp:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(184,146,42,0.1);}
+.la-inp.err{border-color:#C0392B;}
+.la-inp-sfx{position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--ink3);padding:2px;transition:color 0.2s;display:flex;align-items:center;}
+.la-inp-sfx:hover{color:var(--ink);}
+.la-err{display:flex;align-items:center;gap:4px;font-size:11px;color:#C0392B;margin-top:4px;}
+.la-forgot{font-size:12px;color:var(--gold);text-decoration:none;}
+.la-forgot:hover{text-decoration:underline;}
+.la-divider{border:none;border-top:1px solid var(--bdr);margin:20px 0;}
+.la-link-footer{text-align:center;font-size:13px;color:var(--ink3);}
+.la-link-footer a{color:var(--gold);text-decoration:none;font-weight:500;}
+.la-link-footer a:hover{text-decoration:underline;}
+.la-nav-l,.la-nav-r{display:flex;align-items:center;}
+.la-nav-c{position:absolute;left:50%;transform:translateX(-50%);}
+.la-back-btn{background:none;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--ink2);display:inline-flex;align-items:center;gap:4px;padding:6px 10px;border-radius:6px;transition:all 0.2s;letter-spacing:0.1px;}
+.la-back-btn:hover{color:var(--gold);background:var(--gold-light);}
+@keyframes la-in{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+.la-anim-1{animation:la-in 0.5s cubic-bezier(0.22,1,0.36,1) both;}
+.la-anim-2{animation:la-in 0.5s cubic-bezier(0.22,1,0.36,1) 0.1s both;}
+@media(max-width:900px){.la-nav{padding:0 20px;}.la-wrap{padding:40px 20px;}.la-grid-2{grid-template-columns:1fr;gap:36px;}.la-card{padding:28px 24px;}.la-nav-c{display:none;}}
+`;
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [errors, setErrors] = useState<{ email?: string, password?: string }>({});
+  const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
   const location = useLocation();
@@ -26,23 +76,14 @@ const Login = () => {
 
   useEffect(() => {
     if (errorToast.isVisible && errorToast.message) {
-      toast({
-        title: "Erro no login",
-        description: errorToast.message,
-        variant: "destructive",
-        duration: 5000,
-      });
-      setTimeout(() => {
-        hideError();
-      }, 0);
+      toast({ title: 'Erro no login', description: errorToast.message, variant: 'destructive', duration: 5000 });
+      setTimeout(() => { hideError(); }, 0);
     }
   }, [errorToast.isVisible, errorToast.message, toast, hideError]);
 
-  // Verifica se o usuário já está autenticado e redireciona automaticamente
   useEffect(() => {
     const token = localStorage.getItem('@Liderum:token');
     const storedUser = localStorage.getItem('@Liderum:user');
-    
     if (token && storedUser && isAuthenticated) {
       const from = location.state?.from?.pathname || '/home';
       navigate(from, { replace: true });
@@ -56,9 +97,8 @@ const Login = () => {
   useEffect(() => {
     if (email && !validateEmail(email)) {
       const timer = setTimeout(() => {
-        setErrors(prev => ({ ...prev, email: "Por favor, insira um email válido" }));
+        setErrors(prev => ({ ...prev, email: 'Por favor, insira um email válido' }));
       }, 1000);
-
       return () => clearTimeout(timer);
     } else if (email && validateEmail(email)) {
       setErrors(prev => ({ ...prev, email: undefined }));
@@ -67,80 +107,39 @@ const Login = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    // Validação completa
-    const newErrors: { email?: string, password?: string } = {};
-
+    const newErrors: { email?: string; password?: string } = {};
     if (!email) {
-      newErrors.email = "Email é obrigatório";
+      newErrors.email = 'Email é obrigatório';
     } else if (!validateEmail(email)) {
-      newErrors.email = "Por favor, insira um email válido";
+      newErrors.email = 'Por favor, insira um email válido';
     }
-
-    if (!password) {
-      newErrors.password = "Senha é obrigatória";
-    }
-
-    if (Object.keys(newErrors).length > 0) {
-      setErrors(newErrors);
-      return;
-    }
+    if (!password) newErrors.password = 'Senha é obrigatória';
+    if (Object.keys(newErrors).length > 0) { setErrors(newErrors); return; }
 
     setIsLoading(true);
-
     try {
       await signIn(email, password);
-
       const token = localStorage.getItem('@Liderum:token');
       const storedUser = localStorage.getItem('@Liderum:user');
-
-      if (!token || !storedUser) {
-        throw new Error('Erro ao salvar dados de autenticação');
-      }
-
-      toast({
-        title: "Bem-vindo!",
-        description: "Login realizado com sucesso.",
-        variant: "success",
-        duration: 2000,
-      });
-
+      if (!token || !storedUser) throw new Error('Erro ao salvar dados de autenticação');
+      toast({ title: 'Bem-vindo!', description: 'Login realizado com sucesso.', variant: 'success', duration: 2000 });
       const finalDestination = from || '/home';
-
-      console.log('Login bem-sucedido! Token:', !!token, 'User:', !!storedUser, 'Destino:', finalDestination);
-
-      // Aguarda um pouco para garantir que o contexto atualizou
-      // e então redireciona
       setIsRedirecting(true);
-
-      // Usa requestAnimationFrame + setTimeout para garantir que o React atualizou
       requestAnimationFrame(() => {
         setTimeout(() => {
-          console.log('Redirecionando para:', finalDestination);
-          // Força o redirecionamento usando window.location se navigate falhar
           try {
             navigate(finalDestination, { replace: true });
-            
-            // Fallback: se após 1 segundo ainda estiver em /login, força redirecionamento
             setTimeout(() => {
-              if (window.location.pathname === '/login') {
-                console.log('Fallback: Forçando redirecionamento via window.location');
-                window.location.href = finalDestination;
-              }
+              if (window.location.pathname === '/login') window.location.href = finalDestination;
             }, 1000);
           } catch (error) {
-            console.error('Erro ao navegar:', error);
             window.location.href = finalDestination;
           }
         }, 300);
       });
     } catch (error) {
-
       setPassword('');
-
-      if (error instanceof Error && error.message.toLowerCase().includes('email')) {
-        setEmail('');
-      }
+      if (error instanceof Error && error.message.toLowerCase().includes('email')) setEmail('');
     } finally {
       setIsLoading(false);
     }
@@ -148,275 +147,133 @@ const Login = () => {
 
   if (isRedirecting) {
     const destination = from === '/home' ? 'página inicial' : from === '/index' ? 'página inicial' : 'dashboard';
-    return (
-      <Redirecting
-        message="Preparando seu ambiente de trabalho..."
-        destination={destination}
-        countdown={1}
-      />
-    );
+    return <Redirecting message="Preparando seu ambiente de trabalho..." destination={destination} countdown={1} />;
   }
 
   return (
     <>
+      <style>{CSS}</style>
+      <div className="la-root">
+        <nav className="la-nav">
+          <div className="la-nav-l">
+            <button type="button" className="la-back-btn" onClick={() => navigate('/')}>
+              ← Voltar
+            </button>
+          </div>
+          <div className="la-nav-c">
+            <button type="button" className="la-logo" onClick={() => navigate('/')}>
+              Lide<span>rum</span>
+            </button>
+          </div>
+          <div className="la-nav-r">
+            <button type="button" className="la-btn la-btn-ghost" onClick={() => navigate('/cadastro')}>
+              Criar conta
+            </button>
+          </div>
+        </nav>
 
-      <div className="min-h-screen bg-white">
-        { }
-        <motion.header
-          initial={{ y: -100, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ duration: 0.5 }}
-          className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-b border-gray-200"
-        >
-          <div className="container mx-auto px-6 h-16">
-            <div className="flex items-center justify-between h-full">
-              <motion.div
-                className="flex items-center gap-3 cursor-pointer"
-                onClick={() => navigate('/')}
-                whileHover={{ scale: 1.05 }}
-              >
-                <div className="w-10 h-10 bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-600 rounded-lg flex items-center justify-center shadow-lg">
-                  <BarChart className="h-6 w-6 text-white" />
+        <main className="la-main">
+          <div className="la-centered">
+            <div className="la-wrap">
+              <div className="la-grid-2">
+                <div className="la-anim-1">
+                  <div className="la-tag">Acesso seguro</div>
+                  <h1 className="la-h1">Entre na sua <em>operação</em></h1>
+                  <p className="la-sub">
+                    Acesse vendas, financeiro, estoque e segurança — tudo integrado em uma plataforma.
+                  </p>
+                  <div className="la-trust">
+                    <div className="la-trust-item">
+                      <span className="la-trust-check">✓</span>
+                      Sessão protegida e validação em tempo real
+                    </div>
+                    <div className="la-trust-item">
+                      <span className="la-trust-check">✓</span>
+                      Interface direta para acesso rápido
+                    </div>
+                    <div className="la-trust-item">
+                      <span className="la-trust-check">✓</span>
+                      Dados criptografados end-to-end
+                    </div>
+                  </div>
                 </div>
-                <span className="text-xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-                  Liderum
-                </span>
-              </motion.div>
 
-              <nav className="hidden lg:flex items-center gap-1">
-              </nav>
+                <div className="la-anim-2">
+                  <div className="la-card">
+                    <div className="la-card-title">Entrar</div>
+                    <div className="la-card-sub">Acesse sua conta Liderum</div>
 
-              <div className="flex items-center gap-3">
-                <Button
-                  onClick={() => navigate('/cadastro')}
-                  className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-sm px-5 shadow-lg"
-                >
-                  Criar Conta
-                </Button>
-                <Button
-                  variant="ghost"
-                  className="lg:hidden"
-                  onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                >
-                  {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-                </Button>
+                    <form onSubmit={handleSubmit}>
+                      <div className="la-field">
+                        <label className="la-lbl" htmlFor="email">Email</label>
+                        <div className="la-inp-wrap">
+                          <Mail size={15} className="la-inp-ico" />
+                          <input
+                            id="email"
+                            type="email"
+                            placeholder="seu@email.com"
+                            className={`la-inp${errors.email ? ' err' : ''}`}
+                            value={email}
+                            onChange={(e) => { setEmail(e.target.value); if (errors.email) setErrors({ ...errors, email: undefined }); }}
+                            disabled={isLoading}
+                          />
+                        </div>
+                        {errors.email && (
+                          <p className="la-err"><AlertCircle size={11} />{errors.email}</p>
+                        )}
+                      </div>
+
+                      <div className="la-field">
+                        <div className="la-lbl-row">
+                          <label className="la-lbl" htmlFor="password" style={{ margin: 0 }}>Senha</label>
+                          <Link to="/forgot-password" className="la-forgot">Esqueceu a senha?</Link>
+                        </div>
+                        <div className="la-inp-wrap">
+                          <Lock size={15} className="la-inp-ico" />
+                          <input
+                            id="password"
+                            type={showPassword ? 'text' : 'password'}
+                            placeholder="••••••••"
+                            className={`la-inp${errors.password ? ' err' : ''}`}
+                            style={{ paddingRight: '36px' }}
+                            value={password}
+                            onChange={(e) => { setPassword(e.target.value); if (errors.password) setErrors({ ...errors, password: undefined }); }}
+                            disabled={isLoading}
+                          />
+                          <button
+                            type="button"
+                            className="la-inp-sfx"
+                            onClick={() => setShowPassword(!showPassword)}
+                            disabled={isLoading}
+                            aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
+                          >
+                            {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
+                          </button>
+                        </div>
+                        {errors.password && (
+                          <p className="la-err"><AlertCircle size={11} />{errors.password}</p>
+                        )}
+                      </div>
+
+                      <button type="submit" className="la-btn la-btn-dark la-btn-full" disabled={isLoading}>
+                        {isLoading ? (
+                          <><Loader2 size={15} className="animate-spin" />Entrando...</>
+                        ) : (
+                          <>Entrar <ArrowRight size={15} /></>
+                        )}
+                      </button>
+                    </form>
+
+                    <hr className="la-divider" />
+                    <p className="la-link-footer">
+                      Não possui conta?{' '}
+                      <Link to="/cadastro">Criar nova conta</Link>
+                    </p>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
-
-          <AnimatePresence>
-            {mobileMenuOpen && (
-              <motion.div
-                initial={{ height: 0, opacity: 0 }}
-                animate={{ height: "auto", opacity: 1 }}
-                exit={{ height: 0, opacity: 0 }}
-                className="lg:hidden bg-white border-t border-gray-200"
-              >
-                <nav className="container mx-auto px-6 py-4 space-y-2">
-                  <Button
-                    variant="ghost"
-                    onClick={() => navigate('/cadastro')}
-                    className="w-full justify-start"
-                  >
-                    Criar Conta
-                  </Button>
-                </nav>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </motion.header>
-
-        <main className="pt-16 min-h-screen flex items-center">
-          <section className="relative w-full py-20 bg-white overflow-hidden">
-
-            <div className="container mx-auto px-6 relative z-10">
-              <div className="max-w-md mx-auto">
-                <motion.div
-                  initial={{ opacity: 0, y: 30 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.6 }}
-                  className="text-center mb-8"
-                >
-                  <motion.div
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: 0.2 }}
-                    className="inline-block mb-4"
-                  >
-                    <Badge className="bg-blue-100 text-blue-700 border-blue-200">
-                      <Shield className="h-3 w-3 mr-2" />
-                      Acesso Seguro
-                    </Badge>
-                  </motion.div>
-
-                  <h1 className="text-4xl md:text-5xl font-bold mb-4 leading-tight">
-                    <span className="block text-gray-900 mb-2">Bem-vindo de Volta</span>
-                    <span className="block bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 bg-clip-text text-transparent">
-                      Acesse sua Conta
-                    </span>
-                  </h1>
-
-                  <p className="text-lg text-gray-600 leading-relaxed">
-                    Entre com suas credenciais para acessar o ERP Liderum
-                  </p>
-                </motion.div>
-
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ delay: 0.3, duration: 0.5 }}
-                >
-                  <Card className="border-2 border-gray-200 shadow-xl bg-white">
-                    <div className="p-8">
-                      <form onSubmit={handleSubmit} className="space-y-6">
-                        <div className="space-y-2">
-                          <Label htmlFor="email" className="text-sm font-medium text-gray-700">
-                            Email
-                          </Label>
-                          <div className="relative">
-                            <div className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none text-gray-400">
-                              <Mail size={18} />
-                            </div>
-                            <Input
-                              id="email"
-                              type="email"
-                              placeholder="seu@email.com"
-                              className={`h-12 pl-11 border-gray-200 focus:border-blue-500 focus:ring-blue-500 ${errors.email ? 'border-red-500 focus-visible:ring-red-500' : ''}`}
-                              value={email}
-                              onChange={(e) => {
-                                setEmail(e.target.value);
-                                if (errors.email) {
-                                  setErrors({ ...errors, email: undefined });
-                                }
-                              }}
-                              disabled={isLoading}
-                            />
-                          </div>
-                          {errors.email && (
-                            <motion.p
-                              initial={{ opacity: 0, y: -10 }}
-                              animate={{ opacity: 1, y: 0 }}
-                              className="text-sm text-red-500 flex items-center gap-1.5 mt-1"
-                            >
-                              <AlertCircle size={14} />
-                              {errors.email}
-                            </motion.p>
-                          )}
-                        </div>
-
-                        {/* Senha */}
-                        <div className="space-y-2">
-                          <div className="flex justify-between items-center">
-                            <Label htmlFor="password" className="text-sm font-medium text-gray-700">
-                              Senha
-                            </Label>
-                            <Link
-                              to="/forgot-password"
-                              className="text-xs text-blue-600 hover:text-blue-700 hover:underline font-medium"
-                            >
-                              Esqueceu a senha?
-                            </Link>
-                          </div>
-                          <div className="relative">
-                            <div className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none text-gray-400">
-                              <Lock size={18} />
-                            </div>
-                            <Input
-                              id="password"
-                              type={showPassword ? "text" : "password"}
-                              placeholder="••••••••"
-                              className={`h-12 pl-11 pr-11 border-gray-200 focus:border-blue-500 focus:ring-blue-500 ${errors.password ? 'border-red-500 focus-visible:ring-red-500' : ''}`}
-                              value={password}
-                              onChange={(e) => {
-                                setPassword(e.target.value);
-                                if (errors.password) setErrors({ ...errors, password: undefined });
-                              }}
-                              disabled={isLoading}
-                            />
-                            <button
-                              type="button"
-                              className="absolute inset-y-0 right-0 flex items-center pr-4 text-gray-400 hover:text-gray-600 transition-colors"
-                              onClick={() => setShowPassword(!showPassword)}
-                              disabled={isLoading}
-                            >
-                              {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                            </button>
-                          </div>
-                          {errors.password && (
-                            <motion.p
-                              initial={{ opacity: 0, y: -10 }}
-                              animate={{ opacity: 1, y: 0 }}
-                              className="text-sm text-red-500 flex items-center gap-1.5 mt-1"
-                            >
-                              <AlertCircle size={14} />
-                              {errors.password}
-                            </motion.p>
-                          )}
-                        </div>
-
-                        {/* Botão Submit */}
-                        <motion.div
-                          whileHover={{ scale: 1.02 }}
-                          whileTap={{ scale: 0.98 }}
-                        >
-                          <Button
-                            type="submit"
-                            className="w-full h-12 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold shadow-lg hover:shadow-xl transition-all group"
-                            disabled={isLoading}
-                          >
-                            {isLoading ? (
-                              <>
-                                <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                                Entrando...
-                              </>
-                            ) : (
-                              <>
-                                Entrar
-                                <ArrowRight className="w-5 h-5 ml-2 transition-transform group-hover:translate-x-1" />
-                              </>
-                            )}
-                          </Button>
-                        </motion.div>
-                      </form>
-
-                      {/* Divisor */}
-                      <div className="relative my-6">
-                        <div className="absolute inset-0 flex items-center">
-                          <div className="w-full border-t border-gray-200"></div>
-                        </div>
-                        <div className="relative flex justify-center">
-                          <span className="bg-white px-4 text-sm text-gray-500">ou</span>
-                        </div>
-                      </div>
-
-                      {/* Links */}
-                      <div className="space-y-3 text-center">
-                        <p className="text-sm text-gray-600">
-                          Não possui uma conta?{" "}
-                          <Link
-                            to="/cadastro"
-                            className="text-blue-600 font-semibold hover:text-blue-700 hover:underline transition-colors"
-                          >
-                            Criar nova conta
-                          </Link>
-                        </p>
-                      </div>
-                    </div>
-                  </Card>
-                </motion.div>
-
-                {/* Footer */}
-                <motion.p
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 0.5 }}
-                  className="text-center text-xs text-gray-500 mt-8"
-                >
-                  © {new Date().getFullYear()} Liderum. Todos os direitos reservados.
-                </motion.p>
-              </div>
-            </div>
-          </section>
         </main>
       </div>
     </>

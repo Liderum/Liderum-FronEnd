@@ -32,7 +32,7 @@ export function Header() {
   };
 
   const handleHelp = () => {
-    navigate('/dashboard/help');
+    navigate('/contact');
   };
 
   const getInitials = (name: string) => {

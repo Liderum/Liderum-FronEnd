@@ -8,7 +8,7 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '
 import { useSimpleToast } from '@/hooks/useSimpleToast';
 import { CompanyService } from '@/services/managementService';
 import { Company, CreateCompanyDto, UpdateCompanyDto } from '@/types/management';
-import { Plus, Pencil, Trash2, Building2, RefreshCw } from 'lucide-react';
+import { Plus, Pencil, Trash2, Building2, RefreshCw, BarChart3 } from 'lucide-react';
 
 export function Companies() {
   const { showToast } = useSimpleToast();
@@ -91,11 +91,15 @@ export function Companies() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 text-foreground">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Empresas</h1>
-          <p className="text-gray-600 mt-1">Gerencie as empresas cadastradas</p>
+          <p className="text-xs uppercase tracking-[0.16em] text-muted-foreground">Gestao</p>
+          <h1 className="mt-1 flex items-center gap-2 text-2xl font-semibold tracking-tight">
+            <BarChart3 className="h-5 w-5 text-primary" />
+            Empresas
+          </h1>
+          <p className="mt-1 text-muted-foreground">Gerencie as empresas cadastradas</p>
         </div>
         <div className="flex gap-2">
           <Button onClick={loadCompanies} variant="outline" className="gap-2">
@@ -109,7 +113,7 @@ export function Companies() {
         </div>
       </div>
 
-      <Card>
+      <Card className="border-border shadow-none">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Building2 className="h-5 w-5" />
@@ -135,7 +139,7 @@ export function Companies() {
                 <TableBody>
                   {companies.length === 0 && (
                     <TableRow>
-                      <TableCell colSpan={4} className="text-center text-sm text-gray-500">
+                      <TableCell colSpan={4} className="text-center text-sm text-muted-foreground">
                         Nenhuma empresa encontrada
                       </TableCell>
                     </TableRow>
@@ -178,7 +182,7 @@ export function Companies() {
       </Card>
 
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-        <DialogContent>
+        <DialogContent className="border-border">
           <DialogHeader>
             <DialogTitle>
               {editingCompany ? 'Editar Empresa' : 'Nova Empresa'}

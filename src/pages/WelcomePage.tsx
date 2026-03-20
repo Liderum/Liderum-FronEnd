@@ -26,28 +26,28 @@ const WelcomePage = () => {
       title: "Dashboard",
       description: "Visão geral do seu sistema",
       icon: BarChart3,
-      path: "/dashboard",
+      path: "/home",
       color: "bg-blue-500"
     },
     {
       title: "Vendas",
       description: "Gerencie suas vendas online",
       icon: ShoppingCart,
-      path: "/dashboard/sales",
+      path: "/sales",
       color: "bg-green-500"
     },
     {
       title: "Estoque",
       description: "Controle de Estoque",
       icon: Package,
-      path: "/dashboard/inventory",
+      path: "/inventory",
       color: "bg-orange-500"
     },
     {
       title: "Faturamento",
       description: "Gestão de vendas",
       icon: Users,
-      path: "/dashboard/billing",
+      path: "/billing",
       color: "bg-purple-500"
     }
   ];
@@ -57,8 +57,27 @@ const WelcomePage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-50">
-      <div className="max-w-7xl mx-auto px-6 py-20">
+    <div className="min-h-screen bg-background text-foreground">
+      <header className="fixed inset-x-0 top-0 z-50 border-b border-border bg-background/95 backdrop-blur">
+        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6">
+          <button
+            type="button"
+            className="flex items-center gap-2"
+            onClick={() => navigate('/')}
+            aria-label="Voltar para a página inicial"
+          >
+            <span className="rounded-md border border-border p-2">
+              <BarChart3 className="h-4 w-4 text-primary" />
+            </span>
+            <span className="text-base font-semibold tracking-tight">Liderum</span>
+          </button>
+          <Button variant="outline" size="sm" onClick={() => navigate('/home')}>
+            Ir para home
+          </Button>
+        </div>
+      </header>
+
+      <div className="max-w-7xl mx-auto px-6 py-20 pt-24">
         <div className="space-y-12">
           {/* Header */}
           <motion.div 

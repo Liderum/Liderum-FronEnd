@@ -1,7 +1,7 @@
 import { ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, CreditCard, Smartphone } from 'lucide-react';
+import { ArrowLeft, BarChart3, ShieldCheck } from 'lucide-react';
 import { PaymentFooter } from '@/components/PaymentFooter';
 
 interface PaymentLayoutProps {
@@ -14,44 +14,47 @@ export function PaymentLayout({ children, showBackButton = true, backTo = '/' }:
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen bg-white">
-      {/* Header */}
-      <header className="bg-white/95 backdrop-blur-md border-b border-gray-200 shadow-lg">
-        <div className="container mx-auto px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
+    <div className="min-h-screen bg-background text-foreground">
+      <header className="border-b border-border bg-background/95 backdrop-blur">
+        <div className="mx-auto max-w-6xl px-4 py-3 sm:px-6">
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
               {showBackButton && (
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={() => navigate(backTo)}
-                  className="text-gray-600 hover:text-gray-900 transition-all duration-300 hover:bg-blue-50"
+                  className="text-muted-foreground hover:text-foreground"
                 >
                   <ArrowLeft className="h-4 w-4 mr-2" />
                   Voltar
                 </Button>
               )}
-              <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-blue-700 rounded-xl flex items-center justify-center shadow-lg">
-                  <CreditCard className="h-6 w-6 text-white" />
+              <button
+                type="button"
+                onClick={() => navigate('/')}
+                className="flex items-center gap-2"
+                aria-label="Voltar para a página inicial"
+              >
+                <span className="rounded-md border border-border p-2">
+                  <BarChart3 className="h-4 w-4 text-primary" />
+                </span>
+                <div className="flex items-center gap-2">
+                  <span className="text-base font-semibold tracking-tight">Liderum</span>
+                  <span className="text-xs text-muted-foreground">Pagamentos</span>
                 </div>
-                <div>
-                  <span className="text-xl font-bold text-gray-900">Liderum</span>
-                  <span className="text-sm text-gray-500 ml-2">Pagamentos</span>
-                </div>
-              </div>
+              </button>
             </div>
             
-            <div className="flex items-center space-x-2 text-sm text-gray-600 bg-green-50 px-3 py-2 rounded-full">
-              <Smartphone className="h-4 w-4 text-green-600" />
-              <span className="font-medium text-green-700">Pagamento Seguro</span>
+            <div className="hidden items-center gap-2 rounded-full border border-border px-3 py-1.5 text-sm text-muted-foreground sm:flex">
+              <ShieldCheck className="h-4 w-4 text-primary" />
+              <span>Pagamento seguro</span>
             </div>
           </div>
         </div>
       </header>
 
-      {/* Main Content */}
-      <main className="container mx-auto px-6 py-8">
+      <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
         <div className="max-w-2xl mx-auto">
           <div className="animate-fade-in-up">
             {children}
@@ -59,7 +62,6 @@ export function PaymentLayout({ children, showBackButton = true, backTo = '/' }:
         </div>
       </main>
 
-      {/* Footer */}
       <PaymentFooter />
     </div>
   );

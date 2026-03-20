@@ -5,6 +5,7 @@ import {
   Home,
   ShoppingCart,
   FileText,
+  Wallet,
   Package,
   Users,
   BarChart3,
@@ -17,8 +18,7 @@ import {
   Building2,
   UserCheck,
   ExternalLink,
-  Zap,
-  LayoutDashboard
+  Zap
 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -32,12 +32,6 @@ const mainNavigation = [
     badge: null
   },
   { 
-    name: 'Dashboard', 
-    href: '/dashboard', 
-    icon: LayoutDashboard,
-    badge: null
-  },
-  { 
     name: 'Vendas', 
     href: '/sales', 
     icon: ShoppingCart,
@@ -48,6 +42,12 @@ const mainNavigation = [
     href: '/billing', 
     icon: FileText,
     badge: '3'
+  },
+  { 
+    name: 'Financeiro', 
+    href: '/financial', 
+    icon: Wallet,
+    badge: null
   },
   { 
     name: 'Estoque', 
@@ -71,9 +71,9 @@ const secondaryNavigation = [
     name: 'Relatórios',
     icon: BarChart3,
     children: [
-      { name: 'Vendas', href: '/dashboard/reports/sales', icon: TrendingUp },
-      { name: 'Financeiro', href: '/dashboard/reports/financial', icon: ShoppingCart },
-      { name: 'Estoque', href: '/dashboard/reports/inventory', icon: Package },
+      { name: 'Vendas', href: '/sales', icon: TrendingUp },
+      { name: 'Financeiro', href: '/financial', icon: ShoppingCart },
+      { name: 'Estoque', href: '/inventory', icon: Package },
     ]
   },
   {
@@ -90,9 +90,9 @@ const secondaryNavigation = [
     name: 'Operações',
     icon: ShoppingCart,
     children: [
-      { name: 'Pedidos', href: '/dashboard/orders', icon: ShoppingCart },
-      { name: 'Entregas', href: '/dashboard/deliveries', icon: Truck },
-      { name: 'Pagamentos', href: '/dashboard/payments', icon: CreditCard },
+      { name: 'Pedidos', href: '/sales', icon: ShoppingCart },
+      { name: 'Entregas', href: '/sales', icon: Truck },
+      { name: 'Pagamentos', href: '/billing', icon: CreditCard },
     ]
   }
 ];

@@ -13,7 +13,6 @@ import Login from './pages/Login';
 import Cadastro from './pages/Cadastro';
 import Index from './pages/Index';
 import Home from './pages/Home';
-import { Dashboard } from './pages/Dashboard';
 import { Sales } from './pages/sales/Sales';
 import { Billing } from './pages/billing/Billing';
 import { Inventory } from './pages/inventory/Inventory';
@@ -30,6 +29,7 @@ import { PaymentRoutes } from './pages/payments';
 import { Companies } from './pages/management/Companies';
 import { Customers } from './pages/management/Customers';
 import { Suppliers } from './pages/management/Suppliers';
+import { Financial } from './pages/financial/Financial';
 
 function AppContent() {
   // Monitora mudanças de rota para segurança
@@ -71,16 +71,7 @@ function AppContent() {
           </PrivateRoute>
         }
       />
-      <Route
-        path="/dashboard"
-        element={
-          <PrivateRoute>
-            <DashboardLayout />
-          </PrivateRoute>
-        }
-      >
-        <Route index element={<Dashboard />} />
-      </Route>
+      <Route path="/dashboard" element={<Navigate to="/home" replace />} />
 
       {/* Gestão / Management */}
       <Route
@@ -115,6 +106,16 @@ function AppContent() {
         }
       >
         <Route index element={<Billing />} />
+      </Route>
+      <Route
+        path="/financial"
+        element={
+          <PrivateRoute>
+            <DashboardLayout />
+          </PrivateRoute>
+        }
+      >
+        <Route index element={<Financial />} />
       </Route>
       <Route
         path="/inventory"

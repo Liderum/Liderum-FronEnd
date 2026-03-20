@@ -1,28 +1,22 @@
 import { useState, useEffect } from 'react';
 import { motion } from "framer-motion";
-import { 
+import {
   ShoppingCart, 
   TrendingUp, 
-  TrendingDown,
   DollarSign,
   Package,
-  Users,
   ExternalLink,
   Zap,
   RefreshCw,
-  Settings,
   Eye,
   Edit,
   MoreHorizontal,
   ArrowUpDown,
-  Calendar,
   BarChart3,
   CheckCircle,
   AlertTriangle,
   XCircle,
   Plus,
-  Download,
-  Upload,
   Filter,
   Search
 } from "lucide-react";
@@ -32,10 +26,9 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useToast } from "@/hooks/use-toast";
+import { DEFAULT_LOAD_ERROR_MESSAGE } from '@/lib/errorMessages';
 
 interface Sale {
   id: string;
@@ -190,10 +183,10 @@ export function Sales() {
         deliveredOrders
       });
     } catch (err) {
-      setError('Erro ao carregar vendas');
+      setError(DEFAULT_LOAD_ERROR_MESSAGE);
       toast({
         title: "Erro",
-        description: "Não foi possível carregar as vendas",
+        description: DEFAULT_LOAD_ERROR_MESSAGE,
         variant: "destructive",
       });
     } finally {
@@ -380,9 +373,9 @@ export function Sales() {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="text-center">
-          <XCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">Erro ao carregar vendas</h3>
-          <p className="text-gray-600 mb-4">{error}</p>
+          <XCircle className="h-10 w-10 text-destructive mx-auto mb-3" />
+          <h3 className="text-lg font-semibold mb-2">Nao foi possivel carregar</h3>
+          <p className="text-muted-foreground mb-4">{error}</p>
           <Button onClick={loadSales}>
             <RefreshCw className="h-4 w-4 mr-2" />
             Tentar novamente
@@ -393,12 +386,16 @@ export function Sales() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 text-foreground">
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Gestão de Vendas</h1>
-          <p className="text-gray-600 mt-1">Gerencie suas vendas em todos os marketplaces</p>
+          <p className="text-xs uppercase tracking-[0.16em] text-muted-foreground">Comercial</p>
+          <h1 className="mt-1 flex items-center gap-2 text-3xl font-semibold tracking-tight">
+            <BarChart3 className="h-6 w-6 text-primary" />
+            Gestão de Vendas
+          </h1>
+          <p className="mt-1 text-muted-foreground">Gerencie suas vendas em todos os marketplaces</p>
         </div>
         <div className="flex flex-wrap gap-2">
           <Button variant="outline" onClick={() => syncMarketplace('Mercado Livre')}>
@@ -539,7 +536,7 @@ export function Sales() {
       </div>
 
       {/* Filtros e Busca */}
-      <Card>
+      <Card className="border-border shadow-none">
         <CardHeader>
           <CardTitle className="flex items-center">
             <Filter className="h-5 w-5 mr-2" />
@@ -551,7 +548,7 @@ export function Sales() {
             <div className="space-y-2">
               <Label htmlFor="search">Buscar</Label>
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
                   id="search"
                   placeholder="ID do pedido, produto, cliente..."
@@ -633,7 +630,7 @@ export function Sales() {
       </Card>
 
       {/* Tabela de Vendas */}
-      <Card>
+      <Card className="border-border shadow-none">
         <CardHeader>
           <div className="flex justify-between items-center">
             <CardTitle>
@@ -667,12 +664,12 @@ export function Sales() {
                       key={sale.id}
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
-                      className="border-b hover:bg-gray-50"
+                      className="border-b hover:bg-muted/30"
                     >
                       <td className="py-3 px-2">
                         <div>
                           <div className="font-medium">{sale.orderId}</div>
-                          <div className="text-sm text-gray-500">#{sale.id}</div>
+                          <div className="text-sm text-muted-foreground">#{sale.id}</div>
                         </div>
                       </td>
                       <td className="py-3 px-2">
@@ -686,10 +683,10 @@ export function Sales() {
                           <div className="text-sm text-gray-500">Qtd: {sale.quantity}</div>
                         </div>
                       </td>
-                      <td className="py-3 px-2 text-sm text-gray-600">{sale.customerName}</td>
+                      <td className="py-3 px-2 text-sm text-muted-foreground">{sale.customerName}</td>
                       <td className="py-3 px-2 text-sm">
                         <div className="font-medium">R$ {sale.totalValue.toFixed(2)}</div>
-                        <div className="text-gray-500">R$ {sale.price.toFixed(2)} cada</div>
+                        <div className="text-muted-foreground">R$ {sale.price.toFixed(2)} cada</div>
                       </td>
                       <td className="py-3 px-2">
                         <Badge variant="outline" className={statusInfo.color}>
@@ -700,7 +697,7 @@ export function Sales() {
                       <td className="py-3 px-2 text-sm">
                         <div>{new Date(sale.orderDate).toLocaleDateString('pt-BR')}</div>
                         {sale.trackingCode && (
-                          <div className="text-xs text-gray-500">Rastreamento: {sale.trackingCode}</div>
+                          <div className="text-xs text-muted-foreground">Rastreamento: {sale.trackingCode}</div>
                         )}
                       </td>
                       <td className="py-3 px-2">
@@ -736,7 +733,7 @@ export function Sales() {
           {/* Paginação */}
           {totalPages > 1 && (
             <div className="flex items-center justify-between mt-4">
-              <div className="text-sm text-gray-600">
+              <div className="text-sm text-muted-foreground">
                 Mostrando {startIndex + 1} a {Math.min(endIndex, filteredSales.length)} de {filteredSales.length} vendas
               </div>
               <div className="flex items-center space-x-2">

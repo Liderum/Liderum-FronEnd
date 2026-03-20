@@ -1,31 +1,92 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion, useInView, AnimatePresence } from "framer-motion";
-import { useRef } from 'react';
-import { 
-  ArrowLeft, 
-  Send, 
-  Loader2,
-  Phone,
-  Mail,
-  Clock,
-  MapPin,
-  CheckCircle,
-  AlertCircle,
-  BarChart,
-  Menu,
-  X,
-  MessageSquare,
-  HeadphonesIcon
-} from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { useToast } from "@/hooks/use-toast";
+import { AlertCircle, ArrowRight, Loader2, Mail, MapPin, Menu, Phone, Send, X } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 import { useSessionCleanup } from '@/hooks/useSessionCleanup';
+
+const CSS = `
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,700;1,400;1,700&family=DM+Sans:wght@300;400;500&display=swap');
+:root{--cream:#F7F4EF;--cream2:#EDE9E1;--ink:#1A1814;--ink2:#3D3A34;--ink3:#7A7670;--gold:#B8922A;--gold2:#D4A843;--gold-light:#F0E4C4;--bdr:rgba(26,24,20,0.1);}
+.la-root{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--ink);min-height:100vh;line-height:1.6;}
+.la-root*,.la-root *::before,.la-root *::after{box-sizing:border-box;}
+.la-nav{position:fixed;top:0;left:0;right:0;z-index:100;height:64px;display:flex;align-items:center;justify-content:space-between;padding:0 48px;background:rgba(247,244,239,0.97);backdrop-filter:blur(14px);border-bottom:1px solid var(--bdr);}
+.la-logo{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:700;color:var(--ink);background:none;border:none;cursor:pointer;letter-spacing:-0.5px;}
+.la-logo span{color:var(--gold);}
+.la-nav-links{display:flex;gap:8px;align-items:center;}
+.la-nav-links-mobile{display:none;}
+.la-nav-l,.la-nav-r{display:flex;align-items:center;}
+.la-nav-c{position:absolute;left:50%;transform:translateX(-50%);}
+.la-back-btn{background:none;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--ink2);display:inline-flex;align-items:center;gap:4px;padding:6px 10px;border-radius:6px;transition:all 0.2s;letter-spacing:0.1px;}
+.la-back-btn:hover{color:var(--gold);background:var(--gold-light);}
+.la-btn{padding:9px 20px;border-radius:6px;font-size:13px;font-weight:500;border:none;cursor:pointer;transition:all 0.2s;font-family:'DM Sans',sans-serif;display:inline-flex;align-items:center;gap:6px;}
+.la-btn-dark{background:var(--ink);color:#fff;}
+.la-btn-dark:hover:not(:disabled){background:var(--gold);}
+.la-btn-ghost{background:transparent;color:var(--ink);border:1px solid transparent;}
+.la-btn-ghost:hover:not(:disabled){border-color:var(--bdr);}
+.la-btn-outline{background:transparent;color:var(--ink);border:1px solid var(--bdr);}
+.la-btn-outline:hover:not(:disabled){border-color:var(--ink);}
+.la-btn:disabled{opacity:0.55;cursor:not-allowed;}
+.la-btn-full{width:100%;height:44px;justify-content:center;font-size:14px;}
+.la-btn-icon{padding:8px;border-radius:6px;background:transparent;border:none;cursor:pointer;display:flex;align-items:center;color:var(--ink);transition:background 0.2s;}
+.la-btn-icon:hover{background:var(--cream2);}
+.la-mobile-menu{background:rgba(247,244,239,0.97);border-top:1px solid var(--bdr);padding:12px 20px 16px;display:flex;flex-direction:column;gap:4px;}
+.la-main{padding-top:64px;}
+/* HERO */
+.la-hero{background:#fff;border-bottom:1px solid var(--bdr);padding:80px 48px;}
+.la-hero-inner{max-width:1200px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:64px;align-items:center;}
+.la-tag{font-size:11px;font-weight:500;letter-spacing:1.5px;text-transform:uppercase;color:var(--gold);margin-bottom:16px;}
+.la-h1{font-family:'Cormorant Garamond',serif;font-size:clamp(34px,4vw,52px);font-weight:700;line-height:1.1;letter-spacing:-1px;margin-bottom:16px;}
+.la-h1 em{font-style:italic;color:var(--gold);}
+.la-sub{font-size:16px;color:var(--ink3);line-height:1.75;font-weight:300;margin-bottom:0;max-width:440px;}
+.la-cta-row{display:flex;gap:12px;flex-wrap:wrap;margin-top:28px;}
+/* CONTACT CARD */
+.la-contact-card{background:var(--cream2);border:1px solid var(--bdr);border-radius:14px;padding:32px;}
+.la-contact-tag{font-size:10px;letter-spacing:1.2px;text-transform:uppercase;color:var(--ink3);margin-bottom:20px;display:block;}
+.la-channel{display:flex;align-items:flex-start;gap:14px;padding:16px 0;border-bottom:1px solid var(--bdr);}
+.la-channel:last-child{border-bottom:none;padding-bottom:0;}
+.la-channel-ico{width:36px;height:36px;border-radius:8px;background:var(--gold-light);border:1px solid rgba(184,146,42,0.2);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--gold);}
+.la-channel-ttl{font-size:13px;font-weight:500;color:var(--ink);margin-bottom:3px;}
+.la-channel-val{font-size:13px;color:var(--ink3);line-height:1.6;}
+/* FORM SECTION */
+.la-form-section{padding:80px 48px;background:var(--cream);}
+.la-form-inner{max-width:720px;margin:0 auto;}
+.la-h2{font-family:'Cormorant Garamond',serif;font-size:clamp(26px,3vw,36px);font-weight:700;line-height:1.15;letter-spacing:-0.8px;margin-bottom:4px;}
+.la-h2 em{font-style:italic;color:var(--gold);}
+.la-section-sub{font-size:13px;color:var(--ink3);margin-bottom:28px;}
+.la-card{background:#fff;border-radius:16px;padding:40px;border:1px solid var(--bdr);box-shadow:0 4px 40px rgba(26,24,20,0.07);position:relative;overflow:hidden;}
+.la-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--gold),var(--gold2));}
+/* FIELDS */
+.la-field{margin-bottom:18px;}
+.la-lbl{display:block;font-size:12px;font-weight:500;color:var(--ink2);margin-bottom:5px;letter-spacing:0.2px;}
+.la-inp{width:100%;height:44px;padding:0 12px;border:1px solid rgba(26,24,20,0.14);border-radius:8px;font-size:13px;font-family:'DM Sans',sans-serif;color:var(--ink);background:#fff;outline:none;transition:border 0.2s,box-shadow 0.2s;}
+.la-inp:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(184,146,42,0.1);}
+.la-inp.err{border-color:#C0392B;}
+.la-textarea{width:100%;padding:12px;border:1px solid rgba(26,24,20,0.14);border-radius:8px;font-size:13px;font-family:'DM Sans',sans-serif;color:var(--ink);background:#fff;outline:none;transition:border 0.2s,box-shadow 0.2s;resize:none;line-height:1.6;}
+.la-textarea:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(184,146,42,0.1);}
+.la-textarea.err{border-color:#C0392B;}
+.la-err{display:flex;align-items:center;gap:4px;font-size:11px;color:#C0392B;margin-top:4px;}
+/* FOOTER */
+.la-footer{border-top:1px solid var(--bdr);background:var(--cream2);padding:28px 48px;}
+.la-footer-inner{max-width:1200px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;}
+.la-footer-logo{font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:700;color:var(--ink);background:none;border:none;cursor:pointer;letter-spacing:-0.5px;}
+.la-footer-logo span{color:var(--gold);}
+.la-footer-copy{font-size:12px;color:var(--ink3);}
+@keyframes la-in{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+.la-anim-1{animation:la-in 0.5s cubic-bezier(0.22,1,0.36,1) both;}
+.la-anim-2{animation:la-in 0.5s cubic-bezier(0.22,1,0.36,1) 0.1s both;}
+@media(max-width:900px){
+  .la-nav{padding:0 20px;}
+  .la-nav-links{display:none;}
+  .la-nav-links-mobile{display:flex;}
+  .la-nav-c{display:none;}
+  .la-hero{padding:60px 20px;}
+  .la-hero-inner{grid-template-columns:1fr;gap:36px;}
+  .la-form-section{padding:60px 20px;}
+  .la-card{padding:28px 24px;}
+  .la-footer{padding:24px 20px;}
+  .la-footer-inner{flex-direction:column;text-align:center;}
+}
+`;
 
 interface ContactForm {
   nome: string;
@@ -40,80 +101,35 @@ export function Contact() {
   const [loading, setLoading] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const formRef = useRef(null);
-  const isFormInView = useInView(formRef, { once: true, margin: "-100px" });
-  
+
   useSessionCleanup();
-  
-  const [form, setForm] = useState<ContactForm>({
-    nome: '',
-    telefone: '',
-    email: '',
-    mensagem: ''
-  });
+
+  const [form, setForm] = useState<ContactForm>({ nome: '', telefone: '', email: '', mensagem: '' });
 
   const validateForm = (): boolean => {
     const newErrors: Record<string, string> = {};
-
-    if (!form.nome.trim()) {
-      newErrors.nome = 'Nome é obrigatório';
-    }
-
-    if (!form.telefone.trim()) {
-      newErrors.telefone = 'Telefone é obrigatório';
-    }
-
-    if (!form.email.trim()) {
-      newErrors.email = 'E-mail é obrigatório';
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
-      newErrors.email = 'E-mail inválido';
-    }
-
-    if (!form.mensagem.trim()) {
-      newErrors.mensagem = 'Mensagem é obrigatória';
-    }
-
+    if (!form.nome.trim()) newErrors.nome = 'Nome é obrigatório';
+    if (!form.telefone.trim()) newErrors.telefone = 'Telefone é obrigatório';
+    if (!form.email.trim()) { newErrors.email = 'E-mail é obrigatório'; }
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) { newErrors.email = 'E-mail inválido'; }
+    if (!form.mensagem.trim()) newErrors.mensagem = 'Mensagem é obrigatória';
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
     if (!validateForm()) {
-      toast({
-        title: "Erro",
-        description: "Por favor, corrija os erros no formulário",
-        variant: "destructive",
-      });
+      toast({ title: 'Erro', description: 'Revise os campos obrigatórios do formulário.', variant: 'destructive' });
       return;
     }
-
     try {
       setLoading(true);
-      
-      // Simula envio da mensagem (aqui você pode integrar com sua API)
       await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      toast({
-        title: "Sucesso",
-        description: "Mensagem enviada com sucesso! Entraremos em contato em breve.",
-        variant: "default",
-      });
-
-      // Limpa o formulário
-      setForm({
-        nome: '',
-        telefone: '',
-        email: '',
-        mensagem: ''
-      });
+      toast({ title: 'Mensagem enviada', description: 'Recebemos seu contato e retornaremos em breve.' });
+      setForm({ nome: '', telefone: '', email: '', mensagem: '' });
     } catch (err) {
-      toast({
-        title: "Erro",
-        description: "Erro ao enviar mensagem. Tente novamente.",
-        variant: "destructive",
-      });
+      toast({ title: 'Erro', description: 'Não foi possível enviar sua mensagem.', variant: 'destructive' });
     } finally {
       setLoading(false);
     }
@@ -121,414 +137,190 @@ export function Contact() {
 
   const handleInputChange = (field: keyof ContactForm, value: string) => {
     setForm(prev => ({ ...prev, [field]: value }));
-    // Remove erro quando usuário começa a digitar
-    if (errors[field]) {
-      setErrors(prev => ({ ...prev, [field]: '' }));
-    }
-  };
-
-  const scrollToSection = (sectionId: string) => {
-    const element = document.getElementById(sectionId);
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      setMobileMenuOpen(false);
-    }
+    if (errors[field]) setErrors(prev => ({ ...prev, [field]: '' }));
   };
 
   return (
-    <div className="min-h-screen bg-white">
-      {/* Header com mesmo padrão da LandingPage */}
-      <motion.header 
-        initial={{ y: -100, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 0.5 }}
-        className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-b border-gray-200"
-      >
-        <div className="container mx-auto px-6 h-16">
-          <div className="flex items-center justify-between h-full">
-            <motion.div 
-              className="flex items-center gap-3 cursor-pointer"
-              onClick={() => navigate('/')}
-              whileHover={{ scale: 1.05 }}
-            >
-              <div className="w-10 h-10 bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-600 rounded-lg flex items-center justify-center shadow-lg">
-                <BarChart className="h-6 w-6 text-white" />
-              </div>
-              <span className="text-xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-                Liderum
-              </span>
-            </motion.div>
-            
-            <nav className="hidden lg:flex items-center gap-1">
-              <Button 
-                variant="ghost" 
-                onClick={() => navigate('/')}
-                className="text-sm font-medium text-gray-700 hover:text-blue-600"
-              >
-                Voltar
-              </Button>
-            </nav>
-
-            <div className="flex items-center gap-3">
-              <Button 
-                variant="ghost" 
-                onClick={() => navigate('/login')}
-                className="hidden md:flex text-sm"
-              >
+    <>
+      <style>{CSS}</style>
+      <div className="la-root">
+        <nav className="la-nav">
+          <div className="la-nav-l">
+            <button type="button" className="la-back-btn" onClick={() => navigate('/')}>
+              ← Voltar
+            </button>
+          </div>
+          <div className="la-nav-c">
+            <button type="button" className="la-logo" onClick={() => navigate('/')}>
+              Lide<span>rum</span>
+            </button>
+          </div>
+          <div className="la-nav-r">
+            <div className="la-nav-links">
+              <button type="button" className="la-btn la-btn-ghost" onClick={() => navigate('/login')}>
                 Entrar
-              </Button>
-              <Button 
-                onClick={() => navigate('/cadastro')}
-                className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-sm px-5 shadow-lg"
-              >
-                Teste Grátis
-              </Button>
-              <Button
-                variant="ghost"
-                className="lg:hidden"
-                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              >
-                {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-              </Button>
+              </button>
+              <button type="button" className="la-btn la-btn-dark" onClick={() => navigate('/cadastro')}>
+                Teste gratuito
+              </button>
             </div>
-          </div>
-        </div>
-
-        <AnimatePresence>
-          {mobileMenuOpen && (
-            <motion.div
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: "auto", opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              className="lg:hidden bg-white border-t border-gray-200"
+            <button
+              type="button"
+              className="la-btn-icon la-nav-links-mobile"
+              onClick={() => setMobileMenuOpen(prev => !prev)}
+              aria-label={mobileMenuOpen ? 'Fechar menu' : 'Abrir menu'}
             >
-              <nav className="container mx-auto px-6 py-4 space-y-2">
-                <Button
-                  variant="ghost"
-                  onClick={() => navigate('/')}
-                  className="w-full justify-start"
-                >
-                  Voltar
-                </Button>
-                <Button
-                  variant="ghost"
-                  onClick={() => navigate('/login')}
-                  className="w-full justify-start"
-                >
-                  Entrar
-                </Button>
-              </nav>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </motion.header>
-
-      <main className="pt-16">
-        {/* Hero Section */}
-        <section className="relative py-20 bg-white overflow-hidden">
-          
-          <div className="container mx-auto px-6 relative z-10">
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
-              className="text-center max-w-3xl mx-auto mb-12"
-            >
-              <motion.div
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 0.2 }}
-                className="inline-block mb-4"
-              >
-                <Badge className="bg-blue-100 text-blue-700 border-blue-200">
-                  <MessageSquare className="h-3 w-3 mr-2" />
-                  Fale Conosco
-                </Badge>
-              </motion.div>
-              
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-8 leading-tight">
-                <span className="block text-gray-900 mb-2">Entre em Contato</span>
-                <span className="block bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 bg-clip-text text-transparent">
-                  Estamos Aqui para Ajudar
-                </span>
-              </h1>
-              
-              <p className="text-lg md:text-xl text-gray-600 leading-relaxed mt-4">
-                Tem dúvidas sobre o ERP Liderum? Quer saber mais sobre nossos módulos? 
-                Entre em contato e nossa equipe responderá o mais rápido possível.
-              </p>
-            </motion.div>
+              {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
+            </button>
           </div>
-        </section>
+        </nav>
 
-        {/* Conteúdo Principal */}
-        <section className="py-20 bg-white">
-          <div className="container mx-auto px-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 max-w-6xl mx-auto">
-              {/* Informações de Contato */}
-              <motion.div
-                initial={{ opacity: 0, x: -30 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.6, delay: 0.2 }}
-                className="space-y-6"
-              >
-                <div>
-                  <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4">
-                    Informações de Contato
-                  </h2>
-                  <p className="text-gray-600 mb-8">
-                    Escolha a forma de contato que preferir. Estamos disponíveis para ajudar.
-                  </p>
+        {mobileMenuOpen && (
+          <div className="la-mobile-menu" style={{ position: 'fixed', top: '64px', left: 0, right: 0, zIndex: 99 }}>
+            <button type="button" className="la-btn la-btn-ghost" style={{ justifyContent: 'flex-start' }} onClick={() => navigate('/')}>Voltar</button>
+            <button type="button" className="la-btn la-btn-ghost" style={{ justifyContent: 'flex-start' }} onClick={() => navigate('/login')}>Entrar</button>
+            <button type="button" className="la-btn la-btn-dark" style={{ justifyContent: 'flex-start' }} onClick={() => navigate('/cadastro')}>Teste gratuito</button>
+          </div>
+        )}
+
+        <main className="la-main">
+          <section className="la-hero">
+            <div className="la-hero-inner">
+              <div className="la-anim-1">
+                <div className="la-tag">Fale conosco</div>
+                <h1 className="la-h1">Converse com o time <em>comercial</em> da Liderum.</h1>
+                <p className="la-sub">
+                  Tire dúvidas sobre módulos, implantação e aderência ao seu processo. Nossa equipe retorna com orientação objetiva para avaliação da plataforma.
+                </p>
+                <div className="la-cta-row">
+                  <button type="button" className="la-btn la-btn-dark" onClick={() => navigate('/cadastro')}>
+                    Criar conta teste <ArrowRight size={14} />
+                  </button>
+                  <button
+                    type="button"
+                    className="la-btn la-btn-outline"
+                    onClick={() => document.getElementById('formulario-contato')?.scrollIntoView({ behavior: 'smooth' })}
+                  >
+                    Enviar mensagem
+                  </button>
                 </div>
+              </div>
 
-                <div className="space-y-4">
-                  <motion.div
-                    whileHover={{ y: -4 }}
-                    transition={{ duration: 0.2 }}
-                  >
-                    <Card className="p-6 border-2 border-gray-200 hover:border-blue-300 transition-all">
-                      <div className="flex items-start gap-4">
-                        <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center flex-shrink-0">
-                          <Phone className="h-6 w-6 text-blue-600" />
-                        </div>
-                        <div>
-                          <h3 className="font-semibold text-gray-900 mb-1">Telefone</h3>
-                          <p className="text-gray-600">(11) 99386-6659</p>
-                          <p className="text-sm text-gray-500 mt-1">Segunda a Sexta, 8h às 17h</p>
-                        </div>
-                      </div>
-                    </Card>
-                  </motion.div>
-
-                  <motion.div
-                    whileHover={{ y: -4 }}
-                    transition={{ duration: 0.2 }}
-                  >
-                    <Card className="p-6 border-2 border-gray-200 hover:border-green-300 transition-all">
-                      <div className="flex items-start gap-4">
-                        <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center flex-shrink-0">
-                          <Mail className="h-6 w-6 text-green-600" />
-                        </div>
-                        <div>
-                          <h3 className="font-semibold text-gray-900 mb-1">E-mail</h3>
-                          <p className="text-gray-600">liderumSuporte@gmail.com.br</p>
-                          <p className="text-sm text-gray-500 mt-1">Resposta em até 24 horas</p>
-                        </div>
-                      </div>
-                    </Card>
-                  </motion.div>
-
-                  <motion.div
-                    whileHover={{ y: -4 }}
-                    transition={{ duration: 0.2 }}
-                  >
-                    <Card className="p-6 border-2 border-gray-200 hover:border-purple-300 transition-all">
-                      <div className="flex items-start gap-4">
-                        <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center flex-shrink-0">
-                          <MapPin className="h-6 w-6 text-purple-600" />
-                        </div>
-                        <div>
-                          <h3 className="font-semibold text-gray-900 mb-1">Localização</h3>
-                          <p className="text-gray-600">São Paulo, SP</p>
-                          <p className="text-sm text-gray-500 mt-1">Brasil</p>
-                        </div>
-                      </div>
-                    </Card>
-                  </motion.div>
-
-                  <motion.div
-                    whileHover={{ y: -4 }}
-                    transition={{ duration: 0.2 }}
-                  >
-                    <Card className="p-6 border-2 border-gray-200 hover:border-orange-300 transition-all bg-white">
-                      <div className="flex items-start gap-4">
-                        <div className="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center flex-shrink-0">
-                          <Clock className="h-6 w-6 text-orange-600" />
-                        </div>
-                        <div>
-                          <h3 className="font-semibold text-gray-900 mb-1">Horário de Atendimento</h3>
-                          <p className="text-gray-600">Segunda - Sexta</p>
-                          <p className="text-sm text-gray-500 mt-1">08:00 - 17:00</p>
-                        </div>
-                      </div>
-                    </Card>
-                  </motion.div>
-                </div>
-              </motion.div>
-
-              {/* Formulário */}
-              <motion.div
-                ref={formRef}
-                initial={{ opacity: 0, x: 30 }}
-                animate={isFormInView ? { opacity: 1, x: 0 } : {}}
-                transition={{ duration: 0.6, delay: 0.3 }}
-              >
-                <Card className="p-8 border-2 border-gray-200 shadow-lg">
-                  <div className="mb-6">
-                    <div className="flex items-center gap-3 mb-2">
-                      <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center">
-                        <Send className="h-5 w-5 text-white" />
-                      </div>
-                      <h2 className="text-2xl font-bold text-gray-900">
-                        Envie sua Mensagem
-                      </h2>
+              <div className="la-anim-2">
+                <div className="la-contact-card">
+                  <span className="la-contact-tag">Canais de atendimento</span>
+                  <div className="la-channel">
+                    <div className="la-channel-ico"><Phone size={16} /></div>
+                    <div>
+                      <div className="la-channel-ttl">Telefone</div>
+                      <div className="la-channel-val">(11) 99386-6659<br />Segunda a sexta, 08h às 17h</div>
                     </div>
-                    <p className="text-gray-600 text-sm">
-                      Preencha o formulário abaixo e entraremos em contato o mais rápido possível.
-                    </p>
+                  </div>
+                  <div className="la-channel">
+                    <div className="la-channel-ico"><Mail size={16} /></div>
+                    <div>
+                      <div className="la-channel-ttl">E-mail</div>
+                      <div className="la-channel-val">liderumsuporte@gmail.com.br<br />Resposta em até 24 horas úteis</div>
+                    </div>
+                  </div>
+                  <div className="la-channel">
+                    <div className="la-channel-ico"><MapPin size={16} /></div>
+                    <div>
+                      <div className="la-channel-ttl">Localização</div>
+                      <div className="la-channel-val">São Paulo, SP — Brasil</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section className="la-form-section" id="formulario-contato">
+            <div className="la-form-inner">
+              <div className="la-tag" style={{ textAlign: 'center' }}>Formulário de contato</div>
+              <h2 className="la-h2" style={{ textAlign: 'center' }}>Envie sua <em>mensagem</em></h2>
+              <p className="la-section-sub" style={{ textAlign: 'center' }}>
+                Preencha os dados abaixo para receber retorno do nosso time.
+              </p>
+
+              <div className="la-card">
+                <form onSubmit={handleSubmit}>
+                  <div className="la-field">
+                    <label className="la-lbl" htmlFor="nome">Nome *</label>
+                    <input
+                      id="nome"
+                      className={`la-inp${errors.nome ? ' err' : ''}`}
+                      placeholder="Seu nome completo"
+                      value={form.nome}
+                      onChange={(e) => handleInputChange('nome', e.target.value)}
+                      disabled={loading}
+                    />
+                    {errors.nome && <p className="la-err"><AlertCircle size={11} />{errors.nome}</p>}
                   </div>
 
-                  <form onSubmit={handleSubmit} className="space-y-5">
-                    {/* Nome */}
-                    <div>
-                      <Label htmlFor="nome" className="text-sm font-medium text-gray-700 mb-2 block">
-                        Nome *
-                      </Label>
-                      <Input
-                        id="nome"
-                        placeholder="Seu nome completo"
-                        value={form.nome}
-                        onChange={(e) => handleInputChange('nome', e.target.value)}
-                        disabled={loading}
-                        className={`h-11 ${errors.nome ? 'border-red-500 focus:border-red-500' : 'border-gray-200 focus:border-blue-500'}`}
-                      />
-                      {errors.nome && (
-                        <motion.p
-                          initial={{ opacity: 0, y: -10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          className="text-sm text-red-500 mt-2 flex items-center gap-1"
-                        >
-                          <AlertCircle className="h-4 w-4" />
-                          {errors.nome}
-                        </motion.p>
-                      )}
-                    </div>
+                  <div className="la-field">
+                    <label className="la-lbl" htmlFor="telefone">Telefone *</label>
+                    <input
+                      id="telefone"
+                      className={`la-inp${errors.telefone ? ' err' : ''}`}
+                      placeholder="(11) 99999-9999"
+                      value={form.telefone}
+                      onChange={(e) => handleInputChange('telefone', e.target.value)}
+                      disabled={loading}
+                    />
+                    {errors.telefone && <p className="la-err"><AlertCircle size={11} />{errors.telefone}</p>}
+                  </div>
 
-                    {/* Telefone */}
-                    <div>
-                      <Label htmlFor="telefone" className="text-sm font-medium text-gray-700 mb-2 block">
-                        Telefone *
-                      </Label>
-                      <Input
-                        id="telefone"
-                        placeholder="(11) 99999-9999"
-                        value={form.telefone}
-                        onChange={(e) => handleInputChange('telefone', e.target.value)}
-                        disabled={loading}
-                        className={`h-11 ${errors.telefone ? 'border-red-500 focus:border-red-500' : 'border-gray-200 focus:border-blue-500'}`}
-                      />
-                      {errors.telefone && (
-                        <motion.p
-                          initial={{ opacity: 0, y: -10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          className="text-sm text-red-500 mt-2 flex items-center gap-1"
-                        >
-                          <AlertCircle className="h-4 w-4" />
-                          {errors.telefone}
-                        </motion.p>
-                      )}
-                    </div>
+                  <div className="la-field">
+                    <label className="la-lbl" htmlFor="email">E-mail *</label>
+                    <input
+                      id="email"
+                      type="email"
+                      className={`la-inp${errors.email ? ' err' : ''}`}
+                      placeholder="seu@email.com"
+                      value={form.email}
+                      onChange={(e) => handleInputChange('email', e.target.value)}
+                      disabled={loading}
+                    />
+                    {errors.email && <p className="la-err"><AlertCircle size={11} />{errors.email}</p>}
+                  </div>
 
-                    {/* E-mail */}
-                    <div>
-                      <Label htmlFor="email" className="text-sm font-medium text-gray-700 mb-2 block">
-                        E-mail *
-                      </Label>
-                      <Input
-                        id="email"
-                        type="email"
-                        placeholder="seu@email.com"
-                        value={form.email}
-                        onChange={(e) => handleInputChange('email', e.target.value)}
-                        disabled={loading}
-                        className={`h-11 ${errors.email ? 'border-red-500 focus:border-red-500' : 'border-gray-200 focus:border-blue-500'}`}
-                      />
-                      {errors.email && (
-                        <motion.p
-                          initial={{ opacity: 0, y: -10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          className="text-sm text-red-500 mt-2 flex items-center gap-1"
-                        >
-                          <AlertCircle className="h-4 w-4" />
-                          {errors.email}
-                        </motion.p>
-                      )}
-                    </div>
+                  <div className="la-field">
+                    <label className="la-lbl" htmlFor="mensagem">Mensagem *</label>
+                    <textarea
+                      id="mensagem"
+                      className={`la-textarea${errors.mensagem ? ' err' : ''}`}
+                      placeholder="Descreva seu contexto e o que você precisa avaliar no ERP."
+                      value={form.mensagem}
+                      onChange={(e) => handleInputChange('mensagem', e.target.value)}
+                      disabled={loading}
+                      rows={6}
+                    />
+                    {errors.mensagem && <p className="la-err"><AlertCircle size={11} />{errors.mensagem}</p>}
+                  </div>
 
-                    {/* Mensagem */}
-                    <div>
-                      <Label htmlFor="mensagem" className="text-sm font-medium text-gray-700 mb-2 block">
-                        Mensagem *
-                      </Label>
-                      <Textarea
-                        id="mensagem"
-                        placeholder="Como podemos ajudar você?"
-                        value={form.mensagem}
-                        onChange={(e) => handleInputChange('mensagem', e.target.value)}
-                        disabled={loading}
-                        rows={6}
-                        className={`resize-none ${errors.mensagem ? 'border-red-500 focus:border-red-500' : 'border-gray-200 focus:border-blue-500'}`}
-                      />
-                      {errors.mensagem && (
-                        <motion.p
-                          initial={{ opacity: 0, y: -10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          className="text-sm text-red-500 mt-2 flex items-center gap-1"
-                        >
-                          <AlertCircle className="h-4 w-4" />
-                          {errors.mensagem}
-                        </motion.p>
-                      )}
-                    </div>
-
-                    {/* Botão */}
-                    <motion.div
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                    >
-                      <Button 
-                        type="submit" 
-                        disabled={loading}
-                        className="w-full h-12 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold shadow-lg hover:shadow-xl transition-all"
-                        size="lg"
-                      >
-                        {loading ? (
-                          <>
-                            <Loader2 className="h-5 w-5 mr-2 animate-spin" />
-                            Enviando...
-                          </>
-                        ) : (
-                          <>
-                            <Send className="h-5 w-5 mr-2" />
-                            Enviar Mensagem
-                          </>
-                        )}
-                      </Button>
-                    </motion.div>
-                  </form>
-                </Card>
-              </motion.div>
-            </div>
-          </div>
-        </section>
-      </main>
-
-      {/* Footer */}
-      <footer className="bg-white text-gray-900 border-t border-gray-200 mt-20">
-        <div className="container mx-auto px-6 py-12">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-lg flex items-center justify-center">
-                <BarChart className="h-6 w-6 text-white" />
+                  <button type="submit" className="la-btn la-btn-dark la-btn-full" disabled={loading}>
+                    {loading ? (
+                      <><Loader2 size={15} className="animate-spin" />Enviando...</>
+                    ) : (
+                      <><Send size={14} />Enviar mensagem</>
+                    )}
+                  </button>
+                </form>
               </div>
-              <span className="text-lg font-bold">Liderum</span>
             </div>
-            <p className="text-gray-600 text-sm">
-              © {new Date().getFullYear()} Liderum. Todos os direitos reservados.
-            </p>
+          </section>
+        </main>
+
+        <footer className="la-footer">
+          <div className="la-footer-inner">
+            <button type="button" className="la-footer-logo" onClick={() => navigate('/')}>
+              Lide<span>rum</span>
+            </button>
+            <p className="la-footer-copy">© {new Date().getFullYear()} Liderum. Todos os direitos reservados.</p>
           </div>
-        </div>
-      </footer>
-    </div>
+        </footer>
+      </div>
+    </>
   );
 }

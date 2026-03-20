@@ -1,6 +1,10 @@
 import { useState, useEffect } from 'react';
-import { Routes, Route, Link } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import api from '../../services/api/axios';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { ArrowDownCircle, ArrowUpCircle, BarChart3, Plus, RefreshCw, AlertCircle } from 'lucide-react';
+import { DEFAULT_LOAD_ERROR_MESSAGE } from '@/lib/errorMessages';
 
 interface Transaction {
   id: string;
@@ -15,55 +19,88 @@ export function Financial() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
-  useEffect(() => {
-    async function loadTransactions() {
-      try {
-        const response = await api.get('/financial/transactions');
-        setTransactions(response.data);
-      } catch (err) {
-        setError('Erro ao carregar transações');
-      } finally {
-        setLoading(false);
-      }
+  const loadTransactions = async () => {
+    try {
+      setLoading(true);
+      setError('');
+      const response = await api.get('/financial/transactions');
+      setTransactions(response.data);
+    } catch (err) {
+      setError(DEFAULT_LOAD_ERROR_MESSAGE);
+    } finally {
+      setLoading(false);
     }
+  };
 
+  useEffect(() => {
     loadTransactions();
   }, []);
 
   if (loading) {
-    return <div>Carregando...</div>;
+    return (
+      <div className="flex min-h-[320px] items-center justify-center">
+        <RefreshCw className="h-5 w-5 animate-spin text-primary" />
+      </div>
+    );
   }
 
   if (error) {
-    return <div className="text-red-600">{error}</div>;
+    return (
+      <Card className="border-border shadow-none">
+        <CardContent className="flex min-h-[260px] flex-col items-center justify-center gap-3 text-center">
+          <AlertCircle className="h-8 w-8 text-destructive" />
+          <p className="text-sm text-muted-foreground">{error}</p>
+          <Button variant="outline" onClick={loadTransactions}>
+            <RefreshCw className="mr-2 h-4 w-4" />
+            Tentar novamente
+          </Button>
+        </CardContent>
+      </Card>
+    );
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 text-foreground">
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-semibold text-gray-900">Financeiro</h1>
-        <Link
-          to="/financial/new"
-          className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
-        >
-          Nova Transação
-        </Link>
+        <div>
+          <p className="text-xs uppercase tracking-[0.16em] text-muted-foreground">Financeiro</p>
+          <h1 className="mt-1 flex items-center gap-2 text-2xl font-semibold tracking-tight">
+            <BarChart3 className="h-5 w-5 text-primary" />
+            Fluxo Financeiro
+          </h1>
+        </div>
+        <Button asChild>
+          <Link to="/financial/new">
+            <Plus className="mr-2 h-4 w-4" />
+            Nova Transação
+          </Link>
+        </Button>
       </div>
 
-      <div className="bg-white shadow rounded-lg">
-        <div className="px-4 py-5 sm:p-6">
+      <Card className="border-border shadow-none">
+        <CardHeader>
+          <CardTitle>Transações</CardTitle>
+        </CardHeader>
+        <CardContent>
           <div className="flow-root">
-            <ul className="-my-5 divide-y divide-gray-200">
+            <ul className="-my-5 divide-y divide-border">
               {transactions.map((transaction) => (
                 <li key={transaction.id} className="py-4">
                   <div className="flex items-center space-x-4">
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-gray-900 truncate">
+                      <p className="text-sm font-medium truncate">
                         {transaction.description}
                       </p>
-                      <p className="text-sm text-gray-500">
+                      <p className="text-sm text-muted-foreground">
                         {new Date(transaction.date).toLocaleDateString()}
                       </p>
+                    </div>
+                    <div>
+                      {transaction.type === 'income' ? (
+                        <ArrowUpCircle className="h-4 w-4 text-green-600" />
+                      ) : (
+                        <ArrowDownCircle className="h-4 w-4 text-red-600" />
+                      )}
                     </div>
                     <div
                       className={`text-sm font-medium ${
@@ -80,8 +117,8 @@ export function Financial() {
               ))}
             </ul>
           </div>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
     </div>
   );
 } 

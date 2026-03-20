@@ -26,10 +26,10 @@ const Home = () => {
 
   const quickActions = [
     {
-      title: "Dashboard",
-      description: "Visão geral do seu sistema",
+      title: "Visão Geral",
+      description: "Resumo operacional da empresa",
       icon: BarChart3,
-      path: "/dashboard",
+      path: "/home",
       color: "bg-blue-500",
     },
     {

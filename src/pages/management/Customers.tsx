@@ -9,7 +9,7 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '
 import { useSimpleToast } from '@/hooks/useSimpleToast';
 import { CustomerService, CompanyService } from '@/services/managementService';
 import { Customer, CreateCustomerDto, UpdateCustomerDto, Company } from '@/types/management';
-import { Plus, Pencil, Trash2, Users, RefreshCw, Building2 } from 'lucide-react';
+import { Plus, Pencil, Trash2, Users, RefreshCw, Building2, BarChart3 } from 'lucide-react';
 
 export function Customers() {
   const { showToast } = useSimpleToast();
@@ -128,11 +128,15 @@ export function Customers() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 text-foreground">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Clientes</h1>
-          <p className="text-gray-600 mt-1">Gerencie os clientes cadastrados</p>
+          <p className="text-xs uppercase tracking-[0.16em] text-muted-foreground">Gestao</p>
+          <h1 className="mt-1 flex items-center gap-2 text-2xl font-semibold tracking-tight">
+            <BarChart3 className="h-5 w-5 text-primary" />
+            Clientes
+          </h1>
+          <p className="mt-1 text-muted-foreground">Gerencie os clientes cadastrados</p>
         </div>
         <div className="flex gap-2">
           <Button onClick={loadCustomers} variant="outline" className="gap-2" disabled={!selectedCompanyId}>
@@ -146,7 +150,7 @@ export function Customers() {
         </div>
       </div>
 
-      <Card>
+      <Card className="border-border shadow-none">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Building2 className="h-5 w-5" />
@@ -177,7 +181,7 @@ export function Customers() {
         </CardContent>
       </Card>
 
-      <Card>
+      <Card className="border-border shadow-none">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Users className="h-5 w-5" />
@@ -190,7 +194,7 @@ export function Customers() {
               <RefreshCw className="h-6 w-6 animate-spin text-primary" />
             </div>
           ) : !selectedCompanyId ? (
-            <div className="text-center py-8 text-gray-500">
+            <div className="text-center py-8 text-muted-foreground">
               Selecione uma empresa para visualizar os clientes
             </div>
           ) : (
@@ -207,7 +211,7 @@ export function Customers() {
                 <TableBody>
                   {customers.length === 0 && (
                     <TableRow>
-                      <TableCell colSpan={4} className="text-center text-sm text-gray-500">
+                      <TableCell colSpan={4} className="text-center text-sm text-muted-foreground">
                         Nenhum cliente encontrado
                       </TableCell>
                     </TableRow>
@@ -249,7 +253,7 @@ export function Customers() {
       </Card>
 
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-        <DialogContent>
+        <DialogContent className="border-border">
           <DialogHeader>
             <DialogTitle>{editingCustomer ? 'Editar Cliente' : 'Novo Cliente'}</DialogTitle>
           </DialogHeader>
