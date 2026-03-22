@@ -3,8 +3,8 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Home, ShoppingCart, FileText, Wallet, Package, Users,
-  BarChart3, Truck, CreditCard, TrendingUp, ChevronRight,
-  Building2, UserCheck, Zap, Settings, LogOut, HelpCircle,
+  BarChart3, TrendingUp, ChevronRight,
+  Zap, LogOut,
   ShoppingBag, Layers
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
@@ -168,17 +168,6 @@ export function Sidebar() {
             </div>
           ))}
 
-          <div className="sb-divider" />
-
-          {/* Atalhos de rodapé no scroll */}
-          <div className="sb-section">
-            <NavLink to="/settings" className={({ isActive: a }) => `sb-item${a ? ' active' : ''}`}>
-              <div className="sb-item-left"><Settings size={14} /><span>Configurações</span></div>
-            </NavLink>
-            <NavLink to="/contact" className={({ isActive: a }) => `sb-item${a ? ' active' : ''}`}>
-              <div className="sb-item-left"><HelpCircle size={14} /><span>Suporte</span></div>
-            </NavLink>
-          </div>
         </div>
 
         {/* Usuário */}
@@ -191,9 +180,6 @@ export function Sidebar() {
             </div>
           </div>
           <div className="sb-action-row">
-            <button className="sb-action-btn" onClick={() => navigate('/settings')}>
-              <Settings size={11} /> Config
-            </button>
             <button className="sb-action-btn danger" onClick={handleSignOut}>
               <LogOut size={11} /> Sair
             </button>
