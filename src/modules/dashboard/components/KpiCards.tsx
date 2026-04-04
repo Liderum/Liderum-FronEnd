@@ -68,9 +68,10 @@ export function KpiCards({ kpis }: KpiCardsProps) {
             </div>
             <div>
               <div style={{
-                fontFamily: "'Cormorant Garamond', serif",
+                fontFamily: 'var(--font-numeric)',
                 fontSize: 26,
-                fontWeight: 700,
+                fontWeight: 600,
+                fontVariantNumeric: 'tabular-nums lining-nums',
                 color: 'var(--ink, #1A1814)',
                 lineHeight: 1.1,
               }}>

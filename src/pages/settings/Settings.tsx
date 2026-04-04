@@ -103,14 +103,14 @@ interface UserProfile {
 interface SettingsData {
   companyName: string; companyEmail: string; companyPhone: string;
   address: { street: string; number: string; neighborhood: string; city: string; state: string; zipCode: string; };
-  emailNotifications: boolean; pushNotifications: boolean; lowStockAlerts: boolean;
-  salesAlerts: boolean; systemAlerts: boolean; paymentMethods: PaymentMethod[]; userProfile: UserProfile;
+  emailNotifications: boolean; pushNotifications: boolean; delayAlerts: boolean;
+  extrasAlerts: boolean; systemAlerts: boolean; paymentMethods: PaymentMethod[]; userProfile: UserProfile;
 }
 
 const initialSettings: SettingsData = {
   companyName: "Liderum", companyEmail: "contato@liderum.com", companyPhone: "(11) 99999-9999",
   address: { street: "Rua das Empresas", number: "123", neighborhood: "Centro", city: "São Paulo", state: "SP", zipCode: "01000-000" },
-  emailNotifications: true, pushNotifications: true, lowStockAlerts: true, salesAlerts: true, systemAlerts: false,
+  emailNotifications: true, pushNotifications: true, delayAlerts: true, extrasAlerts: true, systemAlerts: false,
   paymentMethods: [
     {
       id: "1", name: "Cartão de Crédito", type: "credit_card", isActive: true, fee: 3.5, processingTime: "Imediato",
@@ -135,7 +135,7 @@ const initialSettings: SettingsData = {
       ]
     }
   ],
-  userProfile: { name: "João Silva", email: "joao.silva@liderum.com", phone: "(11) 99999-9999", position: "Gerente de Vendas", department: "Vendas", avatar: "" }
+  userProfile: { name: "João Silva", email: "joao.silva@liderum.com", phone: "(11) 99999-9999", position: "Engenheiro de Obras", department: "Operações", avatar: "" }
 };
 
 export function Settings() {
@@ -398,8 +398,8 @@ export function Settings() {
                     <div className="ld-divider" style={{ margin: '4px 0 12px' }} />
                     <h2 className="ld-h2" style={{ fontSize: 14, marginBottom: 0 }}>Tipos de Alerta</h2>
                     {[
-                      { id: 'lowStockAlerts', field: 'lowStockAlerts' as keyof SettingsData, label: 'Estoque Baixo', desc: 'Notificar quando produtos estão com estoque baixo' },
-                      { id: 'salesAlerts', field: 'salesAlerts' as keyof SettingsData, label: 'Alertas de Vendas', desc: 'Notificar sobre vendas importantes e metas' },
+                      { id: 'delayAlerts', field: 'delayAlerts' as keyof SettingsData, label: 'Atrasos em obras', desc: 'Notificar quando obras ou etapas estiverem atrasadas' },
+                      { id: 'extrasAlerts', field: 'extrasAlerts' as keyof SettingsData, label: 'Extras pendentes', desc: 'Notificar sobre solicitações de extras aguardando aprovação' },
                       { id: 'systemAlerts', field: 'systemAlerts' as keyof SettingsData, label: 'Alertas do Sistema', desc: 'Notificar sobre atualizações e manutenções' },
                     ].map(item => (
                       <div key={item.id} className="ld-notif-row">

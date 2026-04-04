@@ -32,19 +32,11 @@ import BudgetPage from './modules/budget/pages/BudgetPage';
 import ExtrasPage from './modules/extras/pages/ExtrasPage';
 import DailyLogPage from './modules/daily-log/pages/DailyLogPage';
 
-// Legacy pages (kept for backward compatibility)
-import { Sales } from './pages/sales/Sales';
-import { Billing } from './pages/billing/Billing';
-import { Inventory } from './pages/inventory/Inventory';
-import { NewProductPage } from './pages/inventory/NewProductPage';
-import ProductView from './pages/inventory/ProductView';
-import ProductEdit from './pages/inventory/ProductEdit';
 import Users from './pages/users/Users';
 import Settings from './pages/settings/Settings';
 import { Companies } from './pages/management/Companies';
 import { Customers } from './pages/management/Customers';
 import { Suppliers } from './pages/management/Suppliers';
-import { Financial } from './pages/financial/Financial';
 
 function AppContent() {
   useRouteSecurity();
@@ -110,34 +102,6 @@ function AppContent() {
         <Route path="users" element={<Users />} />
       </Route>
 
-      {/* Legacy modules */}
-      <Route
-        path="/sales"
-        element={<PrivateRoute><DashboardLayout /></PrivateRoute>}
-      >
-        <Route index element={<Sales />} />
-      </Route>
-      <Route
-        path="/billing"
-        element={<PrivateRoute><DashboardLayout /></PrivateRoute>}
-      >
-        <Route index element={<Billing />} />
-      </Route>
-      <Route
-        path="/financial"
-        element={<PrivateRoute><DashboardLayout /></PrivateRoute>}
-      >
-        <Route index element={<Financial />} />
-      </Route>
-      <Route
-        path="/inventory"
-        element={<PrivateRoute><DashboardLayout /></PrivateRoute>}
-      >
-        <Route index element={<Inventory />} />
-        <Route path="new-product" element={<NewProductPage />} />
-        <Route path="view/:id" element={<ProductView />} />
-        <Route path="edit/:id" element={<ProductEdit />} />
-      </Route>
       <Route
         path="/settings"
         element={<PrivateRoute><DashboardLayout /></PrivateRoute>}

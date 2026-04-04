@@ -9,7 +9,7 @@ const CSS = `
 .sc{font-family:'DM Sans',sans-serif;color:var(--ink,#1A1814);display:flex;flex-direction:column;gap:18px;}
 .sc-summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;}
 .sc-summary-card{background:#fff;border-radius:10px;border:1px solid var(--bdr,rgba(26,24,20,0.10));padding:14px 16px;display:flex;align-items:center;gap:10px;box-shadow:0 2px 8px rgba(26,24,20,0.03);}
-.sc-summary-val{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:700;color:var(--ink,#1A1814);}
+.sc-summary-val{font-family:var(--font-numeric);font-size:22px;font-weight:600;font-variant-numeric:tabular-nums lining-nums;color:var(--ink,#1A1814);}
 .sc-summary-label{font-size:10.5px;color:var(--ink3,#7A7670);font-weight:500;text-transform:uppercase;letter-spacing:0.4px;}
 .sc-timeline{position:relative;padding-left:28px;}
 .sc-timeline::before{content:'';position:absolute;left:11px;top:0;bottom:0;width:2px;background:rgba(26,24,20,0.08);border-radius:2px;}
@@ -77,7 +77,7 @@ export default function SchedulePage() {
           {summaryItems.map(s => (
             <div key={s.label} className="sc-summary-card">
               <div style={{ width: 36, height: 36, borderRadius: 8, background: s.bg, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <span style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 16, fontWeight: 700, color: s.color }}>{s.value}</span>
+                <span style={{ fontFamily: 'var(--font-numeric)', fontSize: 16, fontWeight: 600, fontVariantNumeric: 'tabular-nums', color: s.color }}>{s.value}</span>
               </div>
               <div className="sc-summary-label">{s.label}</div>
             </div>

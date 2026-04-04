@@ -56,7 +56,7 @@ export function PaymentMethodSelection() {
           {/* Plan Info */}
           <div className="bg-white rounded-2xl p-6 max-w-md mx-auto border border-gray-200 shadow-lg">
             <h3 className="font-bold text-blue-900 text-lg">{planName}</h3>
-            <p className="text-3xl font-bold text-blue-600 mt-2">R$ {planPrice}</p>
+            <p className="font-numeric tabular-nums text-3xl font-bold text-blue-600 mt-2">R$ {planPrice}</p>
             <p className="text-sm text-blue-700 font-medium">por mês</p>
           </div>
         </div>

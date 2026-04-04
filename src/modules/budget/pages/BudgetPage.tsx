@@ -10,7 +10,7 @@ const CSS = `
 .bg-stat{background:#fff;border-radius:12px;border:1px solid var(--bdr,rgba(26,24,20,0.10));padding:20px;display:flex;align-items:center;gap:14px;box-shadow:0 2px 10px rgba(26,24,20,0.04);position:relative;overflow:hidden;}
 .bg-stat::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;}
 .bg-stat-icon{width:42px;height:42px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
-.bg-stat-val{font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:700;color:var(--ink,#1A1814);line-height:1.1;}
+.bg-stat-val{font-family:var(--font-numeric);font-size:24px;font-weight:600;font-variant-numeric:tabular-nums lining-nums;color:var(--ink,#1A1814);line-height:1.1;}
 .bg-stat-label{font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:0.4px;color:var(--ink3,#7A7670);margin-top:2px;}
 .bg-table-wrap{background:#fff;border-radius:12px;border:1px solid var(--bdr,rgba(26,24,20,0.10));box-shadow:0 2px 10px rgba(26,24,20,0.04);overflow:hidden;}
 .bg-table-header{padding:16px 20px;border-bottom:1px solid rgba(26,24,20,0.06);display:flex;align-items:center;justify-content:space-between;}
@@ -27,7 +27,7 @@ const CSS = `
 .bg-tbl-diff{display:inline-flex;align-items:center;gap:3px;font-size:12px;font-weight:600;padding:2px 8px;border-radius:6px;}
 .bg-totals{display:flex;justify-content:flex-end;padding:14px 20px;gap:32px;border-top:2px solid rgba(26,24,20,0.08);}
 .bg-total-item{text-align:right;}
-.bg-total-val{font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:700;color:var(--ink,#1A1814);}
+.bg-total-val{font-family:var(--font-numeric);font-size:18px;font-weight:600;font-variant-numeric:tabular-nums lining-nums;color:var(--ink,#1A1814);}
 .bg-total-label{font-size:10.5px;color:var(--ink3,#7A7670);text-transform:uppercase;letter-spacing:0.4px;font-weight:500;}
 `;
 
@@ -133,12 +133,14 @@ export default function BudgetPage() {
                         </span>
                       </td>
                       <td style={{ color: 'var(--ink)', fontWeight: 400 }}>{item.description}</td>
-                      <td style={{ textAlign: 'right', fontWeight: 500, whiteSpace: 'nowrap' }}>{formatCurrency(item.plannedCost)}</td>
-                      <td style={{ textAlign: 'right', fontWeight: 500, whiteSpace: 'nowrap' }}>{formatCurrency(item.actualCost)}</td>
+                      <td style={{ textAlign: 'right', fontFamily: 'var(--font-numeric)', fontVariantNumeric: 'tabular-nums', fontWeight: 500, whiteSpace: 'nowrap' }}>{formatCurrency(item.plannedCost)}</td>
+                      <td style={{ textAlign: 'right', fontFamily: 'var(--font-numeric)', fontVariantNumeric: 'tabular-nums', fontWeight: 500, whiteSpace: 'nowrap' }}>{formatCurrency(item.actualCost)}</td>
                       <td style={{ textAlign: 'right' }}>
                         <span
                           className="bg-tbl-diff"
                           style={{
+                            fontFamily: 'var(--font-numeric)',
+                            fontVariantNumeric: 'tabular-nums',
                             background: diff === 0 ? '#F5F5F5' : isOver ? '#FDEDEC' : '#E8F5E9',
                             color: diff === 0 ? '#7A7670' : isOver ? '#C0392B' : '#1E8449',
                           }}

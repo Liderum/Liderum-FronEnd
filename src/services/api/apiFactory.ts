@@ -134,9 +134,6 @@ class ApiFactory {
 
 // Instâncias específicas para cada módulo
 export const authApiInstance = authApi;
-export const inventoryApi = ApiFactory.getInstance('INVENTORY');
-export const financialApi = ApiFactory.getInstance('FINANCIAL');
-export const billingApi = ApiFactory.getInstance('BILLING');
 export const usersApi = ApiFactory.getInstance('USERS');
 export const managementApi = ApiFactory.getInstance('MANAGEMENT');
 

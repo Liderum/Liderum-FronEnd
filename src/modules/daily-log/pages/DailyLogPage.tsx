@@ -19,7 +19,7 @@ const CSS = `
 .dl-entry-card{background:#fff;border-radius:12px;border:1px solid var(--bdr,rgba(26,24,20,0.10));box-shadow:0 2px 10px rgba(26,24,20,0.04);overflow:hidden;transition:all 0.18s;}
 .dl-entry-card:hover{box-shadow:0 6px 24px rgba(26,24,20,0.08);}
 .dl-entry-header{padding:16px 22px;border-bottom:1px solid rgba(26,24,20,0.06);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;}
-.dl-entry-date{font-family:'Cormorant Garamond',serif;font-size:17px;font-weight:700;color:var(--ink,#1A1814);}
+.dl-entry-date{font-family:var(--font-numeric);font-size:16px;font-weight:600;font-variant-numeric:tabular-nums lining-nums;color:var(--ink,#1A1814);}
 .dl-entry-meta{display:flex;gap:14px;flex-wrap:wrap;}
 .dl-entry-meta-item{display:flex;align-items:center;gap:4px;font-size:11.5px;color:var(--ink3,#7A7670);}
 .dl-entry-body{padding:18px 22px;display:flex;flex-direction:column;gap:14px;}

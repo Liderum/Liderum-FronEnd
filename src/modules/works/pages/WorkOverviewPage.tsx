@@ -13,7 +13,7 @@ const CSS = `
 .wo-stat{background:#fff;border-radius:12px;border:1px solid var(--bdr,rgba(26,24,20,0.10));padding:18px 20px;display:flex;align-items:center;gap:14px;box-shadow:0 2px 10px rgba(26,24,20,0.04);position:relative;overflow:hidden;}
 .wo-stat::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;}
 .wo-stat-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
-.wo-stat-val{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:700;color:var(--ink,#1A1814);line-height:1.1;}
+.wo-stat-val{font-family:var(--font-numeric);font-size:22px;font-weight:600;font-variant-numeric:tabular-nums lining-nums;color:var(--ink,#1A1814);line-height:1.1;}
 .wo-stat-label{font-size:11px;font-weight:500;letter-spacing:0.4px;text-transform:uppercase;color:var(--ink3,#7A7670);margin-top:2px;}
 .wo-section-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;}
 .wo-card{background:#fff;border-radius:12px;border:1px solid var(--bdr,rgba(26,24,20,0.10));box-shadow:0 2px 10px rgba(26,24,20,0.04);overflow:hidden;}

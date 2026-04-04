@@ -79,12 +79,12 @@ export function WorksStatusTable({ works }: WorksStatusTableProps) {
                           transition: 'width 0.5s ease',
                         }} />
                       </div>
-                      <span style={{ fontSize: 11.5, fontWeight: 600, color: 'var(--ink2, #3D3A34)', minWidth: 32, textAlign: 'right' }}>
+                      <span style={{ fontFamily: 'var(--font-numeric)', fontVariantNumeric: 'tabular-nums', fontSize: 11.5, fontWeight: 600, color: 'var(--ink2, #3D3A34)', minWidth: 32, textAlign: 'right' }}>
                         {work.percentComplete}%
                       </span>
                     </div>
                   </td>
-                  <td style={{ padding: '14px 16px', fontSize: 12.5, fontWeight: 500, color: 'var(--ink, #1A1814)', whiteSpace: 'nowrap' }}>
+                  <td style={{ padding: '14px 16px', fontFamily: 'var(--font-numeric)', fontVariantNumeric: 'tabular-nums', fontSize: 12.5, fontWeight: 500, color: 'var(--ink, #1A1814)', whiteSpace: 'nowrap' }}>
                     {formatCurrency(work.currentCost)}
                   </td>
                   <td style={{ padding: '14px 16px' }}>

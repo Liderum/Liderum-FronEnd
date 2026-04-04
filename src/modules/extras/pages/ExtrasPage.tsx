@@ -14,7 +14,7 @@ const CSS = `
 .ex-summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;}
 .ex-summary-card{background:#fff;border-radius:10px;border:1px solid var(--bdr,rgba(26,24,20,0.10));padding:16px 18px;display:flex;align-items:center;gap:12px;box-shadow:0 2px 8px rgba(26,24,20,0.03);}
 .ex-summary-icon{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
-.ex-summary-val{font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:700;color:var(--ink,#1A1814);}
+.ex-summary-val{font-family:var(--font-numeric);font-size:20px;font-weight:600;font-variant-numeric:tabular-nums lining-nums;color:var(--ink,#1A1814);}
 .ex-summary-label{font-size:10.5px;color:var(--ink3,#7A7670);font-weight:500;text-transform:uppercase;letter-spacing:0.3px;}
 .ex-filters{display:flex;gap:6px;flex-wrap:wrap;}
 .ex-filter{padding:6px 12px;border-radius:7px;font-size:11.5px;font-weight:500;cursor:pointer;border:1px solid transparent;background:transparent;color:var(--ink3,#7A7670);font-family:'DM Sans',sans-serif;transition:all 0.14s;}
@@ -167,7 +167,7 @@ export default function ExtrasPage() {
                       <Clock size={12} /> Prazo: <span className="ex-card-meta-value">{extra.scheduleImpact}</span>
                     </div>
                     <div className="ex-card-meta-item">
-                      <DollarSign size={12} /> <span className="ex-card-meta-value" style={{ color: '#C0392B' }}>{formatCurrency(extra.financialImpact)}</span>
+                      <DollarSign size={12} /> <span className="ex-card-meta-value" style={{ fontFamily: 'var(--font-numeric)', fontVariantNumeric: 'tabular-nums', color: '#C0392B' }}>{formatCurrency(extra.financialImpact)}</span>
                     </div>
                     <div className="ex-card-meta-item">
                       <User size={12} /> {extra.requestedBy}

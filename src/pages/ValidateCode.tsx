@@ -42,7 +42,7 @@ const CSS = `
 .la-card-title{font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:700;color:var(--ink);margin-bottom:4px;}
 .la-card-sub{font-size:13px;color:var(--ink3);margin-bottom:28px;}
 .la-otp{display:flex;gap:10px;justify-content:center;margin:4px 0 20px;}
-.la-otp-digit{width:52px;height:60px;border:1px solid rgba(26,24,20,0.14);border-radius:10px;text-align:center;font-family:'Cormorant Garamond',serif;font-size:30px;font-weight:700;color:var(--ink);background:#fff;outline:none;transition:border 0.2s,box-shadow 0.2s;}
+.la-otp-digit{width:52px;height:60px;border:1px solid rgba(26,24,20,0.14);border-radius:10px;text-align:center;font-family:var(--font-numeric);font-size:26px;font-weight:600;font-variant-numeric:tabular-nums;color:var(--ink);background:#fff;outline:none;transition:border 0.2s,box-shadow 0.2s;}
 .la-otp-digit:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(184,146,42,0.1);}
 .la-otp-digit.err{border-color:#C0392B;}
 .la-otp-digit.validating{border-color:var(--gold);background:var(--gold-light);}

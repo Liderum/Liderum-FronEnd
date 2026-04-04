@@ -68,6 +68,11 @@
 }
 
 @layer base {
+  :root {
+    /* Algarismos: IBM Plex Sans (lining + tabular) — melhor legibilidade que serif em KPIs, moeda e % */
+    --font-numeric: "IBM Plex Sans", "DM Sans", ui-sans-serif, system-ui, sans-serif;
+  }
+
   * {
     @apply border-border;
   }
@@ -76,6 +81,20 @@
     @apply bg-background text-foreground;
     font-feature-settings: "rlig" 1, "calt" 1;
   }
+}
+
+@layer utilities {
+  .font-numeric {
+    font-family: var(--font-numeric);
+    font-variant-numeric: tabular-nums lining-nums;
+    font-feature-settings: "tnum" 1, "lnum" 1;
+  }
+}
+
+/* Eixos e tooltips Recharts: números consistentes */
+.recharts-cartesian-axis-tick text {
+  font-family: var(--font-numeric);
+  font-variant-numeric: tabular-nums;
 }
 
 @layer utilities {

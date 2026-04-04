@@ -77,7 +77,7 @@ export function PaymentResult() {
               {success ? 'Sucesso!' : 'Erro'}
             </CardTitle>
             <CardDescription>
-              Valor: <span className="font-semibold text-lg">R$ {planPrice}</span>
+              Valor: <span className="font-numeric tabular-nums font-semibold text-lg">R$ {planPrice}</span>
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
@@ -247,7 +247,7 @@ export function PaymentResult() {
                   <span className="text-lg">💰</span>
                   <span className="text-sm text-gray-600">Valor:</span>
                 </div>
-                <span className="text-lg font-bold text-blue-600">R$ {planPrice}</span>
+                <span className="font-numeric tabular-nums text-lg font-bold text-blue-600">R$ {planPrice}</span>
               </div>
 
               <div className="flex items-center justify-between">

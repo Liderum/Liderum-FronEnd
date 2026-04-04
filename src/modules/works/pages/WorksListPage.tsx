@@ -41,8 +41,8 @@ const CSS = `
 .wl-card-progress-bar{flex:1;height:6px;border-radius:10px;background:rgba(26,24,20,0.06);overflow:hidden;}
 .wl-card-progress-fill{height:100%;border-radius:10px;transition:width 0.5s ease;}
 .wl-card-footer{display:flex;align-items:center;justify-content:space-between;padding-top:12px;border-top:1px solid rgba(26,24,20,0.06);}
-.wl-card-cost{font-size:14px;font-weight:600;color:var(--ink,#1A1814);}
-.wl-card-cost-label{font-size:10.5px;color:var(--ink3,#7A7670);font-weight:400;}
+.wl-card-cost{font-family:var(--font-numeric);font-size:14px;font-weight:600;font-variant-numeric:tabular-nums lining-nums;color:var(--ink,#1A1814);}
+.wl-card-cost-label{font-family:var(--font-numeric);font-size:10.5px;color:var(--ink3,#7A7670);font-weight:400;font-variant-numeric:tabular-nums;}
 .wl-card-arrow{display:flex;align-items:center;gap:4px;font-size:12px;color:var(--gold,#B8922A);font-weight:500;}
 .wl-empty{text-align:center;padding:60px 20px;color:var(--ink3,#7A7670);}
 @media(max-width:640px){.wl-grid{grid-template-columns:1fr;}}
@@ -209,7 +209,7 @@ function WorkCard({ work, index, onClick }: { work: Work; index: number; onClick
             }}
           />
         </div>
-        <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--ink2)' }}>{work.percentComplete}%</span>
+        <span style={{ fontFamily: 'var(--font-numeric)', fontVariantNumeric: 'tabular-nums', fontSize: 12, fontWeight: 600, color: 'var(--ink2)' }}>{work.percentComplete}%</span>
       </div>
 
       {/* Footer */}
