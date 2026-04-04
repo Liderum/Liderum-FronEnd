@@ -337,9 +337,9 @@ export function Users() {
 
         {/* Modal */}
         <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-          <DialogContent style={{ fontFamily: "'DM Sans', sans-serif" }}>
+          <DialogContent>
             <DialogHeader>
-              <DialogTitle style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 20 }}>
+              <DialogTitle>
                 {editingUser ? 'Editar Usuário' : 'Novo Usuário'}
               </DialogTitle>
             </DialogHeader>

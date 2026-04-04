@@ -489,9 +489,9 @@ export function Inventory() {
 
         {/* Delete Confirm */}
         <Dialog open={showDeleteModal} onOpenChange={setShowDeleteModal}>
-          <DialogContent style={{ fontFamily: "'DM Sans',sans-serif" }}>
+          <DialogContent>
             <DialogHeader>
-              <DialogTitle style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: 20 }}>Confirmar Exclusão</DialogTitle>
+              <DialogTitle>Confirmar Exclusão</DialogTitle>
               <DialogDescription>
                 Tem certeza que deseja excluir <strong>{productToDelete?.name}</strong>?{' '}
                 <span style={{ color: '#C0392B', fontWeight: 500 }}>Esta ação não pode ser desfeita.</span>

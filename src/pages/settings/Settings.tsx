@@ -631,9 +631,9 @@ export function Settings() {
 
         {/* Modal Cartão */}
         <Dialog open={creditCardModalOpen} onOpenChange={setCreditCardModalOpen}>
-          <DialogContent style={{ fontFamily: "'DM Sans',sans-serif" }}>
+          <DialogContent>
             <DialogHeader>
-              <DialogTitle style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: 20 }}>
+              <DialogTitle>
                 {editingCard ? 'Editar Cartão' : 'Adicionar Cartão de Crédito'}
               </DialogTitle>
               <DialogDescription>{editingCard ? 'Atualize as informações do cartão' : 'Cadastre um novo cartão de crédito'}</DialogDescription>
@@ -661,9 +661,9 @@ export function Settings() {
 
         {/* Modal PIX */}
         <Dialog open={pixModalOpen} onOpenChange={setPixModalOpen}>
-          <DialogContent style={{ fontFamily: "'DM Sans',sans-serif" }}>
+          <DialogContent>
             <DialogHeader>
-              <DialogTitle style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: 20 }}>
+              <DialogTitle>
                 {editingPix ? 'Editar Chave PIX' : 'Adicionar Chave PIX'}
               </DialogTitle>
               <DialogDescription>{editingPix ? 'Atualize as informações da chave PIX' : 'Cadastre uma nova chave PIX'}</DialogDescription>

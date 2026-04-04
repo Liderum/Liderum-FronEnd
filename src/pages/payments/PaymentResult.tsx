@@ -184,7 +184,7 @@ export function PaymentResult() {
 
       {/* Transaction Details Modal */}
       <Dialog open={isDetailsModalOpen} onOpenChange={setIsDetailsModalOpen}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent>
           <DialogHeader>
             <DialogTitle className="flex items-center space-x-2">
               <Receipt className="h-5 w-5" />

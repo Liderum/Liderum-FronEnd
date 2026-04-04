@@ -172,9 +172,9 @@ export function Suppliers() {
         </div>
 
         <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-          <DialogContent style={{ fontFamily: "'DM Sans',sans-serif", borderRadius: 10, border: '1px solid rgba(26,24,20,0.10)' }}>
+          <DialogContent>
             <DialogHeader>
-              <DialogTitle style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: 18 }}>
+              <DialogTitle>
                 {editingSupplier ? 'Editar Fornecedor' : 'Novo Fornecedor'}
               </DialogTitle>
             </DialogHeader>

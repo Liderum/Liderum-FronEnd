@@ -48,7 +48,7 @@ const getEnvironment = (): 'development' | 'staging' | 'production' => {
 // Configurações de desenvolvimento
 const developmentConfig: ApiConfig = {
   AUTH: {
-    BASE_URL: import.meta.env.VITE_AUTH_API_URL || 'https://localhost:7247/liderum/api/login',
+    BASE_URL: 'http://localhost:5001/liderum/api/login',
   },
   FINANCIAL: {
     BASE_URL: import.meta.env.VITE_FINANCIAL_API_URL || 'https://localhost:3002',
@@ -57,7 +57,7 @@ const developmentConfig: ApiConfig = {
     BASE_URL: import.meta.env.VITE_BILLING_API_URL || 'https://localhost:3003',
   },
   INVENTORY: {
-    BASE_URL: import.meta.env.VITE_INVENTORY_API_URL || 'https://localhost:7143/Liderum', 
+    BASE_URL: import.meta.env.VITE_INVENTORY_API_URL || 'http://localhost:5002/Liderum', 
   },
   USERS: {
     BASE_URL: import.meta.env.VITE_USERS_API_URL || 'https://localhost:7247/liderum/api/user',
