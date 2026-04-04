@@ -290,7 +290,7 @@ export function Contact() {
                     <textarea
                       id="mensagem"
                       className={`la-textarea${errors.mensagem ? ' err' : ''}`}
-                      placeholder="Descreva seu contexto e o que você precisa avaliar no ERP."
+                      placeholder="Descreva seu contexto e o que você precisa para gestão das suas obras."
                       value={form.mensagem}
                       onChange={(e) => handleInputChange('mensagem', e.target.value)}
                       disabled={loading}

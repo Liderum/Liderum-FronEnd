@@ -1,15 +1,26 @@
 import axios, { AxiosInstance } from 'axios';
 import { API_CONFIG, ApiModule } from '@/config/api';
-import { ResponseRegisteredUser } from '@/types/auth';
+import { LoginResponse } from '@/types/auth';
 
 // Instância base para autenticação
 const authApi = axios.create({
   baseURL: API_CONFIG.AUTH.BASE_URL,
-  timeout: 15000, // Aumentado para 15 segundos
+  timeout: 15000,
   headers: {
     'Content-Type': 'application/json',
   },
 });
+
+authApi.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('@Liderum:token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
 
 // Factory para criar instâncias de API por módulo
 class ApiFactory {
@@ -56,7 +67,7 @@ class ApiFactory {
         
         // Não faz refresh token se a requisição original já foi para /refresh
         // Isso evita loops infinitos
-        if (originalRequest?.url?.includes('/refresh')) {
+        if (originalRequest?.url?.includes('/refresh-token')) {
           return Promise.reject(error);
         }
         
@@ -85,21 +96,20 @@ class ApiFactory {
             
             if (refreshToken) {
               console.log('Tentando renovar token automaticamente...');
-              const response = await authApi.post('/refresh', {
+              const response = await authApi.post('/refresh-token', {
                 refreshToken: refreshToken
               });
               
-              const { success, tokens, errors } = response.data as ResponseRegisteredUser;
+              const data = response.data as LoginResponse;
               
-              if (success && tokens) {
-                localStorage.setItem('@Liderum:token', tokens.accessToken);
-                localStorage.setItem('@Liderum:refreshToken', tokens.refreshToken);
+              if (data.accessToken) {
+                localStorage.setItem('@Liderum:token', data.accessToken);
+                localStorage.setItem('@Liderum:refreshToken', data.refreshToken);
                 
-                originalRequest.headers.Authorization = `Bearer ${tokens.accessToken}`;
+                originalRequest.headers.Authorization = `Bearer ${data.accessToken}`;
                 return instance(originalRequest);
               } else {
-                const errorMessage = Array.isArray(errors) ? errors[0] : errors || 'Erro ao renovar token';
-                throw new Error(errorMessage);
+                throw new Error('Erro ao renovar token');
               }
             }
           } catch (refreshError) {

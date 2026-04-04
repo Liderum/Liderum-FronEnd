@@ -48,7 +48,7 @@ const getEnvironment = (): 'development' | 'staging' | 'production' => {
 // Configurações de desenvolvimento
 const developmentConfig: ApiConfig = {
   AUTH: {
-    BASE_URL: 'http://localhost:5001/liderum/api/login',
+    BASE_URL: 'https://localhost:7247/liderum/api/login',
   },
   FINANCIAL: {
     BASE_URL: import.meta.env.VITE_FINANCIAL_API_URL || 'https://localhost:3002',

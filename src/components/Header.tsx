@@ -1,6 +1,6 @@
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Bell, Settings, LogOut, User, ChevronDown, HelpCircle, Package, AlertTriangle, TrendingUp, CheckCircle } from 'lucide-react';
+import { Bell, Settings, LogOut, User, ChevronDown, HelpCircle, AlertTriangle, Clock, CheckCircle } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useToast } from "@/hooks/use-toast";
 
@@ -42,20 +42,33 @@ const CSS = `
 `;
 
 const routeLabels: Record<string, string> = {
-  '/home': 'Início',
-  '/sales': 'Vendas',
-  '/billing': 'Faturamento',
-  '/financial': 'Financeiro',
-  '/inventory': 'Estoque',
+  '/home': 'Dashboard',
+  '/works': 'Obras',
   '/settings': 'Configurações',
+  '/management/customers': 'Clientes',
   '/management/users': 'Usuários',
+  '/management/companies': 'Empresas',
+  '/management/suppliers': 'Fornecedores',
   '/contact': 'Suporte',
 };
 
+function resolveLabel(pathname: string): string {
+  if (routeLabels[pathname]) return routeLabels[pathname];
+  if (pathname.match(/^\/works\/[^/]+\/schedule/)) return 'Cronograma';
+  if (pathname.match(/^\/works\/[^/]+\/budget/)) return 'Orçamento';
+  if (pathname.match(/^\/works\/[^/]+\/extras/)) return 'Extras';
+  if (pathname.match(/^\/works\/[^/]+\/daily-log/)) return 'Diário de Obra';
+  if (pathname.match(/^\/works\/[^/]+/)) return 'Detalhe da Obra';
+  for (const [key, label] of Object.entries(routeLabels)) {
+    if (pathname.startsWith(key + '/')) return label;
+  }
+  return 'Painel';
+}
+
 const notifications = [
-  { id: 1, icon: Package, color: '#FDEDEC', iconColor: '#C0392B', label: 'Estoque baixo', desc: 'Notebook Dell abaixo do mínimo', time: 'Há 2h' },
-  { id: 2, icon: TrendingUp, color: '#E8F5E9', iconColor: '#1E8449', label: 'Nova venda', desc: 'Venda de R$ 2.999,99 no Mercado Livre', time: 'Há 4h' },
-  { id: 3, icon: CheckCircle, color: '#EBF5FB', iconColor: '#1A5276', label: 'Pedido entregue', desc: 'Pedido #1234 confirmado', time: 'Ontem' },
+  { id: 1, icon: AlertTriangle, color: '#FDEDEC', iconColor: '#C0392B', label: 'Obra atrasada', desc: 'Galpão Logístico BR-101 com 22 dias de atraso', time: 'Há 2h' },
+  { id: 2, icon: Clock, color: '#FFF8E1', iconColor: '#B7770D', label: 'Extra pendente', desc: 'Ampliação da área de lazer aguarda aprovação', time: 'Há 6h' },
+  { id: 3, icon: CheckCircle, color: '#E8F5E9', iconColor: '#1E8449', label: 'Obra concluída', desc: 'Condomínio Parque das Águas entregue', time: 'Ontem' },
 ];
 
 export function Header() {
@@ -71,24 +84,19 @@ export function Header() {
 
   const getInitials = (name: string) => name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
 
-  const currentLabel = routeLabels[location.pathname] || routeLabels[Object.keys(routeLabels).find(k => location.pathname.startsWith(k + '/')) || ''] || 'Painel';
+  const currentLabel = resolveLabel(location.pathname);
 
   return (
     <>
       <style>{CSS}</style>
       <header className="hd">
-
-        {/* Breadcrumb */}
         <div className="hd-breadcrumb">
-          <span className="hd-bc-item">Liderum ERP</span>
+          <span className="hd-bc-item">Liderum</span>
           <span className="hd-bc-sep">/</span>
           <span className="hd-bc-current">{currentLabel}</span>
         </div>
 
-        {/* Direita */}
         <div className="hd-right">
-
-          {/* Notificações */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <button className="hd-icon-btn" aria-label="Notificações">
@@ -126,7 +134,6 @@ export function Header() {
 
           <div className="hd-sep" />
 
-          {/* Usuário */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <button className="hd-user-btn">
@@ -160,7 +167,6 @@ export function Header() {
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
-
         </div>
       </header>
     </>

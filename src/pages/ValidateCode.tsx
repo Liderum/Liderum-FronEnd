@@ -2,8 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Shield, ArrowLeft, Loader2, RotateCcw } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { ValidateCodeRequest, ValidateCodeResponse } from '@/types/auth';
-import api from '@/services/api/axios';
+import { AuthService } from '@/services/authService';
 import { Redirecting } from '@/components/Redirecting';
 import { SimpleToast } from '@/components/SimpleToast';
 import { useRedirect } from '@/hooks/useRedirect';
@@ -116,13 +115,8 @@ const ValidateCode = () => {
     setIsValidating(true);
     setErrors({});
     try {
-      const response = await api.post<ValidateCodeResponse>('/validate-code', { email, code: codeString } as ValidateCodeRequest, { timeout: 25000 });
-      if (response.data) {
-        startRedirect('/reset-password');
-      } else {
-        const errorMessage = response.data.errors?.[0] || response.data.message || 'Código inválido';
-        throw new Error(errorMessage);
-      }
+      await AuthService.validateCode({ email, code: codeString });
+      startRedirect('/reset-password');
     } catch (error: unknown) {
       showError(error as Error);
       setCode(['', '', '', '', '', '']);
@@ -136,12 +130,10 @@ const ValidateCode = () => {
   const handleResendCode = async () => {
     setIsLoading(true);
     try {
-      const response = await api.post('/forgot-password', { email }, { timeout: 30000 });
-      if (response.data) {
-        toast({ title: 'Código reenviado!', description: 'Verifique seu email para o novo código.', variant: 'default', duration: 5000, className: 'bg-green-50 border-green-200' });
-        setCode(['', '', '', '', '', '']);
-        inputRefs.current[0]?.focus();
-      }
+      await AuthService.forgotPassword({ email });
+      toast({ title: 'Código reenviado!', description: 'Verifique seu email para o novo código.', variant: 'default', duration: 5000, className: 'bg-green-50 border-green-200' });
+      setCode(['', '', '', '', '', '']);
+      inputRefs.current[0]?.focus();
     } catch (error) {
       showError(error);
     } finally {

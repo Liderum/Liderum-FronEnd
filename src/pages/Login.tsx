@@ -110,7 +110,7 @@ const Login = () => {
     const newErrors: { email?: string; password?: string } = {};
     if (!email) {
       newErrors.email = 'Email é obrigatório';
-    } else if (!validateEmail(email)) {
+      
       newErrors.email = 'Por favor, insira um email válido';
     }
     if (!password) newErrors.password = 'Senha é obrigatória';
@@ -180,7 +180,7 @@ const Login = () => {
                   <div className="la-tag">Acesso seguro</div>
                   <h1 className="la-h1">Entre na sua <em>operação</em></h1>
                   <p className="la-sub">
-                    Acesse vendas, financeiro, estoque e segurança — tudo integrado em uma plataforma.
+                    Gerencie obras, cronogramas, orçamentos e diário de obra — tudo integrado em uma plataforma.
                   </p>
                   <div className="la-trust">
                     <div className="la-trust-item">

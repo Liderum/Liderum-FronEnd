@@ -4,7 +4,7 @@ import { Mail, User, Phone, Building, Lock, Shield, AlertCircle, Loader2, Eye, E
 import { useToast } from '@/hooks/use-toast';
 import { validateEmail } from '@/lib/emailValidation';
 import { useSessionCleanup } from '@/hooks/useSessionCleanup';
-import { usersApi } from '@/services/api/apiFactory';
+import { UserService } from '@/services/authService';
 
 const CSS = `
 @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,700;1,400;1,700&family=DM+Sans:wght@300;400;500&display=swap');
@@ -156,29 +156,21 @@ const Cadastro = () => {
     if (validateForm()) {
       setIsLoading(true);
       try {
-        const requestData = {
-          Name: formData.nome,
-          Email: formData.email,
-          Password: formData.senha,
-          Phone: getCleanPhone(formData.telefone),
-          Cnpj: getCleanCNPJ(formData.cnpj)
-        };
-        const response = await usersApi.post('/created', requestData);
-        if (response.status === 200 || response.status === 201) {
-          const responseData = response.data;
-          if (responseData.success === true) {
-            toast({
-              title: '🎉 Cadastro realizado com sucesso!',
-              description: `Bem-vindo, ${responseData.name}! Você será redirecionado para a página de login em alguns segundos.`,
-              className: 'bg-gradient-to-r from-green-50 to-emerald-50 border-green-300 text-green-800 shadow-lg animate-in slide-in-from-top-2 duration-500',
-              duration: 5000
-            });
-            setErrors({});
-            setTimeout(() => { navigate('/login'); }, 3000);
-          } else {
-            throw new Error('Cadastro não foi realizado com sucesso');
-          }
-        }
+        await UserService.register({
+          name: formData.nome,
+          email: formData.email,
+          password: formData.senha,
+          phone: getCleanPhone(formData.telefone),
+          cnpj: getCleanCNPJ(formData.cnpj),
+        });
+        toast({
+          title: '🎉 Cadastro realizado com sucesso!',
+          description: `Bem-vindo, ${formData.nome}! Você será redirecionado para a página de login em alguns segundos.`,
+          className: 'bg-gradient-to-r from-green-50 to-emerald-50 border-green-300 text-green-800 shadow-lg animate-in slide-in-from-top-2 duration-500',
+          duration: 5000,
+        });
+        setErrors({});
+        setTimeout(() => { navigate('/login'); }, 3000);
       } catch (error: unknown) {
         let errorMessage = 'Ocorreu um erro ao tentar criar sua conta';
         if (error && typeof error === 'object') {

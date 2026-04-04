@@ -1,0 +1,139 @@
+import { Outlet, NavLink, useParams, useLocation } from 'react-router-dom';
+import { motion } from 'framer-motion';
+import {
+  LayoutDashboard, CalendarClock, DollarSign, FilePlus2, BookOpen,
+  ArrowLeft, MapPin, User, Building2,
+} from 'lucide-react';
+import { mockWorks } from '@/modules/shared/data/mockData';
+import { STATUS_CONFIG, RISK_CONFIG } from '@/modules/shared/types';
+import { useNavigate } from 'react-router-dom';
+
+const CSS = `
+.wk{font-family:'DM Sans',sans-serif;color:var(--ink,#1A1814);display:flex;flex-direction:column;gap:20px;}
+.wk-back{display:inline-flex;align-items:center;gap:5px;font-size:12px;color:var(--ink3,#7A7670);cursor:pointer;background:none;border:none;font-family:'DM Sans',sans-serif;padding:0;transition:color 0.14s;}
+.wk-back:hover{color:var(--gold,#B8922A);}
+.wk-hero{background:linear-gradient(135deg,var(--ink,#1A1814) 0%,#2C2820 100%);border-radius:14px;padding:28px 32px;position:relative;overflow:hidden;}
+.wk-hero::after{content:'';position:absolute;top:-40px;right:-40px;width:200px;height:200px;border-radius:50%;background:radial-gradient(circle,rgba(184,146,42,0.15) 0%,transparent 70%);pointer-events:none;}
+.wk-hero-top{display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:12px;}
+.wk-hero-name{font-family:'Cormorant Garamond',serif;font-size:clamp(22px,2.5vw,30px);font-weight:700;color:#fff;line-height:1.1;letter-spacing:-0.3px;}
+.wk-hero-client{font-size:13px;color:rgba(255,255,255,0.50);margin-top:5px;}
+.wk-hero-meta{display:flex;gap:16px;margin-top:14px;flex-wrap:wrap;}
+.wk-hero-meta-item{display:flex;align-items:center;gap:5px;font-size:12px;color:rgba(255,255,255,0.55);}
+.wk-hero-progress{display:flex;align-items:center;gap:12px;margin-top:18px;}
+.wk-hero-progress-bar{flex:1;max-width:300px;height:6px;border-radius:10px;background:rgba(255,255,255,0.12);overflow:hidden;}
+.wk-hero-progress-fill{height:100%;border-radius:10px;background:linear-gradient(90deg,var(--gold,#B8922A),var(--gold2,#D4A843));transition:width 0.5s ease;}
+.wk-hero-progress-label{font-size:13px;font-weight:600;color:var(--gold2,#D4A843);}
+.wk-tabs{display:flex;gap:2px;background:#fff;border-radius:10px;border:1px solid var(--bdr,rgba(26,24,20,0.10));padding:4px;box-shadow:0 2px 10px rgba(26,24,20,0.04);overflow-x:auto;}
+.wk-tab{display:flex;align-items:center;gap:6px;padding:9px 16px;border-radius:7px;font-size:12.5px;font-weight:400;color:var(--ink3,#7A7670);text-decoration:none;transition:all 0.16s;white-space:nowrap;border:none;background:none;cursor:pointer;font-family:'DM Sans',sans-serif;}
+.wk-tab:hover{color:var(--ink,#1A1814);background:var(--cream,#F7F4EF);}
+.wk-tab.active{color:var(--gold,#B8922A);background:rgba(184,146,42,0.08);font-weight:500;}
+`;
+
+const tabs = [
+  { label: 'Visão Geral', path: '', icon: LayoutDashboard },
+  { label: 'Cronograma', path: '/schedule', icon: CalendarClock },
+  { label: 'Orçamento', path: '/budget', icon: DollarSign },
+  { label: 'Extras', path: '/extras', icon: FilePlus2 },
+  { label: 'Diário de Obra', path: '/daily-log', icon: BookOpen },
+];
+
+export function WorkLayout() {
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const work = mockWorks.find(w => w.id === id) || mockWorks[0];
+  const statusCfg = STATUS_CONFIG[work.status];
+  const riskCfg = RISK_CONFIG[work.riskLevel];
+
+  const basePath = `/works/${id}`;
+
+  return (
+    <>
+      <style>{CSS}</style>
+      <div className="wk">
+        <button className="wk-back" onClick={() => navigate('/works')}>
+          <ArrowLeft size={13} /> Voltar para obras
+        </button>
+
+        {/* Hero */}
+        <motion.div
+          className="wk-hero"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+        >
+          <div className="wk-hero-top">
+            <div>
+              <div className="wk-hero-name">{work.name}</div>
+              <div className="wk-hero-client">{work.client}</div>
+            </div>
+            <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
+              <span style={{
+                padding: '4px 12px',
+                borderRadius: 20,
+                fontSize: 11,
+                fontWeight: 500,
+                background: statusCfg.bg,
+                color: statusCfg.color,
+              }}>
+                ● {statusCfg.label}
+              </span>
+              <span style={{
+                padding: '4px 12px',
+                borderRadius: 20,
+                fontSize: 11,
+                fontWeight: 500,
+                background: `${riskCfg.color}18`,
+                color: riskCfg.color,
+              }}>
+                Risco {riskCfg.label}
+              </span>
+            </div>
+          </div>
+          <div className="wk-hero-meta">
+            <div className="wk-hero-meta-item"><User size={13} /> {work.responsible}</div>
+            <div className="wk-hero-meta-item"><MapPin size={13} /> {work.address}</div>
+            <div className="wk-hero-meta-item"><Building2 size={13} /> {work.currentStage}</div>
+          </div>
+          <div className="wk-hero-progress">
+            <div className="wk-hero-progress-bar">
+              <div className="wk-hero-progress-fill" style={{ width: `${work.percentComplete}%` }} />
+            </div>
+            <span className="wk-hero-progress-label">{work.percentComplete}%</span>
+          </div>
+        </motion.div>
+
+        {/* Tabs */}
+        <div className="wk-tabs">
+          {tabs.map(tab => {
+            const Icon = tab.icon;
+            const fullPath = basePath + tab.path;
+            const isActive = tab.path === ''
+              ? location.pathname === basePath || location.pathname === basePath + '/'
+              : location.pathname.startsWith(fullPath);
+            return (
+              <NavLink
+                key={tab.label}
+                to={fullPath}
+                end={tab.path === ''}
+                className={`wk-tab${isActive ? ' active' : ''}`}
+              >
+                <Icon size={14} /> {tab.label}
+              </NavLink>
+            );
+          })}
+        </div>
+
+        {/* Content */}
+        <motion.div
+          key={location.pathname}
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
+        >
+          <Outlet />
+        </motion.div>
+      </div>
+    </>
+  );
+}

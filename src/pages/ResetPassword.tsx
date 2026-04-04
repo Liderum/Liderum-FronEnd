@@ -2,8 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Lock, ArrowLeft, Loader2, CheckCircle2, Eye, EyeOff } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { ResetPasswordRequest, ResetPasswordResponse } from '@/types/auth';
-import api from '@/services/api/axios';
+import { AuthService } from '@/services/authService';
 import { useAuth } from '@/contexts/AuthContext';
 import { SimpleToast } from '@/components/SimpleToast';
 
@@ -112,14 +111,9 @@ const ResetPassword = () => {
     setIsLoading(true);
     setErrors({});
     try {
-      const response = await api.post<ResetPasswordResponse>('/reset-password', { email, code, newPassword: formData.newPassword, confirmPassword: formData.confirmPassword } as ResetPasswordRequest, { timeout: 20000 });
-      if (response.data) {
-        setIsSuccess(true);
-        toast({ title: 'Senha redefinida!', description: 'Sua senha foi alterada com sucesso.', variant: 'default', duration: 5000, className: 'bg-green-50 border-green-200' });
-      } else {
-        const errorMessage = response.data.errors?.[0] || response.data.message || 'Erro ao redefinir senha';
-        throw new Error(errorMessage);
-      }
+      await AuthService.resetPassword({ email, code, newPassword: formData.newPassword });
+      setIsSuccess(true);
+      toast({ title: 'Senha redefinida!', description: 'Sua senha foi alterada com sucesso.', variant: 'default', duration: 5000, className: 'bg-green-50 border-green-200' });
     } catch (error: unknown) {
       showError(error as Error);
       setErrors({ general: 'Erro ao redefinir senha' });

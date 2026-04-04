@@ -108,7 +108,7 @@ interface SettingsData {
 }
 
 const initialSettings: SettingsData = {
-  companyName: "Liderum ERP", companyEmail: "contato@liderum.com", companyPhone: "(11) 99999-9999",
+  companyName: "Liderum", companyEmail: "contato@liderum.com", companyPhone: "(11) 99999-9999",
   address: { street: "Rua das Empresas", number: "123", neighborhood: "Centro", city: "São Paulo", state: "SP", zipCode: "01000-000" },
   emailNotifications: true, pushNotifications: true, lowStockAlerts: true, salesAlerts: true, systemAlerts: false,
   paymentMethods: [
@@ -126,8 +126,8 @@ const initialSettings: SettingsData = {
     {
       id: "2", name: "PIX", type: "pix", isActive: true, fee: 0.0, processingTime: "Imediato",
       pixKeys: [
-        { id: "pix1", keyType: "email", keyValue: "contato@liderum.com", bankName: "Banco do Brasil", accountHolder: "Liderum ERP Ltda", isActive: true },
-        { id: "pix2", keyType: "cpf", keyValue: "123.456.789-00", bankName: "Banco do Brasil", accountHolder: "Liderum ERP Ltda", isActive: false }
+        { id: "pix1", keyType: "email", keyValue: "contato@liderum.com", bankName: "Banco do Brasil", accountHolder: "Liderum Ltda", isActive: true },
+        { id: "pix2", keyType: "cpf", keyValue: "123.456.789-00", bankName: "Banco do Brasil", accountHolder: "Liderum Ltda", isActive: false }
       ],
       transactions: [
         { id: "t3", method: "pix", amount: 250.00, status: "approved", date: "2025-01-15T09:15:00Z", customer: "Ana Lima", description: "Pagamento de fatura", reference: "F001" },

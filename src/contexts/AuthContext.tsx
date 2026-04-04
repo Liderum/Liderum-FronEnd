@@ -1,7 +1,7 @@
 import { useErrorToast } from "@/hooks/useErrorToast";
 import { createContext, ReactNode, useContext, useState } from "react";
-import api from "../services/api/axios";
-import { ResponseRegisteredUser, User } from "../types/auth";
+import { AuthService, UserService } from "../services/authService";
+import { User, UserProfile } from "../types/auth";
 
 interface AuthContextData {
   user: User | null;
@@ -9,6 +9,7 @@ interface AuthContextData {
   signIn: (email: string, password: string) => Promise<void>;
   signOut: () => void;
   refreshToken: () => Promise<boolean>;
+  fetchUserProfile: () => Promise<UserProfile | null>;
   errorToast: {
     isVisible: boolean;
     message: string;
@@ -66,49 +67,29 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   async function signIn(email: string, password: string) {
     try {
-      const response = await api.post("/doLogin", {
-        email,
-        password,
-      });
+      const data = await AuthService.login({ email, password });
 
-      const { success, identifier, name, tokens, errors } =
-        response.data as ResponseRegisteredUser;
-
-      if (!success || errors) {
-        const errorMessage = Array.isArray(errors)
-          ? errors[0]
-          : errors || "Erro no login";
-        throw new Error(errorMessage);
+      if (!data.accessToken) {
+        throw new Error("Credenciais inválidas");
       }
 
-      // Estrutura do usuário baseada na resposta da API
       const userData: User = {
-        identifier,
-        name,
+        identifier: data.identifier,
+        name: data.name,
         email,
       };
 
-      // Salvando dados reais no localStorage
-      localStorage.setItem("@Liderum:token", tokens.accessToken);
-      localStorage.setItem("@Liderum:refreshToken", tokens.refreshToken);
+      localStorage.setItem("@Liderum:token", data.accessToken);
+      localStorage.setItem("@Liderum:refreshToken", data.refreshToken);
       localStorage.setItem("@Liderum:user", JSON.stringify(userData));
 
-      // Atualiza o estado do usuário ANTES de qualquer outra coisa
-      // Isso garante que isAuthenticated seja true imediatamente
       setUser(userData);
 
-      console.log("Login realizado com sucesso:", {
-        user: userData,
-        token: tokens.accessToken,
-        isAuthenticated: true,
-      });
+      fetchUserProfile().catch(() => {});
     } catch (error) {
       console.error("Erro no login:", error);
-
-      // Mostra o toast de erro com detecção automática de tipo
       showError(error);
 
-      // Limpa dados em caso de erro
       localStorage.removeItem("@Liderum:token");
       localStorage.removeItem("@Liderum:refreshToken");
       localStorage.removeItem("@Liderum:user");
@@ -126,22 +107,14 @@ export function AuthProvider({ children }: AuthProviderProps) {
         return false;
       }
 
-      const response = await api.post("/refresh", {
-        refreshToken: storedRefreshToken,
-      });
+      const data = await AuthService.refreshToken(storedRefreshToken);
 
-      const { success, tokens, errors } =
-        response.data as ResponseRegisteredUser;
-
-      if (!success || errors) {
-        const errorMessage = Array.isArray(errors)
-          ? errors[0]
-          : errors || "Erro ao renovar token";
-        throw new Error(errorMessage);
+      if (!data.accessToken) {
+        throw new Error("Erro ao renovar token");
       }
 
-      localStorage.setItem("@Liderum:token", tokens.accessToken);
-      localStorage.setItem("@Liderum:refreshToken", tokens.refreshToken);
+      localStorage.setItem("@Liderum:token", data.accessToken);
+      localStorage.setItem("@Liderum:refreshToken", data.refreshToken);
 
       return true;
     } catch (error) {
@@ -151,13 +124,38 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
   }
 
+  async function fetchUserProfile(): Promise<UserProfile | null> {
+    try {
+      const profile = await UserService.getProfile();
+
+      if (profile) {
+        const updatedUser: User = {
+          identifier: profile.identifier,
+          name: profile.name,
+          email: profile.email,
+        };
+        localStorage.setItem("@Liderum:user", JSON.stringify(updatedUser));
+        setUser(updatedUser);
+        return profile;
+      }
+      return null;
+    } catch (error) {
+      console.error("Erro ao buscar perfil do usuário:", error);
+      return null;
+    }
+  }
+
   function signOut() {
+    const storedRefreshToken = localStorage.getItem("@Liderum:refreshToken");
+
+    if (storedRefreshToken) {
+      AuthService.logout(storedRefreshToken).catch(() => {});
+    }
+
     localStorage.removeItem("@Liderum:token");
     localStorage.removeItem("@Liderum:refreshToken");
     localStorage.removeItem("@Liderum:user");
     setUser(null);
-
-    console.log("Logout realizado com sucesso");
   }
 
   return (
@@ -168,6 +166,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         signIn,
         signOut,
         refreshToken,
+        fetchUserProfile,
         errorToast,
         showError,
         hideError,

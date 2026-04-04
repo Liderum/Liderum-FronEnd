@@ -3,8 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Mail, ArrowLeft, Loader2, CheckCircle2, AlertCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { validateEmail } from '@/lib/emailValidation';
-import { ForgotPasswordRequest, ForgotPasswordResponse } from '@/types/auth';
-import api from '@/services/api/axios';
+import { AuthService } from '@/services/authService';
 import { useAuth } from '@/contexts/AuthContext';
 import { SimpleToast } from '@/components/SimpleToast';
 
@@ -77,14 +76,9 @@ const ForgotPassword = () => {
     setIsLoading(true);
     setErrors({});
     try {
-      const response = await api.post<ForgotPasswordResponse>('/forgot-password', { email } as ForgotPasswordRequest, { timeout: 30000 });
-      if (response.data.success) {
-        setIsSuccess(true);
-        toast({ title: 'Código enviado!', description: 'Verifique seu email para o código de recuperação.', variant: 'default', duration: 5000, className: 'bg-green-50 border-green-200' });
-      } else {
-        const errorMessage = response.data.errors?.[0] || response.data.message || 'Erro ao enviar código';
-        throw new Error(errorMessage);
-      }
+      await AuthService.forgotPassword({ email });
+      setIsSuccess(true);
+      toast({ title: 'Código enviado!', description: 'Verifique seu email para o código de recuperação.', variant: 'default', duration: 5000, className: 'bg-green-50 border-green-200' });
     } catch (error: unknown) {
       showError(error as Error);
     } finally {

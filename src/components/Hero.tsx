@@ -30,7 +30,7 @@ const Hero = () => {
             <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-primary/10 rounded-lg transform rotate-3"></div>
             <img 
               src="https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?auto=format&fit=crop&q=80&w=1000" 
-              alt="ERP Dashboard" 
+              alt="Dashboard Gestão de Obras" 
               className="rounded-lg shadow-xl relative z-0 object-cover w-full h-full transform -rotate-2 transition-transform hover:rotate-0 duration-300"
             />
           </div>
