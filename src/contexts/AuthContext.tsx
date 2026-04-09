@@ -1,30 +1,51 @@
-import { useErrorToast } from "@/hooks/useErrorToast";
-import { createContext, ReactNode, useContext, useState } from "react";
-import { AuthService, UserService } from "../services/authService";
-import { User, UserProfile } from "../types/auth";
+import { useErrorToast } from '@/hooks/useErrorToast';
+import {
+  createContext,
+  ReactNode,
+  useContext,
+  useState,
+  useEffect,
+  useCallback,
+  useRef,
+} from 'react';
+import {
+  AuthService,
+  UserService,
+  RbacService,
+  SafeAuthCalls,
+} from '../services/authService';
+import { User, UserProfile, RegisterUserRequest } from '../types/auth';
+import { tokenStore } from '../services/api/tokenStore';
+
+interface ErrorToastState {
+  isVisible: boolean;
+  message: string;
+  type: 'error' | 'warning' | 'info';
+  details?: string;
+  errorCode?: string;
+  timestamp?: string;
+}
 
 interface AuthContextData {
   user: User | null;
   isAuthenticated: boolean;
+  isLoading: boolean;
+  permissions: string[];
+  roles: string[];
+  modules: string[];
   signIn: (email: string, password: string) => Promise<void>;
   signOut: () => void;
-  refreshToken: () => Promise<boolean>;
+  register: (data: RegisterUserRequest) => Promise<void>;
+  refreshSession: () => Promise<boolean>;
   fetchUserProfile: () => Promise<UserProfile | null>;
-  errorToast: {
-    isVisible: boolean;
-    message: string;
-    type: "error" | "warning" | "info";
-    details?: string;
-    errorCode?: string;
-    timestamp?: string;
-  };
+  errorToast: ErrorToastState;
   showError: (
     error:
       | string
       | Error
       | {
           message: string;
-          type?: "error" | "warning" | "info";
+          type?: 'error' | 'warning' | 'info';
           details?: string;
           errorCode?: string;
         },
@@ -32,140 +53,166 @@ interface AuthContextData {
   hideError: () => void;
 }
 
-interface AuthProviderProps {
-  children: ReactNode;
-}
-
 const AuthContext = createContext<AuthContextData>({} as AuthContextData);
 
-export function AuthProvider({ children }: AuthProviderProps) {
-  const [user, setUser] = useState<User | null>(() => {
-    const storedUser = localStorage.getItem("@Liderum:user");
-    const storedToken = localStorage.getItem("@Liderum:token");
+export function AuthProvider({ children }: { children: ReactNode }) {
+  const [user, setUser] = useState<User | null>(null);
+  const [permissions, setPermissions] = useState<string[]>([]);
+  const [roles, setRoles] = useState<string[]>([]);
+  const [modules, setModules] = useState<string[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const bootstrapRef = useRef(false);
 
-    // Verifica se existe tanto o usuário quanto o token
-    if (storedUser && storedToken) {
-      try {
-        return JSON.parse(storedUser);
-      } catch (error) {
-        console.error("Erro ao fazer parse do usuário armazenado:", error);
-        // Limpa dados corrompidos
-        localStorage.removeItem("@Liderum:user");
-        localStorage.removeItem("@Liderum:token");
-        localStorage.removeItem("@Liderum:refreshToken");
-        return null;
-      }
-    }
+  const isAuthenticated = !!user;
 
-    return null;
-  });
-
-  const isAuthenticated = !!user && !!localStorage.getItem("@Liderum:token");
-
-  // Hook para gerenciar toasts de erro
   const { errorToast, showError, hideError } = useErrorToast();
 
-  async function signIn(email: string, password: string) {
-    try {
-      const data = await AuthService.login({ email, password });
+  const clearAuth = useCallback(() => {
+    tokenStore.clear();
+    setUser(null);
+    setPermissions([]);
+    setRoles([]);
+    setModules([]);
+  }, []);
 
-      if (!data.accessToken) {
-        throw new Error("Credenciais inválidas");
-      }
-
-      const userData: User = {
-        identifier: data.identifier,
-        name: data.name,
-        email,
-      };
-
-      localStorage.setItem("@Liderum:token", data.accessToken);
-      localStorage.setItem("@Liderum:refreshToken", data.refreshToken);
-      localStorage.setItem("@Liderum:user", JSON.stringify(userData));
-
-      setUser(userData);
-
-      fetchUserProfile().catch(() => {});
-    } catch (error) {
-      console.error("Erro no login:", error);
-      showError(error);
-
-      localStorage.removeItem("@Liderum:token");
-      localStorage.removeItem("@Liderum:refreshToken");
-      localStorage.removeItem("@Liderum:user");
+  // Registra callback para quando o interceptor detectar sessão expirada
+  useEffect(() => {
+    tokenStore.setOnAuthFailure(() => {
       setUser(null);
+      setPermissions([]);
+      setRoles([]);
+      setModules([]);
+    });
+    return () => tokenStore.setOnAuthFailure(null);
+  }, []);
 
-      throw error;
-    }
-  }
-
-  async function refreshToken(): Promise<boolean> {
+  const fetchRbac = useCallback(async () => {
     try {
-      const storedRefreshToken = localStorage.getItem("@Liderum:refreshToken");
-
-      if (!storedRefreshToken) {
-        return false;
-      }
-
-      const data = await AuthService.refreshToken(storedRefreshToken);
-
-      if (!data.accessToken) {
-        throw new Error("Erro ao renovar token");
-      }
-
-      localStorage.setItem("@Liderum:token", data.accessToken);
-      localStorage.setItem("@Liderum:refreshToken", data.refreshToken);
-
-      return true;
-    } catch (error) {
-      console.error("Erro ao renovar token:", error);
-      signOut();
-      return false;
+      const data = await RbacService.getMyPermissions();
+      setPermissions(data.permissions ?? []);
+      setRoles(data.roles ?? []);
+      setModules(data.modules ?? []);
+    } catch {
+      // RBAC fetch failure is non-fatal
     }
-  }
+  }, []);
 
-  async function fetchUserProfile(): Promise<UserProfile | null> {
+  const fetchUserProfile = useCallback(async (): Promise<UserProfile | null> => {
     try {
       const profile = await UserService.getProfile();
-
       if (profile) {
-        const updatedUser: User = {
+        setUser({
           identifier: profile.identifier,
           name: profile.name,
           email: profile.email,
-        };
-        localStorage.setItem("@Liderum:user", JSON.stringify(updatedUser));
-        setUser(updatedUser);
+        });
         return profile;
       }
       return null;
-    } catch (error) {
-      console.error("Erro ao buscar perfil do usuário:", error);
+    } catch {
       return null;
     }
-  }
+  }, []);
 
-  function signOut() {
-    const storedRefreshToken = localStorage.getItem("@Liderum:refreshToken");
+  const refreshSession = useCallback(async (): Promise<boolean> => {
+    try {
+      const data = await AuthService.refreshToken();
+      if (!data.accessToken) return false;
 
-    if (storedRefreshToken) {
-      AuthService.logout(storedRefreshToken).catch(() => {});
+      tokenStore.setAccessToken(data.accessToken);
+      if (data.refreshToken) tokenStore.setRefreshToken(data.refreshToken);
+
+      // Chamadas diretas que não passam pelo interceptor de 401
+      const profile = await SafeAuthCalls.getProfileDirect(data.accessToken);
+      if (profile) {
+        setUser({
+          identifier: profile.identifier,
+          name: profile.name,
+          email: profile.email,
+        });
+      }
+
+      const rbac = await SafeAuthCalls.getMyPermissionsDirect(data.accessToken);
+      if (rbac) {
+        setPermissions(rbac.permissions ?? []);
+        setRoles(rbac.roles ?? []);
+        setModules(rbac.modules ?? []);
+      }
+
+      return !!profile;
+    } catch {
+      clearAuth();
+      return false;
     }
+  }, [clearAuth]);
 
-    localStorage.removeItem("@Liderum:token");
-    localStorage.removeItem("@Liderum:refreshToken");
-    localStorage.removeItem("@Liderum:user");
-    setUser(null);
-  }
+  useEffect(() => {
+    if (bootstrapRef.current) return;
+    bootstrapRef.current = true;
+
+    (async () => {
+      await refreshSession();
+      setIsLoading(false);
+    })();
+  }, [refreshSession]);
+
+  const signIn = useCallback(
+    async (email: string, password: string) => {
+      const data = await AuthService.login({ email, password });
+      if (!data.accessToken) throw new Error('Credenciais inválidas');
+
+      tokenStore.setAccessToken(data.accessToken);
+      tokenStore.setRefreshToken(data.refreshToken);
+
+      setUser({ identifier: data.identifier, name: data.name, email });
+
+      // Chamadas diretas que NÃO passam pelo interceptor de 401.
+      // Se GetProfile ou GetMyPermissions falhar, o login permanece válido
+      // com os dados básicos retornados pelo /doLogin.
+      const profile = await SafeAuthCalls.getProfileDirect(data.accessToken);
+      if (profile) {
+        setUser({
+          identifier: profile.identifier,
+          name: profile.name,
+          email: profile.email,
+        });
+      }
+
+      const rbac = await SafeAuthCalls.getMyPermissionsDirect(data.accessToken);
+      if (rbac) {
+        setPermissions(rbac.permissions ?? []);
+        setRoles(rbac.roles ?? []);
+        setModules(rbac.modules ?? []);
+      }
+    },
+    [],
+  );
+
+  const signOut = useCallback(() => {
+    const rt = tokenStore.getRefreshToken();
+    if (rt) {
+      AuthService.logout(rt).catch(() => {});
+    }
+    clearAuth();
+  }, [clearAuth]);
+
+  const register = useCallback(async (data: RegisterUserRequest) => {
+    await UserService.register(data);
+  }, []);
 
   return (
     <AuthContext.Provider
       value={{
         user,
         isAuthenticated,
+        isLoading,
+        permissions,
+        roles,
+        modules,
         signIn,
         signOut,
-        refreshToken,
+        register,
+        refreshSession,
         fetchUserProfile,
         errorToast,
         showError,
@@ -181,7 +228,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 export function useAuth() {
   const context = useContext(AuthContext);
   if (!context) {
-    throw new Error("useAuth must be used within an AuthProvider");
+    throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;
 }

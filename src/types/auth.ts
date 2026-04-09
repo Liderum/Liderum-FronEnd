@@ -75,4 +75,15 @@ export interface UserProfile {
   email: string;
   phone?: string;
   cnpj?: string;
-} 
+}
+
+export interface RefreshResponse {
+  accessToken: string;
+  refreshToken?: string;
+}
+
+export interface RbacPermissions {
+  roles: string[];
+  modules: string[];
+  permissions: string[];
+}

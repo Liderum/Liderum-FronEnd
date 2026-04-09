@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
 import { PrivateRoute } from './components/PrivateRoute';
+import { PublicRoute } from './components/PublicRoute';
 import { useRouteSecurity } from './hooks/useRouteSecurity';
 import { Toaster } from './components/ui/toaster';
 
@@ -37,6 +38,7 @@ import Settings from './pages/settings/Settings';
 import { Companies } from './pages/management/Companies';
 import { Customers } from './pages/management/Customers';
 import { Suppliers } from './pages/management/Suppliers';
+import RbacAdmin from './pages/management/RbacAdmin';
 
 function AppContent() {
   useRouteSecurity();
@@ -45,12 +47,12 @@ function AppContent() {
     <Routes>
       {/* Public routes */}
       <Route path="/" element={<LandingPage />} />
-      <Route path="/login" element={<Login />} />
-      <Route path="/cadastro" element={<Cadastro />} />
+      <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
+      <Route path="/cadastro" element={<PublicRoute><Cadastro /></PublicRoute>} />
       <Route path="/contact" element={<Contact />} />
-      <Route path="/forgot-password" element={<ForgotPassword />} />
-      <Route path="/validate-code" element={<ValidateCode />} />
-      <Route path="/reset-password" element={<ResetPassword />} />
+      <Route path="/forgot-password" element={<PublicRoute><ForgotPassword /></PublicRoute>} />
+      <Route path="/validate-code" element={<PublicRoute><ValidateCode /></PublicRoute>} />
+      <Route path="/reset-password" element={<PublicRoute><ResetPassword /></PublicRoute>} />
       <Route path="/payments/*" element={<PaymentRoutes />} />
 
       {/* ===== Protected routes ===== */}
@@ -58,7 +60,7 @@ function AppContent() {
       {/* Dashboard */}
       <Route
         path="/home"
-        element={<PrivateRoute><DashboardLayout /></PrivateRoute>}
+        element={<PrivateRoute requiredPermission="dashboard.view"><DashboardLayout /></PrivateRoute>}
       >
         <Route index element={<DashboardPage />} />
       </Route>
@@ -72,7 +74,7 @@ function AppContent() {
       {/* Works — List */}
       <Route
         path="/works"
-        element={<PrivateRoute><DashboardLayout /></PrivateRoute>}
+        element={<PrivateRoute requiredPermission="works.view"><DashboardLayout /></PrivateRoute>}
       >
         <Route index element={<WorksListPage />} />
       </Route>
@@ -80,7 +82,7 @@ function AppContent() {
       {/* Works — Detail with tabs */}
       <Route
         path="/works/:id"
-        element={<PrivateRoute><DashboardLayout /></PrivateRoute>}
+        element={<PrivateRoute requiredPermission="works.read"><DashboardLayout /></PrivateRoute>}
       >
         <Route element={<WorkLayout />}>
           <Route index element={<WorkOverviewPage />} />
@@ -96,15 +98,16 @@ function AppContent() {
         path="/management"
         element={<PrivateRoute><DashboardLayout /></PrivateRoute>}
       >
-        <Route path="companies" element={<Companies />} />
-        <Route path="customers" element={<Customers />} />
-        <Route path="suppliers" element={<Suppliers />} />
-        <Route path="users" element={<Users />} />
+        <Route path="companies" element={<PrivateRoute requiredPermission="companies.view"><Companies /></PrivateRoute>} />
+        <Route path="customers" element={<PrivateRoute requiredPermission="customers.view"><Customers /></PrivateRoute>} />
+        <Route path="suppliers" element={<PrivateRoute requiredPermission="suppliers.view"><Suppliers /></PrivateRoute>} />
+        <Route path="users" element={<PrivateRoute requiredPermission="users.view"><Users /></PrivateRoute>} />
+        <Route path="rbac" element={<PrivateRoute requiredPermission="users.rbac.manage"><RbacAdmin /></PrivateRoute>} />
       </Route>
 
       <Route
         path="/settings"
-        element={<PrivateRoute><DashboardLayout /></PrivateRoute>}
+        element={<PrivateRoute requiredPermission="settings.view"><DashboardLayout /></PrivateRoute>}
       >
         <Route index element={<Settings />} />
       </Route>

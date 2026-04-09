@@ -12,7 +12,7 @@ export const API_CONFIG = {
       BASE_URL_DSV: import.meta.env.DSV_INVENTORY_API_URL || 'http://localhost:5002/Liderum', //ajustar conforme o uso.
     },
     USERS: {
-      BASE_URL_DSV: import.meta.env.DSV_USERS_API_URL || 'https://localhost:7247/liderum/api/user', //ajustar conforme o uso.  
+      BASE_URL_DSV: import.meta.env.DSV_USERS_API_URL || 'http://localhost:5001/liderum/api/user', //ajustar conforme o uso.  
     },
     MANAGEMENT: {
       BASE_URL_DSV: import.meta.env.DSV_MANAGEMENT_API_URL || 'https://localhost:7036',

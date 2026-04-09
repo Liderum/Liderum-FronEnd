@@ -367,3 +367,11 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+
+# Environment files (contêm URLs e configs por ambiente — nunca commitar)
+.env
+.env.local
+.env.*.local
+
+# Vite build output
+dist/

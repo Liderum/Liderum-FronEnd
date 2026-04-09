@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Mail, Lock, Eye, EyeOff, AlertCircle, Loader2, ArrowRight } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
@@ -63,6 +63,9 @@ const CSS = `
 @media(max-width:900px){.la-nav{padding:0 20px;}.la-wrap{padding:40px 20px;}.la-grid-2{grid-template-columns:1fr;gap:36px;}.la-card{padding:28px 24px;}.la-nav-c{display:none;}}
 `;
 
+const LOCKOUT_THRESHOLD = 3;
+const LOCKOUT_DURATION_S = 30;
+
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -72,23 +75,31 @@ const Login = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const location = useLocation();
-  const { signIn, errorToast, hideError, isAuthenticated } = useAuth();
+  const { signIn, isAuthenticated } = useAuth();
+
+  const [failedAttempts, setFailedAttempts] = useState(0);
+  const [lockoutCountdown, setLockoutCountdown] = useState(0);
+  const lockoutTimer = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const startLockout = useCallback(() => {
+    setLockoutCountdown(LOCKOUT_DURATION_S);
+    lockoutTimer.current = setInterval(() => {
+      setLockoutCountdown((prev) => {
+        if (prev <= 1) {
+          if (lockoutTimer.current) clearInterval(lockoutTimer.current);
+          setFailedAttempts(0);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+  }, []);
 
   useEffect(() => {
-    if (errorToast.isVisible && errorToast.message) {
-      toast({ title: 'Erro no login', description: errorToast.message, variant: 'destructive', duration: 5000 });
-      setTimeout(() => { hideError(); }, 0);
-    }
-  }, [errorToast.isVisible, errorToast.message, toast, hideError]);
-
-  useEffect(() => {
-    const token = localStorage.getItem('@Liderum:token');
-    const storedUser = localStorage.getItem('@Liderum:user');
-    if (token && storedUser && isAuthenticated) {
-      const from = location.state?.from?.pathname || '/home';
-      navigate(from, { replace: true });
-    }
-  }, [isAuthenticated, navigate, location.state]);
+    return () => {
+      if (lockoutTimer.current) clearInterval(lockoutTimer.current);
+    };
+  }, []);
 
   const from = location.state?.from?.pathname || '/home';
 
@@ -107,10 +118,12 @@ const Login = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (lockoutCountdown > 0) return;
+
     const newErrors: { email?: string; password?: string } = {};
     if (!email) {
       newErrors.email = 'Email é obrigatório';
-      
+    } else if (!validateEmail(email)) {
       newErrors.email = 'Por favor, insira um email válido';
     }
     if (!password) newErrors.password = 'Senha é obrigatória';
@@ -118,28 +131,18 @@ const Login = () => {
 
     setIsLoading(true);
     try {
-      await signIn(email, password);
-      const token = localStorage.getItem('@Liderum:token');
-      const storedUser = localStorage.getItem('@Liderum:user');
-      if (!token || !storedUser) throw new Error('Erro ao salvar dados de autenticação');
+      await signIn(email.trim(), password);
       toast({ title: 'Bem-vindo!', description: 'Login realizado com sucesso.', variant: 'success', duration: 2000 });
-      const finalDestination = from || '/home';
       setIsRedirecting(true);
-      requestAnimationFrame(() => {
-        setTimeout(() => {
-          try {
-            navigate(finalDestination, { replace: true });
-            setTimeout(() => {
-              if (window.location.pathname === '/login') window.location.href = finalDestination;
-            }, 1000);
-          } catch (error) {
-            window.location.href = finalDestination;
-          }
-        }, 300);
-      });
-    } catch (error) {
+      setTimeout(() => navigate(from, { replace: true }), 300);
+    } catch {
       setPassword('');
-      if (error instanceof Error && error.message.toLowerCase().includes('email')) setEmail('');
+      const next = failedAttempts + 1;
+      setFailedAttempts(next);
+      if (next >= LOCKOUT_THRESHOLD) {
+        startLockout();
+      }
+      toast({ title: 'Erro no login', description: 'Credenciais inválidas. Verifique seus dados.', variant: 'destructive', duration: 5000 });
     } finally {
       setIsLoading(false);
     }
@@ -255,9 +258,18 @@ const Login = () => {
                         )}
                       </div>
 
-                      <button type="submit" className="la-btn la-btn-dark la-btn-full" disabled={isLoading}>
+                      {lockoutCountdown > 0 && (
+                        <p className="la-err" style={{ justifyContent: 'center', marginBottom: '10px' }}>
+                          <AlertCircle size={13} />
+                          Muitas tentativas. Tente novamente em {lockoutCountdown}s
+                        </p>
+                      )}
+
+                      <button type="submit" className="la-btn la-btn-dark la-btn-full" disabled={isLoading || lockoutCountdown > 0}>
                         {isLoading ? (
                           <><Loader2 size={15} className="animate-spin" />Entrando...</>
+                        ) : lockoutCountdown > 0 ? (
+                          <>Aguarde {lockoutCountdown}s</>
                         ) : (
                           <>Entrar <ArrowRight size={15} /></>
                         )}

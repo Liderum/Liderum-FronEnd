@@ -1,9 +1,9 @@
+import { useMemo } from 'react';
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
-import { useState } from 'react';
-import { motion, AnimatePresence } from "framer-motion";
 import {
   Home, Building2, CalendarClock, DollarSign, FilePlus2,
-  BookOpen, Users, Settings, ChevronRight, LogOut,
+  BookOpen, Users, Settings, LogOut,
+  Building, Truck, Shield,
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useToast } from "@/hooks/use-toast";
@@ -45,46 +45,84 @@ const CSS = `
 .sb-action-btn.danger:hover{background:#FDEDEC;color:#C0392B;border-color:rgba(192,57,43,0.2);}
 `;
 
-const nav = [
+interface NavItem {
+  name: string;
+  href: string;
+  icon: React.ElementType;
+  badge?: string;
+  permission?: string;
+}
+
+interface NavSection {
+  label: string;
+  items: NavItem[];
+}
+
+const navSections: NavSection[] = [
   {
     label: 'Operação',
     items: [
-      { name: 'Dashboard', href: '/home', icon: Home },
-      { name: 'Obras', href: '/works', icon: Building2, badge: '7' },
-    ]
+      { name: 'Dashboard', href: '/home', icon: Home, permission: 'dashboard.view' },
+      { name: 'Obras', href: '/works', icon: Building2, badge: '7', permission: 'works.view' },
+    ],
   },
   {
     label: 'Gestão de Obras',
     items: [
-      { name: 'Cronograma', href: '/works/1/schedule', icon: CalendarClock },
-      { name: 'Orçamento', href: '/works/1/budget', icon: DollarSign },
-      { name: 'Extras', href: '/works/1/extras', icon: FilePlus2, badge: '3' },
-      { name: 'Diário de Obra', href: '/works/1/daily-log', icon: BookOpen },
-    ]
+      { name: 'Cronograma', href: '/works/1/schedule', icon: CalendarClock, permission: 'schedule.view' },
+      { name: 'Orçamento', href: '/works/1/budget', icon: DollarSign, permission: 'budget.view' },
+      { name: 'Extras', href: '/works/1/extras', icon: FilePlus2, badge: '3', permission: 'extras.view' },
+      { name: 'Diário de Obra', href: '/works/1/daily-log', icon: BookOpen, permission: 'daily-log.view' },
+    ],
+  },
+  {
+    label: 'Cadastros',
+    items: [
+      { name: 'Empresas', href: '/management/companies', icon: Building, permission: 'companies.view' },
+      { name: 'Clientes', href: '/management/customers', icon: Users, permission: 'customers.view' },
+      { name: 'Fornecedores', href: '/management/suppliers', icon: Truck, permission: 'suppliers.view' },
+    ],
   },
   {
     label: 'Administração',
     items: [
-      { name: 'Clientes', href: '/management/customers', icon: Users },
-      { name: 'Configurações', href: '/settings', icon: Settings },
-    ]
+      { name: 'Usuários', href: '/management/users', icon: Users, permission: 'users.view' },
+      { name: 'Controle de Acesso', href: '/management/rbac', icon: Shield, permission: 'users.rbac.manage' },
+      { name: 'Configurações', href: '/settings', icon: Settings, permission: 'settings.view' },
+    ],
   },
 ];
 
 export function Sidebar() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { user, signOut } = useAuth();
+  const { user, signOut, permissions } = useAuth();
   const { toast } = useToast();
 
-  const isActive = (href: string) => location.pathname === href || location.pathname.startsWith(href + '/');
+  const isActive = (href: string) =>
+    location.pathname === href || location.pathname.startsWith(href + '/');
 
-  const getInitials = (name: string) => name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
+  const getInitials = (name: string) =>
+    name.split(' ').map((w) => w[0]).join('').toUpperCase().slice(0, 2);
 
   const handleSignOut = () => {
     signOut();
-    toast({ title: "Logout realizado", description: "Você foi desconectado com sucesso" });
+    toast({ title: 'Logout realizado', description: 'Você foi desconectado com sucesso' });
   };
+
+  const hasPerm = (perm?: string) => !perm || permissions.includes(perm);
+
+  const visibleSections = useMemo(
+    () =>
+      navSections
+        .map((section) => ({
+          ...section,
+          items: section.items.filter((item) => hasPerm(item.permission)),
+        }))
+        .filter((section) => section.items.length > 0),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [permissions],
+  );
 
   return (
     <>
@@ -99,23 +137,24 @@ export function Sidebar() {
         </div>
 
         <div className="sb-scroll">
-          {nav.map((section) => (
+          {visibleSections.map((section) => (
             <div key={section.label} className="sb-section">
               <div className="sb-section-label">{section.label}</div>
               {section.items.map((item) => {
                 const Icon = item.icon;
-                const badge = 'badge' in item ? item.badge : null;
                 return (
                   <NavLink
                     key={item.name}
                     to={item.href}
-                    className={({ isActive: a }) => `sb-item${a || isActive(item.href) ? ' active' : ''}`}
+                    className={({ isActive: a }) =>
+                      `sb-item${a || isActive(item.href) ? ' active' : ''}`
+                    }
                   >
                     <div className="sb-item-left">
                       <Icon size={14} />
                       <span>{item.name}</span>
                     </div>
-                    {badge && <span className="sb-badge">{badge}</span>}
+                    {item.badge && <span className="sb-badge">{item.badge}</span>}
                   </NavLink>
                 );
               })}

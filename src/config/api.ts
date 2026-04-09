@@ -9,6 +9,9 @@ export interface ApiConfig {
   MANAGEMENT: {
     BASE_URL: string;
   };
+  RBAC: {
+    BASE_URL: string;
+  };
 }
 
 // Função para detectar o ambiente atual
@@ -35,26 +38,32 @@ const getEnvironment = (): 'development' | 'staging' | 'production' => {
 // Configurações de desenvolvimento
 const developmentConfig: ApiConfig = {
   AUTH: {
-    BASE_URL: 'https://localhost:7247/liderum/api/login',
+    BASE_URL: import.meta.env.VITE_AUTH_API_URL || 'http://localhost:5001/liderum/api/login',
   },
   USERS: {
-    BASE_URL: import.meta.env.VITE_USERS_API_URL || 'https://localhost:7247/liderum/api/user',
+    BASE_URL: import.meta.env.VITE_USERS_API_URL || 'http://localhost:5001/liderum/api/user',
   },
   MANAGEMENT: {
     BASE_URL: import.meta.env.VITE_MANAGEMENT_API_URL || 'https://localhost:7036',
+  },
+  RBAC: {
+    BASE_URL: import.meta.env.VITE_RBAC_API_URL || 'http://localhost:5001/liderum/api/rbac',
   },
 };
 
 // Configurações de staging
 const stagingConfig: ApiConfig = {
   AUTH: {
-    BASE_URL: import.meta.env.VITE_AUTH_API_URL || 'https://localhost:7247/liderum/api/login',
+    BASE_URL: import.meta.env.VITE_AUTH_API_URL || 'http://localhost:5001/liderum/api/login',
   },
   USERS: {
-    BASE_URL: import.meta.env.VITE_USERS_API_URL || 'https://localhost:7247/liderum/api/user',
+    BASE_URL: import.meta.env.VITE_USERS_API_URL || 'http://localhost:5001/liderum/api/user',
   },
   MANAGEMENT: {
     BASE_URL: import.meta.env.VITE_MANAGEMENT_API_URL || 'https://localhost:7036',
+  },
+  RBAC: {
+    BASE_URL: import.meta.env.VITE_RBAC_API_URL || 'http://localhost:5001/liderum/api/rbac',
   },
 };
 
@@ -68,6 +77,9 @@ const productionConfig: ApiConfig = {
   },
   MANAGEMENT: {
     BASE_URL: import.meta.env.VITE_MANAGEMENT_API_URL || '',
+  },
+  RBAC: {
+    BASE_URL: import.meta.env.VITE_RBAC_API_URL || '',
   },
 };
 
@@ -92,8 +104,6 @@ export const API_CONFIG = getApiConfig();
 // Exporta o tipo para compatibilidade
 export type ApiModule = keyof ApiConfig;
 
-// Log para debug (apenas em desenvolvimento)
 if (import.meta.env.DEV) {
-  console.log('🔧 Ambiente detectado:', getEnvironment());
-  console.log('🌐 Configuração de API:', API_CONFIG);
+  console.log('Ambiente detectado:', getEnvironment());
 }

@@ -3,7 +3,6 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Mail, User, Phone, Building, Lock, Shield, AlertCircle, Loader2, Eye, EyeOff, Check } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { validateEmail } from '@/lib/emailValidation';
-import { useSessionCleanup } from '@/hooks/useSessionCleanup';
 import { UserService } from '@/services/authService';
 
 const CSS = `
@@ -65,8 +64,6 @@ const CSS = `
 
 const Cadastro = () => {
   const navigate = useNavigate();
-
-  useSessionCleanup();
 
   const [formData, setFormData] = useState({
     nome: '',

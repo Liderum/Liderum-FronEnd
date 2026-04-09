@@ -1,70 +1,111 @@
+import axios from 'axios';
 import { authApiInstance } from './api/apiFactory';
-import { usersApi } from './api/apiFactory';
+import { usersApi, rbacApi } from './api/apiFactory';
+import { API_CONFIG } from '@/config/api';
 import type {
   LoginRequest,
   LoginResponse,
   ForgotPasswordRequest,
   ValidateCodeRequest,
   ResetPasswordRequest,
-  LogoutRequest,
   RegisterUserRequest,
   UserProfile,
+  RefreshResponse,
+  RbacPermissions,
 } from '@/types/auth';
 
 /**
- * Serviço centralizado para todos os endpoints da API de segurança.
- * Baseado no schema: Liderum.Security.API v1
- *
  * AUTH  base: /liderum/api/login
  * USERS base: /liderum/api/user
+ * RBAC  base: /liderum/api/rbac
  */
 export const AuthService = {
-  // POST /liderum/api/login/doLogin
   async login(data: LoginRequest): Promise<LoginResponse> {
     const response = await authApiInstance.post<LoginResponse>('/doLogin', data);
     return response.data;
   },
 
-  // POST /liderum/api/login/refresh-token
-  async refreshToken(refreshToken: string): Promise<LoginResponse> {
-    const response = await authApiInstance.post<LoginResponse>('/refresh-token', {
-      refreshToken,
-    });
+  async refreshToken(): Promise<RefreshResponse> {
+    const response = await authApiInstance.post<RefreshResponse>('/refresh-token');
     return response.data;
   },
 
-  // POST /liderum/api/login/logout
   async logout(refreshToken: string): Promise<void> {
-    await authApiInstance.post('/logout', {
-      refreshToken,
-    } as LogoutRequest);
+    await authApiInstance.post('/logout', { refreshToken });
   },
 
-  // POST /liderum/api/login/forgot-password
   async forgotPassword(data: ForgotPasswordRequest): Promise<void> {
     await authApiInstance.post('/forgot-password', data);
   },
 
-  // POST /liderum/api/login/validate-code
   async validateCode(data: ValidateCodeRequest): Promise<void> {
     await authApiInstance.post('/validate-code', data);
   },
 
-  // POST /liderum/api/login/reset-password
   async resetPassword(data: ResetPasswordRequest): Promise<void> {
     await authApiInstance.post('/reset-password', data);
   },
 };
 
 export const UserService = {
-  // POST /liderum/api/user/created
   async register(data: RegisterUserRequest): Promise<void> {
     await usersApi.post('/created', data);
   },
 
-  // GET /liderum/api/user/getUserProfile
   async getProfile(): Promise<UserProfile> {
     const response = await usersApi.get<UserProfile>('/getUserProfile');
     return response.data;
+  },
+};
+
+export const RbacService = {
+  async getMyPermissions(): Promise<RbacPermissions> {
+    const response = await rbacApi.get<RbacPermissions>('/my-permissions');
+    return response.data;
+  },
+};
+
+/**
+ * Chamadas diretas que NÃO passam pelo interceptor de resposta.
+ * Usadas logo após login/refresh para evitar que um 401 dispare
+ * a cadeia refresh→redirect e destrua a sessão recém-criada.
+ */
+export const SafeAuthCalls = {
+  async getProfileDirect(accessToken: string): Promise<UserProfile | null> {
+    try {
+      const response = await axios.get<UserProfile>(
+        `${API_CONFIG.USERS.BASE_URL}/getUserProfile`,
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            'Content-Type': 'application/json',
+          },
+          withCredentials: true,
+          timeout: 10000,
+        },
+      );
+      return response.data;
+    } catch {
+      return null;
+    }
+  },
+
+  async getMyPermissionsDirect(accessToken: string): Promise<RbacPermissions | null> {
+    try {
+      const response = await axios.get<RbacPermissions>(
+        `${API_CONFIG.RBAC.BASE_URL}/my-permissions`,
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            'Content-Type': 'application/json',
+          },
+          withCredentials: true,
+          timeout: 10000,
+        },
+      );
+      return response.data;
+    } catch {
+      return null;
+    }
   },
 };
