@@ -75,7 +75,7 @@ const Login = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const location = useLocation();
-  const { signIn, isAuthenticated } = useAuth();
+  const { signIn, isAuthenticated, isLoading: authLoading } = useAuth();
 
   const [failedAttempts, setFailedAttempts] = useState(0);
   const [lockoutCountdown, setLockoutCountdown] = useState(0);
@@ -105,6 +105,15 @@ const Login = () => {
 
   const [isRedirecting, setIsRedirecting] = useState(false);
 
+  // Se o usuário já está autenticado (ex.: refreshSession bootou uma sessão
+  // existente), sai da tela de login imediatamente — evita ficar "preso" aqui
+  // após um refresh manual com token vivo.
+  useEffect(() => {
+    if (!authLoading && isAuthenticated) {
+      navigate(from, { replace: true });
+    }
+  }, [authLoading, isAuthenticated, navigate, from]);
+
   useEffect(() => {
     if (email && !validateEmail(email)) {
       const timer = setTimeout(() => {
@@ -133,16 +142,41 @@ const Login = () => {
     try {
       await signIn(email.trim(), password);
       toast({ title: 'Bem-vindo!', description: 'Login realizado com sucesso.', variant: 'success', duration: 2000 });
+      // Navegação imediata — o signIn já hidratou user/permissions antes de
+      // setar isAuthenticated. Sem setTimeout para evitar race com PublicRoute.
       setIsRedirecting(true);
-      setTimeout(() => navigate(from, { replace: true }), 300);
-    } catch {
+      navigate(from, { replace: true });
+    } catch (err: unknown) {
       setPassword('');
-      const next = failedAttempts + 1;
-      setFailedAttempts(next);
-      if (next >= LOCKOUT_THRESHOLD) {
-        startLockout();
+      // Distingue erro de rede/servidor de credenciais inválidas — antes
+      // qualquer falha caía em "Credenciais inválidas" e mascarava problemas
+      // como porta errada, CORS ou API offline.
+      const e = err as { response?: { status?: number; data?: { title?: string; detail?: string } }; code?: string; message?: string };
+      const status = e?.response?.status;
+      const isNetworkError = !e?.response && (e?.code === 'ERR_NETWORK' || e?.message?.includes('Network'));
+
+      if (isNetworkError) {
+        toast({
+          title: 'Sem conexão com o servidor',
+          description: 'Não foi possível alcançar a API de segurança. Verifique se o serviço está rodando.',
+          variant: 'destructive',
+          duration: 6000,
+        });
+      } else if (status && status >= 500) {
+        toast({
+          title: 'Erro no servidor',
+          description: e?.response?.data?.title || 'Tente novamente em instantes.',
+          variant: 'destructive',
+          duration: 5000,
+        });
+      } else {
+        const next = failedAttempts + 1;
+        setFailedAttempts(next);
+        if (next >= LOCKOUT_THRESHOLD) {
+          startLockout();
+        }
+        toast({ title: 'Erro no login', description: 'Credenciais inválidas. Verifique seus dados.', variant: 'destructive', duration: 5000 });
       }
-      toast({ title: 'Erro no login', description: 'Credenciais inválidas. Verifique seus dados.', variant: 'destructive', duration: 5000 });
     } finally {
       setIsLoading(false);
     }

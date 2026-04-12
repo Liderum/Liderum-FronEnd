@@ -32,6 +32,7 @@ import SchedulePage from './modules/schedule/pages/SchedulePage';
 import BudgetPage from './modules/budget/pages/BudgetPage';
 import ExtrasPage from './modules/extras/pages/ExtrasPage';
 import DailyLogPage from './modules/daily-log/pages/DailyLogPage';
+import IncidentsPage from './modules/incidents/pages/IncidentsPage';
 
 import Users from './pages/users/Users';
 import Settings from './pages/settings/Settings';
@@ -57,10 +58,12 @@ function AppContent() {
 
       {/* ===== Protected routes ===== */}
 
-      {/* Dashboard */}
+      {/* Dashboard — sempre acessível para usuários autenticados.
+          Checks de permissão granular ficam nos widgets/abas do Dashboard,
+          nunca na rota raiz de home (evita loop de redirecionamento). */}
       <Route
         path="/home"
-        element={<PrivateRoute requiredPermission="dashboard.view"><DashboardLayout /></PrivateRoute>}
+        element={<PrivateRoute><DashboardLayout /></PrivateRoute>}
       >
         <Route index element={<DashboardPage />} />
       </Route>
@@ -90,6 +93,7 @@ function AppContent() {
           <Route path="budget" element={<BudgetPage />} />
           <Route path="extras" element={<ExtrasPage />} />
           <Route path="daily-log" element={<DailyLogPage />} />
+          <Route path="incidents" element={<IncidentsPage />} />
         </Route>
       </Route>
 

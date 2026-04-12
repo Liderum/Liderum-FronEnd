@@ -1,7 +1,7 @@
 import { Outlet, NavLink, useParams, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
-  LayoutDashboard, CalendarClock, DollarSign, FilePlus2, BookOpen,
+  LayoutDashboard, CalendarClock, DollarSign, FilePlus2, BookOpen, ShieldAlert,
   ArrowLeft, MapPin, User, Building2,
 } from 'lucide-react';
 import { mockWorks } from '@/modules/shared/data/mockData';
@@ -35,6 +35,7 @@ const tabs = [
   { label: 'Orçamento', path: '/budget', icon: DollarSign },
   { label: 'Extras', path: '/extras', icon: FilePlus2 },
   { label: 'Diário de Obra', path: '/daily-log', icon: BookOpen },
+  { label: 'Incidentes', path: '/incidents', icon: ShieldAlert },
 ];
 
 export function WorkLayout() {

@@ -1,11 +1,20 @@
+import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
 import {
   DollarSign, TrendingUp, Calendar, AlertTriangle,
-  CheckCircle2, Clock, ArrowRight, Percent,
+  CheckCircle2, ArrowRight, Percent, ShieldAlert, BookOpen,
 } from 'lucide-react';
-import { mockWorks, mockScheduleTasks, mockRiskAlerts, mockExtras } from '@/modules/shared/data/mockData';
-import { STATUS_CONFIG, TASK_STATUS_CONFIG } from '@/modules/shared/types';
+import {
+  WorksService,
+  ExtrasService,
+  IncidentsService,
+  ScheduleService,
+  DailyLogService,
+} from '@/services/works';
+import { TASK_STATUS_CONFIG, INCIDENT_SEVERITY_CONFIG } from '@/modules/shared/types';
+import type {
+  Work, ExtraRequest, Incident, ScheduleTask, DailyLogEntry,
+} from '@/modules/shared/types';
 
 const CSS = `
 .wo{font-family:'DM Sans',sans-serif;color:var(--ink,#1A1814);display:flex;flex-direction:column;gap:18px;}
@@ -27,8 +36,8 @@ const CSS = `
 .wo-milestone-info{flex:1;}
 .wo-milestone-name{font-size:13px;font-weight:500;color:var(--ink,#1A1814);}
 .wo-milestone-date{font-size:11.5px;color:var(--ink3,#7A7670);margin-top:2px;}
-.wo-alert-item{display:flex;gap:10px;padding:10px 0;border-bottom:1px solid rgba(26,24,20,0.05);}
-.wo-alert-item:last-child{border-bottom:none;}
+.wo-item{display:flex;gap:10px;padding:10px 0;border-bottom:1px solid rgba(26,24,20,0.05);}
+.wo-item:last-child{border-bottom:none;}
 @media(max-width:768px){.wo-section-grid{grid-template-columns:1fr;}}
 `;
 
@@ -39,12 +48,39 @@ function formatCurrency(value: number) {
 export default function WorkOverviewPage() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const work = mockWorks.find(w => w.id === id) || mockWorks[0];
-  const alerts = mockRiskAlerts.filter(a => a.workId === id);
-  const nextMilestones = mockScheduleTasks.filter(t => t.status !== 'concluida').slice(0, 4);
-  const pendingExtras = mockExtras.filter(e => e.status === 'pendente' || e.status === 'em_analise');
+  const workId = id ?? '1';
 
-  const variation = ((work.currentCost - work.plannedCost) / work.plannedCost * 100);
+  const [work, setWork] = useState<Work | null>(null);
+  const [tasks, setTasks] = useState<ScheduleTask[]>([]);
+  const [extras, setExtras] = useState<ExtraRequest[]>([]);
+  const [incidents, setIncidents] = useState<Incident[]>([]);
+  const [logs, setLogs] = useState<DailyLogEntry[]>([]);
+
+  useEffect(() => {
+    Promise.all([
+      WorksService.getById(workId),
+      ScheduleService.list(workId),
+      ExtrasService.list(workId),
+      IncidentsService.list(workId),
+      DailyLogService.list(workId),
+    ]).then(([w, t, e, i, l]) => {
+      setWork(w ?? null);
+      setTasks(t);
+      setExtras(e);
+      setIncidents(i);
+      setLogs(l);
+    });
+  }, [workId]);
+
+  if (!work) {
+    return <div style={{ padding: 40, textAlign: 'center', color: '#7A7670' }}>Carregando…</div>;
+  }
+
+  const variation = work.plannedCost === 0 ? 0 : ((work.currentCost - work.plannedCost) / work.plannedCost) * 100;
+  const pendingExtras = extras.filter((e) => e.status === 'pendente' || e.status === 'em_analise');
+  const openIncidents = incidents.filter((i) => i.status !== 'resolvido' && i.status !== 'cancelado');
+  const nextMilestones = tasks.filter((t) => t.status !== 'concluida').slice(0, 4);
+  const lastLog = logs[0];
 
   const stats = [
     { label: 'Custo Previsto', value: formatCurrency(work.plannedCost), icon: DollarSign, color: '#1A5276', bg: '#EBF5FB' },
@@ -53,18 +89,18 @@ export default function WorkOverviewPage() {
     { label: 'Margem', value: `${work.margin}%`, icon: TrendingUp, color: work.margin > 0 ? '#1E8449' : '#C0392B', bg: work.margin > 0 ? '#E8F5E9' : '#FDEDEC' },
     { label: 'Prazo', value: new Date(work.deadline).toLocaleDateString('pt-BR'), icon: Calendar, color: '#B7770D', bg: '#FFF8E1' },
     { label: 'Extras Pendentes', value: pendingExtras.length, icon: AlertTriangle, color: '#E67E22', bg: '#FFF3E0' },
+    { label: 'Incidentes Abertos', value: openIncidents.length, icon: ShieldAlert, color: openIncidents.length > 0 ? '#C0392B' : '#7A7670', bg: openIncidents.length > 0 ? '#FDEDEC' : '#F5F5F5' },
   ];
 
   return (
     <>
       <style>{CSS}</style>
       <div className="wo">
-        {/* Stats */}
         <div className="wo-grid">
-          {stats.map(s => {
+          {stats.map((s) => {
             const Icon = s.icon;
             return (
-              <div key={s.label} className="wo-stat" style={{ overflow: 'hidden' }}>
+              <div key={s.label} className="wo-stat">
                 <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2, background: `linear-gradient(90deg, ${s.color}, ${s.color}88)` }} />
                 <div className="wo-stat-icon" style={{ background: s.bg }}>
                   <Icon size={18} color={s.color} />
@@ -78,18 +114,17 @@ export default function WorkOverviewPage() {
           })}
         </div>
 
-        {/* Cards */}
         <div className="wo-section-grid">
-          {/* Próximos Marcos */}
           <div className="wo-card">
             <div className="wo-card-header">
               <span className="wo-card-title">Próximos Marcos</span>
-              <button className="wo-card-link" onClick={() => navigate(`/works/${id}/schedule`)}>
+              <button className="wo-card-link" onClick={() => navigate(`/works/${workId}/schedule`)}>
                 Ver cronograma <ArrowRight size={12} />
               </button>
             </div>
             <div className="wo-card-body">
-              {nextMilestones.map(task => {
+              {nextMilestones.length === 0 && <div style={{ color: '#7A7670', fontSize: 12 }}>Nenhuma tarefa pendente.</div>}
+              {nextMilestones.map((task) => {
                 const statusCfg = TASK_STATUS_CONFIG[task.status];
                 return (
                   <div key={task.id} className="wo-milestone">
@@ -98,15 +133,7 @@ export default function WorkOverviewPage() {
                       <div className="wo-milestone-name">{task.name}</div>
                       <div className="wo-milestone-date">
                         {new Date(task.startDate).toLocaleDateString('pt-BR')} — {new Date(task.endDate).toLocaleDateString('pt-BR')}
-                        <span style={{
-                          marginLeft: 8,
-                          fontSize: 10.5,
-                          padding: '1px 7px',
-                          borderRadius: 8,
-                          background: statusCfg.bg,
-                          color: statusCfg.color,
-                          fontWeight: 500,
-                        }}>
+                        <span style={{ marginLeft: 8, fontSize: 10.5, padding: '1px 7px', borderRadius: 8, background: statusCfg.bg, color: statusCfg.color, fontWeight: 500 }}>
                           {statusCfg.label}
                         </span>
                       </div>
@@ -120,38 +147,89 @@ export default function WorkOverviewPage() {
             </div>
           </div>
 
-          {/* Alertas */}
           <div className="wo-card">
             <div className="wo-card-header">
-              <span className="wo-card-title">Alertas & Riscos</span>
+              <span className="wo-card-title">Incidentes Abertos</span>
+              <button className="wo-card-link" onClick={() => navigate(`/works/${workId}/incidents`)}>
+                Ver todos <ArrowRight size={12} />
+              </button>
             </div>
             <div className="wo-card-body">
-              {alerts.length === 0 ? (
+              {openIncidents.length === 0 ? (
                 <div style={{ textAlign: 'center', padding: '30px 0', color: 'var(--ink3)' }}>
                   <CheckCircle2 size={28} color="#1E8449" style={{ margin: '0 auto 8px' }} />
-                  <div style={{ fontSize: 13 }}>Nenhum alerta ativo</div>
+                  <div style={{ fontSize: 13 }}>Nenhum incidente aberto</div>
                 </div>
               ) : (
-                alerts.map(alert => (
-                  <div key={alert.id} className="wo-alert-item">
-                    <div style={{
-                      width: 28,
-                      height: 28,
-                      borderRadius: 7,
-                      background: alert.severity === 'critico' ? '#FDEDEC' : alert.severity === 'alto' ? '#FFF3E0' : '#FFF8E1',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      flexShrink: 0,
-                    }}>
-                      <AlertTriangle size={13} color={alert.severity === 'critico' ? '#C0392B' : alert.severity === 'alto' ? '#E67E22' : '#B7770D'} />
+                openIncidents.slice(0, 4).map((inc) => {
+                  const sevCfg = INCIDENT_SEVERITY_CONFIG[inc.severity];
+                  return (
+                    <div key={inc.id} className="wo-item">
+                      <div style={{ width: 28, height: 28, borderRadius: 7, background: sevCfg.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                        <ShieldAlert size={13} color={sevCfg.color} />
+                      </div>
+                      <div style={{ flex: 1 }}>
+                        <div style={{ fontSize: 12.5, fontWeight: 500 }}>{inc.title}</div>
+                        <div style={{ fontSize: 11, color: '#7A7670', marginTop: 2 }}>
+                          {sevCfg.label} • {inc.reportedBy} • {new Date(inc.reportedAt).toLocaleDateString('pt-BR')}
+                        </div>
+                      </div>
                     </div>
+                  );
+                })
+              )}
+            </div>
+          </div>
+        </div>
+
+        <div className="wo-section-grid">
+          <div className="wo-card">
+            <div className="wo-card-header">
+              <span className="wo-card-title">Extras Pendentes</span>
+              <button className="wo-card-link" onClick={() => navigate(`/works/${workId}/extras`)}>
+                Ver todos <ArrowRight size={12} />
+              </button>
+            </div>
+            <div className="wo-card-body">
+              {pendingExtras.length === 0 ? (
+                <div style={{ color: '#7A7670', fontSize: 12 }}>Nenhum extra pendente.</div>
+              ) : (
+                pendingExtras.slice(0, 3).map((e) => (
+                  <div key={e.id} className="wo-item">
                     <div style={{ flex: 1 }}>
-                      <div style={{ fontSize: 12.5, fontWeight: 500, color: 'var(--ink)' }}>{alert.message}</div>
-                      <div style={{ fontSize: 11, color: 'var(--ink3)', marginTop: 2 }}>{alert.date}</div>
+                      <div style={{ fontSize: 12.5, fontWeight: 500 }}>{e.title}</div>
+                      <div style={{ fontSize: 11, color: '#7A7670', marginTop: 2 }}>
+                        {formatCurrency(e.financialImpact)} • {e.scheduleImpact}
+                      </div>
                     </div>
                   </div>
                 ))
+              )}
+            </div>
+          </div>
+
+          <div className="wo-card">
+            <div className="wo-card-header">
+              <span className="wo-card-title">Último Registro do Diário</span>
+              <button className="wo-card-link" onClick={() => navigate(`/works/${workId}/daily-log`)}>
+                Ver diário <ArrowRight size={12} />
+              </button>
+            </div>
+            <div className="wo-card-body">
+              {!lastLog ? (
+                <div style={{ color: '#7A7670', fontSize: 12 }}>Nenhum registro.</div>
+              ) : (
+                <div>
+                  <div style={{ fontSize: 11, color: '#7A7670', fontWeight: 500, textTransform: 'uppercase', letterSpacing: 0.4 }}>
+                    <BookOpen size={11} style={{ display: 'inline', verticalAlign: 'middle' }} /> {new Date(lastLog.date).toLocaleDateString('pt-BR')} — {lastLog.responsible}
+                  </div>
+                  <div style={{ fontSize: 13, marginTop: 8, lineHeight: 1.5 }}>{lastLog.description}</div>
+                  {lastLog.problems && (
+                    <div style={{ marginTop: 10, padding: 10, background: '#FDEDEC', borderRadius: 8, fontSize: 12, color: '#922B21' }}>
+                      <strong>Problema:</strong> {lastLog.problems}
+                    </div>
+                  )}
+                </div>
               )}
             </div>
           </div>

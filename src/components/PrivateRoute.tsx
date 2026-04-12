@@ -7,6 +7,8 @@ interface PrivateRouteProps {
   requiredRole?: string;
 }
 
+const HOME_PATH = '/home';
+
 export function PrivateRoute({ children, requiredPermission, requiredRole }: PrivateRouteProps) {
   const { isAuthenticated, isLoading, permissions, roles } = useAuth();
   const location = useLocation();
@@ -26,12 +28,17 @@ export function PrivateRoute({ children, requiredPermission, requiredRole }: Pri
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  if (requiredPermission && !permissions.includes(requiredPermission)) {
-    return <Navigate to="/home" replace />;
-  }
+  const missingPermission = !!requiredPermission && !permissions.includes(requiredPermission);
+  const missingRole = !!requiredRole && !roles.includes(requiredRole);
 
-  if (requiredRole && !roles.includes(requiredRole)) {
-    return <Navigate to="/home" replace />;
+  if (missingPermission || missingRole) {
+    // Se já estamos em /home e mesmo assim algum filho pede permissão,
+    // renderizamos os filhos para não entrar em loop — a ausência do widget
+    // fica como responsabilidade de quem o usa dentro da página.
+    if (location.pathname === HOME_PATH) {
+      return <>{children}</>;
+    }
+    return <Navigate to={HOME_PATH} replace />;
   }
 
   return <>{children}</>;

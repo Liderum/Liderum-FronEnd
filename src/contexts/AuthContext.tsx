@@ -164,26 +164,39 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       tokenStore.setAccessToken(data.accessToken);
       tokenStore.setRefreshToken(data.refreshToken);
 
-      setUser({ identifier: data.identifier, name: data.name, email });
+      // Hidratação de perfil e RBAC em paralelo — não bloqueia a autenticação
+      // básica. Falha em qualquer um é não-fatal; o usuário ainda entra com os
+      // dados retornados pelo /doLogin e a home fica acessível pelo fallback
+      // do PrivateRoute.
+      const [profile, rbac] = await Promise.all([
+        SafeAuthCalls.getProfileDirect(data.accessToken),
+        SafeAuthCalls.getMyPermissionsDirect(data.accessToken),
+      ]);
 
-      // Chamadas diretas que NÃO passam pelo interceptor de 401.
-      // Se GetProfile ou GetMyPermissions falhar, o login permanece válido
-      // com os dados básicos retornados pelo /doLogin.
-      const profile = await SafeAuthCalls.getProfileDirect(data.accessToken);
-      if (profile) {
-        setUser({
-          identifier: profile.identifier,
-          name: profile.name,
-          email: profile.email,
-        });
-      }
-
-      const rbac = await SafeAuthCalls.getMyPermissionsDirect(data.accessToken);
       if (rbac) {
         setPermissions(rbac.permissions ?? []);
         setRoles(rbac.roles ?? []);
         setModules(rbac.modules ?? []);
+      } else {
+        // RBAC não carregou — limpa quaisquer valores antigos para não
+        // autorizar rotas por engano com dados de uma sessão anterior.
+        setPermissions([]);
+        setRoles([]);
+        setModules([]);
       }
+
+      // setUser é o ÚLTIMO passo: é ele que dispara isAuthenticated=true e a
+      // transição de rotas. Chamar por último garante que permissions/roles já
+      // estão no estado antes do PrivateRoute reavaliar.
+      setUser(
+        profile
+          ? {
+              identifier: profile.identifier,
+              name: profile.name,
+              email: profile.email,
+            }
+          : { identifier: data.identifier, name: data.name, email },
+      );
     },
     [],
   );

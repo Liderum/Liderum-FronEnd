@@ -2,6 +2,9 @@ export type WorkStatus = 'em_andamento' | 'atrasada' | 'concluida' | 'pausada' |
 export type ExtraStatus = 'pendente' | 'aprovado' | 'rejeitado' | 'em_analise';
 export type RiskLevel = 'baixo' | 'medio' | 'alto' | 'critico';
 export type TaskStatus = 'concluida' | 'em_andamento' | 'pendente' | 'bloqueada' | 'atrasada';
+export type IncidentSeverity = 'baixa' | 'media' | 'alta' | 'critica';
+export type IncidentStatus = 'aberto' | 'em_andamento' | 'resolvido' | 'cancelado';
+export type IncidentCategory = 'execucao' | 'seguranca' | 'qualidade' | 'prazo' | 'fornecedor' | 'cliente';
 
 export interface Work {
   id: string;
@@ -38,10 +41,26 @@ export interface BudgetItem {
   description: string;
   plannedCost: number;
   actualCost: number;
+  revisionNumber?: number;
+  revisedAt?: string;
+  revisedBy?: string;
+  note?: string;
+}
+
+export interface BudgetRevision {
+  id: string;
+  workId: string;
+  revisionNumber: number;
+  reason: string;
+  totalPlanned: number;
+  totalActual: number;
+  createdAt: string;
+  createdBy: string;
 }
 
 export interface ExtraRequest {
   id: string;
+  workId?: string;
   title: string;
   description: string;
   requestDate: string;
@@ -51,6 +70,12 @@ export interface ExtraRequest {
   requestedBy: string;
   approvedBy?: string;
   history: ExtraHistoryEntry[];
+  clientApprovalRequired?: boolean;
+  clientApprovalRequestedAt?: string;
+  clientApprovedAt?: string;
+  clientApprovedBy?: string;
+  clientDecisionNote?: string;
+  attachments?: string[];
 }
 
 export interface ExtraHistoryEntry {
@@ -70,6 +95,32 @@ export interface DailyLogEntry {
   photos: string[];
   weather?: string;
   workersCount?: number;
+}
+
+export interface Incident {
+  id: string;
+  workId: string;
+  title: string;
+  description: string;
+  category: IncidentCategory;
+  severity: IncidentSeverity;
+  status: IncidentStatus;
+  reportedBy: string;
+  reportedAt: string;
+  assignedTo?: string;
+  resolvedAt?: string;
+  resolution?: string;
+  photos: string[];
+  relatedTaskId?: string;
+  relatedExtraId?: string;
+  history: IncidentHistoryEntry[];
+}
+
+export interface IncidentHistoryEntry {
+  date: string;
+  action: string;
+  user: string;
+  notes?: string;
 }
 
 export interface RiskAlert {
@@ -123,4 +174,27 @@ export const EXTRA_STATUS_CONFIG: Record<ExtraStatus, { label: string; color: st
   aprovado: { label: 'Aprovado', color: '#1E8449', bg: '#E8F5E9' },
   rejeitado: { label: 'Rejeitado', color: '#C0392B', bg: '#FDEDEC' },
   em_analise: { label: 'Em análise', color: '#1A5276', bg: '#EBF5FB' },
+};
+
+export const INCIDENT_SEVERITY_CONFIG: Record<IncidentSeverity, { label: string; color: string; bg: string }> = {
+  baixa: { label: 'Baixa', color: '#1E8449', bg: '#E8F5E9' },
+  media: { label: 'Média', color: '#B7770D', bg: '#FFF8E1' },
+  alta: { label: 'Alta', color: '#E67E22', bg: '#FFF3E0' },
+  critica: { label: 'Crítica', color: '#C0392B', bg: '#FDEDEC' },
+};
+
+export const INCIDENT_STATUS_CONFIG: Record<IncidentStatus, { label: string; color: string; bg: string }> = {
+  aberto: { label: 'Aberto', color: '#C0392B', bg: '#FDEDEC' },
+  em_andamento: { label: 'Em andamento', color: '#1A5276', bg: '#EBF5FB' },
+  resolvido: { label: 'Resolvido', color: '#1E8449', bg: '#E8F5E9' },
+  cancelado: { label: 'Cancelado', color: '#7A7670', bg: '#F5F5F5' },
+};
+
+export const INCIDENT_CATEGORY_CONFIG: Record<IncidentCategory, { label: string; icon: string }> = {
+  execucao: { label: 'Execução', icon: 'Hammer' },
+  seguranca: { label: 'Segurança', icon: 'ShieldAlert' },
+  qualidade: { label: 'Qualidade', icon: 'Award' },
+  prazo: { label: 'Prazo', icon: 'Clock' },
+  fornecedor: { label: 'Fornecedor', icon: 'Truck' },
+  cliente: { label: 'Cliente', icon: 'User' },
 };

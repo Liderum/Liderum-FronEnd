@@ -35,19 +35,19 @@ const getEnvironment = (): 'development' | 'staging' | 'production' => {
   return 'production';
 };
 
-// Configurações de desenvolvimento
+// Liderum.Security.API roda em http://localhost:5065 (ver launchSettings.json).
 const developmentConfig: ApiConfig = {
   AUTH: {
-    BASE_URL: import.meta.env.VITE_AUTH_API_URL || 'http://localhost:5001/liderum/api/login',
+    BASE_URL: import.meta.env.VITE_AUTH_API_URL || 'http://localhost:5065/liderum/api/login',
   },
   USERS: {
-    BASE_URL: import.meta.env.VITE_USERS_API_URL || 'http://localhost:5001/liderum/api/user',
+    BASE_URL: import.meta.env.VITE_USERS_API_URL || 'http://localhost:5065/liderum/api/user',
   },
   MANAGEMENT: {
     BASE_URL: import.meta.env.VITE_MANAGEMENT_API_URL || 'https://localhost:7036',
   },
   RBAC: {
-    BASE_URL: import.meta.env.VITE_RBAC_API_URL || 'http://localhost:5001/liderum/api/rbac',
+    BASE_URL: import.meta.env.VITE_RBAC_API_URL || 'http://localhost:5065/liderum/api/rbac',
   },
 };
 

@@ -1,16 +1,18 @@
+import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { motion } from 'framer-motion';
 import {
   Building2, AlertTriangle, DollarSign, TrendingUp,
-  CheckCircle2, Clock, Percent, ArrowRight, Plus,
+  CheckCircle2, Clock, Percent, ArrowRight, Plus, ShieldAlert,
 } from 'lucide-react';
 import { KpiCards } from '@/modules/dashboard/components/KpiCards';
 import { FinancialChart } from '@/modules/dashboard/components/FinancialChart';
 import { WorksEvolutionChart } from '@/modules/dashboard/components/WorksEvolutionChart';
 import { WorksStatusTable } from '@/modules/dashboard/components/WorksStatusTable';
 import { RiskAlerts } from '@/modules/dashboard/components/RiskAlerts';
-import { mockWorks, mockRiskAlerts } from '@/modules/shared/data/mockData';
+import { WorksService, ExtrasService, IncidentsService } from '@/services/works';
+import type { Work, ExtraRequest, Incident, RiskAlert } from '@/modules/shared/types';
 
 const CSS = `
 @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,700;1,400;1,700&family=DM+Sans:wght@300;400;500&display=swap');
@@ -50,13 +52,84 @@ export default function DashboardPage() {
   const { user } = useAuth();
   const navigate = useNavigate();
 
-  const activeWorks = mockWorks.filter(w => w.status === 'em_andamento').length;
-  const delayedWorks = mockWorks.filter(w => w.status === 'atrasada').length;
-  const completedThisMonth = mockWorks.filter(w => w.status === 'concluida').length;
-  const totalPlanned = mockWorks.reduce((sum, w) => sum + w.plannedCost, 0);
-  const totalActual = mockWorks.reduce((sum, w) => sum + w.currentCost, 0);
-  const avgMargin = mockWorks.reduce((sum, w) => sum + w.margin, 0) / mockWorks.length;
-  const pendingExtras = 3;
+  const [works, setWorks] = useState<Work[]>([]);
+  const [extras, setExtras] = useState<ExtraRequest[]>([]);
+  const [incidents, setIncidents] = useState<Incident[]>([]);
+
+  useEffect(() => {
+    Promise.all([WorksService.list(), ExtrasService.listAll(), IncidentsService.listAll()]).then(
+      ([w, e, i]) => {
+        setWorks(w);
+        setExtras(e);
+        setIncidents(i);
+      },
+    );
+  }, []);
+
+  const activeWorks = works.filter((w) => w.status === 'em_andamento').length;
+  const delayedWorks = works.filter((w) => w.status === 'atrasada').length;
+  const completedThisMonth = works.filter((w) => w.status === 'concluida').length;
+  const totalPlanned = works.reduce((sum, w) => sum + w.plannedCost, 0);
+  const totalActual = works.reduce((sum, w) => sum + w.currentCost, 0);
+  const avgMargin = works.length === 0 ? 0 : works.reduce((sum, w) => sum + w.margin, 0) / works.length;
+  const pendingExtras = extras.filter((e) => e.status === 'pendente' || e.status === 'em_analise').length;
+  const openCriticalIncidents = incidents.filter(
+    (i) => i.status !== 'resolvido' && i.status !== 'cancelado' && (i.severity === 'alta' || i.severity === 'critica'),
+  ).length;
+
+  const riskAlerts: RiskAlert[] = useMemo(() => {
+    const alerts: RiskAlert[] = [];
+    for (const w of works) {
+      if (w.status === 'atrasada') {
+        alerts.push({
+          id: `alert-delay-${w.id}`,
+          workId: w.id,
+          workName: w.name,
+          type: 'prazo',
+          message: `Obra marcada como atrasada — ${w.currentStage} em ${w.percentComplete}%.`,
+          severity: w.riskLevel,
+          date: new Date().toISOString().slice(0, 10),
+        });
+      }
+      if (w.plannedCost > 0 && w.currentCost / w.plannedCost > 0.9 && w.status !== 'concluida') {
+        alerts.push({
+          id: `alert-budget-${w.id}`,
+          workId: w.id,
+          workName: w.name,
+          type: 'orcamento',
+          message: `Custo realizado em ${((w.currentCost / w.plannedCost) * 100).toFixed(0)}% do previsto.`,
+          severity: w.currentCost > w.plannedCost ? 'critico' : 'alto',
+          date: new Date().toISOString().slice(0, 10),
+        });
+      }
+      if (w.margin < 0) {
+        alerts.push({
+          id: `alert-margin-${w.id}`,
+          workId: w.id,
+          workName: w.name,
+          type: 'orcamento',
+          message: `Margem negativa detectada (${w.margin}%).`,
+          severity: 'critico',
+          date: new Date().toISOString().slice(0, 10),
+        });
+      }
+    }
+    for (const inc of incidents) {
+      if (inc.status === 'resolvido' || inc.status === 'cancelado') continue;
+      if (inc.severity !== 'alta' && inc.severity !== 'critica') continue;
+      const w = works.find((x) => x.id === inc.workId);
+      alerts.push({
+        id: `alert-inc-${inc.id}`,
+        workId: inc.workId,
+        workName: w?.name ?? 'Obra',
+        type: inc.category === 'seguranca' ? 'seguranca' : 'qualidade',
+        message: inc.title,
+        severity: inc.severity === 'critica' ? 'critico' : 'alto',
+        date: inc.reportedAt.slice(0, 10),
+      });
+    }
+    return alerts.slice(0, 8);
+  }, [works, incidents]);
 
   const kpis = [
     { label: 'Obras Ativas', value: activeWorks, icon: Building2, color: '#1E8449', bg: '#E8F5E9' },
@@ -65,7 +138,8 @@ export default function DashboardPage() {
     { label: 'Custo Realizado', value: `R$ ${(totalActual / 1e6).toFixed(1)}M`, icon: TrendingUp, color: '#B7770D', bg: '#FFF8E1' },
     { label: 'Margem Média', value: `${avgMargin.toFixed(1)}%`, icon: Percent, color: '#B8922A', bg: '#F0E4C4' },
     { label: 'Extras Pendentes', value: pendingExtras, icon: AlertTriangle, color: '#E67E22', bg: '#FFF3E0' },
-    { label: 'Concluídas no Mês', value: completedThisMonth, icon: CheckCircle2, color: '#1E8449', bg: '#E8F5E9' },
+    { label: 'Incidentes Críticos', value: openCriticalIncidents, icon: ShieldAlert, color: '#C0392B', bg: '#FDEDEC' },
+    { label: 'Concluídas', value: completedThisMonth, icon: CheckCircle2, color: '#1E8449', bg: '#E8F5E9' },
   ];
 
   return (
@@ -124,14 +198,21 @@ export default function DashboardPage() {
                   Ver todas <ArrowRight size={12} />
                 </button>
               </div>
-              <WorksStatusTable works={mockWorks.filter(w => w.status !== 'concluida').slice(0, 5)} />
+              <WorksStatusTable works={works.filter((w) => w.status !== 'concluida').slice(0, 5)} />
             </div>
             <div>
               <div style={{ marginBottom: 12 }}>
                 <div className="db-section-label">Monitoramento</div>
                 <div className="db-section-title">Alertas de Risco</div>
               </div>
-              <RiskAlerts alerts={mockRiskAlerts} />
+              {riskAlerts.length === 0 ? (
+                <div style={{ padding: 30, textAlign: 'center', background: '#fff', borderRadius: 12, border: '1px solid rgba(26,24,20,0.08)', color: '#7A7670' }}>
+                  <CheckCircle2 size={28} color="#1E8449" style={{ marginBottom: 8 }} />
+                  <div style={{ fontSize: 13 }}>Nenhum alerta ativo.</div>
+                </div>
+              ) : (
+                <RiskAlerts alerts={riskAlerts} />
+              )}
             </div>
           </div>
         </motion.div>
