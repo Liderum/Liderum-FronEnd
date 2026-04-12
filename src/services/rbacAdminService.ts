@@ -7,6 +7,12 @@ import type {
   CreateRoleRequest,
 } from '@/types/rbac';
 
+export interface RoleUser {
+  identifier: string;
+  name: string;
+  email: string;
+}
+
 export class RbacAdminService {
   static async listRoles(): Promise<RbacRole[]> {
     try {
@@ -38,6 +44,24 @@ export class RbacAdminService {
   static async listModules(): Promise<RbacModule[]> {
     try {
       const response = await rbacApi.get<RbacModule[]>('/modules');
+      return response.data;
+    } catch (error) {
+      throw new Error(extractErrorMessage(error));
+    }
+  }
+
+  static async getRolePermissions(roleId: string): Promise<RbacPermission[]> {
+    try {
+      const response = await rbacApi.get<RbacPermission[]>(`/roles/${roleId}/permissions`);
+      return response.data;
+    } catch (error) {
+      throw new Error(extractErrorMessage(error));
+    }
+  }
+
+  static async getRoleUsers(roleId: string): Promise<RoleUser[]> {
+    try {
+      const response = await rbacApi.get<RoleUser[]>(`/roles/${roleId}/users`);
       return response.data;
     } catch (error) {
       throw new Error(extractErrorMessage(error));

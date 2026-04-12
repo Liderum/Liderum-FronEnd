@@ -4,8 +4,18 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useSimpleToast } from '@/hooks/useSimpleToast';
 import { UserService } from '@/services/userService';
+import { PERMISSION_MAP } from '@/constants/permissions';
 import { CreateUserRequest, PagedResponse, UpdateUserRequest, UserDto, UserStatus } from '@/types/users';
-import { Pencil, Plus, Trash2, UserPlus, Search, Users as UsersIcon, Shield, UserCheck } from 'lucide-react';
+import {
+  Pencil, Plus, Trash2, UserPlus, Search, Users as UsersIcon, Shield, UserCheck, Check,
+  LayoutDashboard, Building2, CalendarClock, DollarSign, FilePlus2,
+  BookOpen, Building, Truck, UserCog, Settings, CreditCard,
+} from 'lucide-react';
+
+const MODULE_ICON_MAP: Record<string, React.ElementType> = {
+  LayoutDashboard, Building2, CalendarClock, DollarSign, FilePlus2,
+  BookOpen, Building, Users: UsersIcon, Truck, UserCog, Settings, CreditCard,
+};
 
 const LDCSS = `
 @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,700;1,400;1,700&family=DM+Sans:wght@300;400;500&display=swap');
@@ -56,6 +66,24 @@ const LDCSS = `
 .ld-a2{animation:ld-in 0.4s cubic-bezier(0.22,1,0.36,1) 0.07s both;}
 .ld-a3{animation:ld-in 0.4s cubic-bezier(0.22,1,0.36,1) 0.14s both;}
 @media(max-width:640px){.ld-filter-grid{grid-template-columns:1fr;}.ld-form-grid{grid-template-columns:1fr;}}
+.ld-modules-section{margin-top:4px;}
+.ld-modules-section-title{font-size:11.5px;font-weight:500;color:var(--ink2);margin-bottom:8px;display:flex;align-items:center;gap:6px;}
+.ld-modules-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:6px;}
+.ld-module-chip{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;border:1px solid var(--bdr);cursor:pointer;transition:all 0.18s;background:#fff;user-select:none;}
+.ld-module-chip:hover{border-color:rgba(184,146,42,0.3);background:rgba(247,244,239,0.4);}
+.ld-module-chip.selected{border-color:rgba(30,132,73,0.35);background:rgba(232,245,233,0.5);}
+.ld-module-check{width:16px;height:16px;border-radius:4px;border:1.5px solid var(--bdr);display:flex;align-items:center;justify-content:center;transition:all 0.18s;flex-shrink:0;background:#fff;}
+.ld-module-chip.selected .ld-module-check{background:#1E8449;border-color:#1E8449;}
+.ld-module-icon{width:24px;height:24px;border-radius:5px;background:linear-gradient(135deg,var(--gold-light),var(--cream2));display:flex;align-items:center;justify-content:center;color:var(--gold);flex-shrink:0;}
+.ld-module-name{font-size:12px;font-weight:500;color:var(--ink2);}
+.ld-perm-group{margin-top:10px;padding:10px 12px;border-radius:8px;background:rgba(247,244,239,0.4);border:1px solid var(--bdr);}
+.ld-perm-group-title{font-size:11px;font-weight:600;color:var(--ink2);margin-bottom:6px;display:flex;align-items:center;gap:6px;}
+.ld-perm-list{display:flex;flex-wrap:wrap;gap:4px;}
+.ld-perm-chip{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:5px;font-size:11px;font-weight:500;border:1px solid var(--bdr);cursor:pointer;transition:all 0.15s;background:#fff;color:var(--ink2);user-select:none;}
+.ld-perm-chip:hover{border-color:rgba(184,146,42,0.3);}
+.ld-perm-chip.active{background:rgba(232,245,233,0.6);border-color:rgba(30,132,73,0.3);color:#1E8449;}
+.ld-perm-mini-check{width:12px;height:12px;border-radius:3px;border:1.5px solid var(--bdr);display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;background:#fff;transition:all 0.15s;}
+.ld-perm-chip.active .ld-perm-mini-check{background:#1E8449;border-color:#1E8449;}
 `;
 
 export function Users() {
@@ -101,7 +129,7 @@ export function Users() {
 
   function openEdit(user: UserDto) {
     setEditingUser(user);
-    setForm({ fullName: user.fullName, email: user.email, role: user.role, password: '', confirmPassword: '', permissions: user.permissions || [] });
+    setForm({ fullName: user.name, email: user.email, role: user.role || '', password: '', confirmPassword: '', permissions: user.permissions || [] });
     setIsModalOpen(true);
   }
 
@@ -116,11 +144,11 @@ export function Users() {
           showToast('Senha e confirmação devem coincidir', 'error');
           return;
         }
-        const message = await UserService.create(form);
-        showToast(message || 'Usuário criado com sucesso', 'success');
+        await UserService.create(form);
+        showToast('Usuário criado com sucesso', 'success');
       } else {
         const payload: UpdateUserRequest = {
-          id: editingUser.id,
+          id: editingUser.identifier,
           fullName: form.fullName,
           email: form.email,
           role: form.role,
@@ -129,8 +157,8 @@ export function Users() {
           password: form.password || undefined,
           confirmPassword: form.confirmPassword || undefined,
         };
-        const message = await UserService.update(payload);
-        showToast(message || 'Usuário atualizado com sucesso', 'success');
+        await UserService.update(payload);
+        showToast('Usuário atualizado com sucesso', 'success');
       }
       setIsModalOpen(false);
       loadUsers();
@@ -140,11 +168,11 @@ export function Users() {
   }
 
   async function handleDelete(user: UserDto) {
-    const confirmed = window.confirm(`Excluir usuário ${user.fullName}?`);
+    const confirmed = window.confirm(`Excluir usuário ${user.name}?`);
     if (!confirmed) return;
     try {
-      const message = await UserService.remove(user.id);
-      showToast(message || 'Usuário excluído com sucesso', 'success');
+      await UserService.remove(user.identifier);
+      showToast('Usuário excluído com sucesso', 'success');
       loadUsers();
     } catch (e: unknown) {
       showToast(e instanceof Error ? e.message : 'Erro ao excluir', 'error');
@@ -276,15 +304,15 @@ export function Users() {
                   </tr>
                 )}
                 {data.items.map((u) => (
-                  <tr key={u.id}>
+                  <tr key={u.identifier}>
                     <td>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                        <span className="ld-avatar">{getInitials(u.fullName)}</span>
-                        <span style={{ fontWeight: 500, color: 'var(--ink)' }}>{u.fullName}</span>
+                        <span className="ld-avatar">{getInitials(u.name)}</span>
+                        <span style={{ fontWeight: 500, color: 'var(--ink)' }}>{u.name}</span>
                       </div>
                     </td>
                     <td style={{ color: 'var(--ink3)' }}>{u.email}</td>
-                    <td>{getRoleBadge(u.role)}</td>
+                    <td>{getRoleBadge(u.role || '')}</td>
                     <td>
                       <span className={u.status === 'active' ? 'ld-badge ld-badge-green' : 'ld-badge ld-badge-gray'}>
                         {u.status === 'active' ? '● Ativo' : '○ Inativo'}
@@ -337,7 +365,7 @@ export function Users() {
 
         {/* Modal */}
         <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-          <DialogContent>
+          <DialogContent style={{ maxWidth: 620, maxHeight: '85vh', overflow: 'auto' }}>
             <DialogHeader>
               <DialogTitle>
                 {editingUser ? 'Editar Usuário' : 'Novo Usuário'}
@@ -353,8 +381,8 @@ export function Users() {
                 <Input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
               </div>
               <div className="ld-field">
-                <label className="ld-lbl">Cargo *</label>
-                <Input value={form.role} onChange={(e) => setForm({ ...form, role: e.target.value })} />
+                <label className="ld-lbl">Cargo / Role *</label>
+                <Input value={form.role} onChange={(e) => setForm({ ...form, role: e.target.value })} placeholder="Ex: Gerente de Obras" />
               </div>
               {!editingUser && (
                 <>
@@ -368,12 +396,140 @@ export function Users() {
                   </div>
                 </>
               )}
-              <div className="ld-field full">
-                <label className="ld-lbl">Permissões (separe por vírgula)</label>
-                <Input
-                  value={(form.permissions || []).join(', ')}
-                  onChange={(e) => setForm({ ...form, permissions: e.target.value.split(',').map((s) => s.trim()).filter(Boolean) })}
-                />
+
+              {/* Seleção de Módulos (Criar) ou Permissões (Editar) */}
+              <div className="ld-field full ld-modules-section">
+                {!editingUser ? (
+                  <>
+                    <label className="ld-modules-section-title">
+                      <Shield size={13} color="var(--gold)" />
+                      Módulos de acesso *
+                    </label>
+                    <p style={{ fontSize: 11, color: 'var(--ink3)', marginBottom: 10 }}>
+                      Selecione os módulos que este usuário poderá acessar. Todas as permissões do módulo serão concedidas.
+                    </p>
+                    <div className="ld-modules-grid">
+                      {PERMISSION_MAP.map((mod) => {
+                        const IconComp = MODULE_ICON_MAP[mod.icon] || Shield;
+                        const isSelected = form.permissions.includes(mod.module);
+                        return (
+                          <div
+                            key={mod.module}
+                            className={`ld-module-chip${isSelected ? ' selected' : ''}`}
+                            onClick={() => {
+                              setForm((prev) => ({
+                                ...prev,
+                                permissions: isSelected
+                                  ? prev.permissions.filter((p) => p !== mod.module)
+                                  : [...prev.permissions, mod.module],
+                              }));
+                            }}
+                          >
+                            <div className="ld-module-check">
+                              {isSelected && <Check size={10} color="#fff" strokeWidth={3} />}
+                            </div>
+                            <div className="ld-module-icon">
+                              <IconComp size={12} />
+                            </div>
+                            <span className="ld-module-name">{mod.label}</span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                    {form.permissions.length > 0 && (
+                      <div style={{ marginTop: 8, display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                        <span style={{ fontSize: 11, color: 'var(--ink3)' }}>
+                          {form.permissions.length} módulo{form.permissions.length !== 1 ? 's' : ''} selecionado{form.permissions.length !== 1 ? 's' : ''}
+                        </span>
+                        <button
+                          type="button"
+                          className="ld-btn ld-btn-outline ld-btn-sm"
+                          style={{ padding: '2px 8px', fontSize: 10 }}
+                          onClick={() => setForm((prev) => ({ ...prev, permissions: PERMISSION_MAP.map((m) => m.module) }))}
+                        >
+                          Selecionar todos
+                        </button>
+                        <button
+                          type="button"
+                          className="ld-btn ld-btn-outline ld-btn-sm"
+                          style={{ padding: '2px 8px', fontSize: 10 }}
+                          onClick={() => setForm((prev) => ({ ...prev, permissions: [] }))}
+                        >
+                          Limpar
+                        </button>
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  <>
+                    <label className="ld-modules-section-title">
+                      <Shield size={13} color="var(--gold)" />
+                      Permissões por módulo
+                    </label>
+                    <p style={{ fontSize: 11, color: 'var(--ink3)', marginBottom: 10 }}>
+                      Selecione as permissões individuais para este usuário.
+                    </p>
+                    {PERMISSION_MAP.map((mod) => {
+                      const IconComp = MODULE_ICON_MAP[mod.icon] || Shield;
+                      const modPerms = mod.permissions.map((p) => p.key);
+                      const selectedPerms = modPerms.filter((k) => form.permissions.includes(k));
+                      const allSelected = selectedPerms.length === modPerms.length;
+
+                      return (
+                        <div key={mod.module} className="ld-perm-group">
+                          <div className="ld-perm-group-title">
+                            <div className="ld-module-icon" style={{ width: 20, height: 20 }}>
+                              <IconComp size={10} />
+                            </div>
+                            {mod.label}
+                            <span style={{ fontSize: 10, color: 'var(--ink3)', fontWeight: 400 }}>
+                              ({selectedPerms.length}/{modPerms.length})
+                            </span>
+                            <button
+                              type="button"
+                              style={{ marginLeft: 'auto', fontSize: 10, color: 'var(--gold)', cursor: 'pointer', background: 'none', border: 'none', fontFamily: 'inherit', fontWeight: 500 }}
+                              onClick={() => {
+                                setForm((prev) => ({
+                                  ...prev,
+                                  permissions: allSelected
+                                    ? prev.permissions.filter((p) => !modPerms.includes(p))
+                                    : [...prev.permissions.filter((p) => !modPerms.includes(p)), ...modPerms],
+                                }));
+                              }}
+                            >
+                              {allSelected ? 'Remover todos' : 'Marcar todos'}
+                            </button>
+                          </div>
+                          <div className="ld-perm-list">
+                            {mod.permissions.map((perm) => {
+                              const isActive = form.permissions.includes(perm.key);
+                              return (
+                                <div
+                                  key={perm.key}
+                                  className={`ld-perm-chip${isActive ? ' active' : ''}`}
+                                  title={perm.description}
+                                  onClick={() => {
+                                    setForm((prev) => ({
+                                      ...prev,
+                                      permissions: isActive
+                                        ? prev.permissions.filter((p) => p !== perm.key)
+                                        : [...prev.permissions, perm.key],
+                                    }));
+                                  }}
+                                >
+                                  <span className="ld-perm-mini-check">
+                                    {isActive && <Check size={8} color="#fff" strokeWidth={3} />}
+                                  </span>
+                                  {perm.label}
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </>
+                )}
               </div>
             </div>
             <DialogFooter style={{ marginTop: 4 }}>

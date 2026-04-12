@@ -1,38 +1,43 @@
 import { usersApi } from './api/apiFactory';
-import { ApiResponse, CreateUserRequest, PagedRequest, PagedResponse, UpdateUserRequest, UserDto } from '@/types/users';
+import type { CreateUserRequest, PagedRequest, PagedResponse, UpdateUserRequest, UserDto } from '@/types/users';
 
 export class UserService {
   static async list(params: PagedRequest): Promise<PagedResponse<UserDto>> {
-    const response = await usersApi.get<ApiResponse<PagedResponse<UserDto>>>('/list', { params });
-    if (!response.data.isSuccess) {
-      throw new Error(response.data.message || 'Erro ao listar usuários');
-    }
-    return response.data.data[0];
+    const queryParams: Record<string, string | number> = {
+      page: params.page,
+      pageSize: params.pageSize,
+    };
+    if (params.search) queryParams.search = params.search;
+    if (params.status && params.status !== 'all') queryParams.status = params.status;
+    if (params.role && params.role !== 'all') queryParams.role = params.role;
+
+    const response = await usersApi.get<PagedResponse<UserDto>>('/list', { params: queryParams });
+    return response.data;
   }
 
-  static async create(payload: CreateUserRequest): Promise<string> {
-    const response = await usersApi.post<ApiResponse<null>>('/create', payload);
-    if (!response.data.isSuccess) {
-      throw new Error(response.data.message || 'Erro ao criar usuário');
-    }
-    return response.data.message;
+  static async create(payload: CreateUserRequest): Promise<void> {
+    // Mapeia o payload do frontend para o formato do AddMember do backend
+    await usersApi.post('/add-member', {
+      name: payload.fullName,
+      email: payload.email,
+      password: payload.password,
+      roleName: payload.role,
+      modules: payload.permissions, // Frontend envia permissões como nomes de módulos
+    });
   }
 
-  static async update(payload: UpdateUserRequest): Promise<string> {
-    const response = await usersApi.put<ApiResponse<null>>(`/update/${payload.id}`, payload);
-    if (!response.data.isSuccess) {
-      throw new Error(response.data.message || 'Erro ao atualizar usuário');
-    }
-    return response.data.message;
+  static async update(payload: UpdateUserRequest): Promise<void> {
+    await usersApi.put(`/update/${payload.id}`, {
+      fullName: payload.fullName,
+      email: payload.email,
+      role: payload.role,
+      status: payload.status,
+      permissions: payload.permissions,
+      password: payload.password || undefined,
+    });
   }
 
-  static async remove(id: string): Promise<string> {
-    const response = await usersApi.delete<ApiResponse<null>>(`/delete/${id}`);
-    if (!response.data.isSuccess) {
-      throw new Error(response.data.message || 'Erro ao excluir usuário');
-    }
-    return response.data.message;
+  static async remove(id: string): Promise<void> {
+    await usersApi.delete(`/delete/${id}`);
   }
 }
-
-

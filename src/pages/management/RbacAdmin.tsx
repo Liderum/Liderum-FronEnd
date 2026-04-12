@@ -7,6 +7,7 @@ import { UserService } from '@/services/userService';
 import { PERMISSION_MAP } from '@/constants/permissions';
 import type { RbacRole, RbacPermission } from '@/types/rbac';
 import type { UserDto } from '@/types/users';
+import type { RoleUser } from '@/services/rbacAdminService';
 import {
   Shield, Plus, Search, ChevronRight, Check, X, Users,
   LayoutDashboard, Building2, CalendarClock, DollarSign, FilePlus2,
@@ -111,7 +112,7 @@ export function RbacAdmin() {
   const [saving, setSaving] = useState(false);
 
   const [users, setUsers] = useState<UserDto[]>([]);
-  const [roleUsers, setRoleUsers] = useState<UserDto[]>([]);
+  const [roleUsers, setRoleUsers] = useState<RoleUser[]>([]);
   const [userSearch, setUserSearch] = useState('');
 
   const [showCreateRole, setShowCreateRole] = useState(false);
@@ -166,14 +167,20 @@ export function RbacAdmin() {
       setRolePermissionIds(new Set());
       setRoleUsers([]);
 
-      // TODO: the API might return role permissions separately;
-      // for now we use the permissions attached to the role or a dedicated endpoint
-      // Simulating by trying to load permissions for this role
-      // The backend's /my-permissions returns data for the current user;
-      // for admin view we need the role's permissions
-      // We'll track toggled permissions via API calls (assign/remove)
+      try {
+        const [perms, usersData] = await Promise.all([
+          RbacAdminService.getRolePermissions(role.id),
+          RbacAdminService.getRoleUsers(role.id),
+        ]);
+
+        // Monta o set de IDs das permissões já atribuídas a este role
+        setRolePermissionIds(new Set(perms.map((p) => p.id)));
+        setRoleUsers(usersData);
+      } catch (e) {
+        showToast(e instanceof Error ? e.message : 'Erro ao carregar dados da role', 'error');
+      }
     },
-    [],
+    [showToast],
   );
 
   const isPermGranted = useCallback(
@@ -273,10 +280,10 @@ export function RbacAdmin() {
     async (user: UserDto) => {
       if (!selectedRole) return;
       try {
-        await RbacAdminService.assignRoleToUser(selectedRole.id, user.id);
-        setRoleUsers((prev) => [...prev, user]);
+        await RbacAdminService.assignRoleToUser(selectedRole.id, user.identifier);
+        setRoleUsers((prev) => [...prev, { identifier: user.identifier, name: user.name, email: user.email }]);
         setShowAssignUser(false);
-        showToast(`${user.fullName} adicionado à role`, 'success');
+        showToast(`${user.name} adicionado à role`, 'success');
       } catch (e) {
         showToast(e instanceof Error ? e.message : 'Erro ao atribuir role', 'error');
       }
@@ -285,13 +292,13 @@ export function RbacAdmin() {
   );
 
   const handleRemoveUser = useCallback(
-    async (user: UserDto) => {
+    async (user: RoleUser) => {
       if (!selectedRole) return;
-      if (!window.confirm(`Remover ${user.fullName} da role ${selectedRole.name}?`)) return;
+      if (!window.confirm(`Remover ${user.name} da role ${selectedRole.name}?`)) return;
       try {
-        await RbacAdminService.removeRoleFromUser(selectedRole.id, user.id);
-        setRoleUsers((prev) => prev.filter((u) => u.id !== user.id));
-        showToast(`${user.fullName} removido da role`, 'success');
+        await RbacAdminService.removeRoleFromUser(selectedRole.id, user.identifier);
+        setRoleUsers((prev) => prev.filter((u) => u.identifier !== user.identifier));
+        showToast(`${user.name} removido da role`, 'success');
       } catch (e) {
         showToast(e instanceof Error ? e.message : 'Erro ao remover da role', 'error');
       }
@@ -300,12 +307,12 @@ export function RbacAdmin() {
   );
 
   const filteredAssignUsers = useMemo(() => {
-    const roleUserIds = new Set(roleUsers.map((u) => u.id));
+    const roleUserIds = new Set(roleUsers.map((u) => u.identifier));
     const q = assignSearch.toLowerCase();
     return users.filter(
       (u) =>
-        !roleUserIds.has(u.id) &&
-        (u.fullName.toLowerCase().includes(q) || u.email.toLowerCase().includes(q)),
+        !roleUserIds.has(u.identifier) &&
+        (u.name.toLowerCase().includes(q) || u.email.toLowerCase().includes(q)),
     );
   }, [users, roleUsers, assignSearch]);
 
@@ -513,10 +520,10 @@ export function RbacAdmin() {
                       </div>
                     ) : (
                       roleUsers.map((u) => (
-                        <div key={u.id} className="rbac-user-row">
-                          <span className="rbac-avatar">{getInitials(u.fullName)}</span>
+                        <div key={u.identifier} className="rbac-user-row">
+                          <span className="rbac-avatar">{getInitials(u.name)}</span>
                           <div style={{ flex: 1, minWidth: 0 }}>
-                            <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--ink)' }}>{u.fullName}</div>
+                            <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--ink)' }}>{u.name}</div>
                             <div style={{ fontSize: 11, color: 'var(--ink3)' }}>{u.email}</div>
                           </div>
                           <button
@@ -598,10 +605,10 @@ export function RbacAdmin() {
                 </div>
               ) : (
                 filteredAssignUsers.map((u) => (
-                  <div key={u.id} className="rbac-user-row" style={{ cursor: 'pointer' }} onClick={() => handleAssignUser(u)}>
-                    <span className="rbac-avatar">{getInitials(u.fullName)}</span>
+                  <div key={u.identifier} className="rbac-user-row" style={{ cursor: 'pointer' }} onClick={() => handleAssignUser(u)}>
+                    <span className="rbac-avatar">{getInitials(u.name)}</span>
                     <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--ink)' }}>{u.fullName}</div>
+                      <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--ink)' }}>{u.name}</div>
                       <div style={{ fontSize: 11, color: 'var(--ink3)' }}>{u.email}</div>
                     </div>
                     <Plus size={14} color="var(--gold)" />
