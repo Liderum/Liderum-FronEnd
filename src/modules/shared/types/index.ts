@@ -9,18 +9,32 @@ export type IncidentCategory = 'execucao' | 'seguranca' | 'qualidade' | 'prazo' 
 export interface Work {
   id: string;
   name: string;
-  client: string;
-  responsible: string;
-  currentStage: string;
-  percentComplete: number;
-  currentCost: number;
-  plannedCost: number;
-  deadline: string;
-  startDate: string;
+  description?: string;
+  address: string;
   status: WorkStatus;
-  address?: string;
-  riskLevel: RiskLevel;
+  statusLabel?: string;
+  startDate: string;
+  expectedEndDate?: string;
+  actualEndDate?: string;
+  totalBudget: number;
+  currentCost: number;
   margin: number;
+  marginPercent?: number;
+  customerId?: string;
+  responsibleUserId?: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface CreateWorkDto {
+  name: string;
+  description?: string;
+  address: string;
+  startDate: string;
+  expectedEndDate?: string;
+  totalBudget: number;
+  customerId: string;
+  responsibleUserId?: string;
 }
 
 export interface ScheduleTask {

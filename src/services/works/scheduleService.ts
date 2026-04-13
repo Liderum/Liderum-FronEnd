@@ -1,9 +1,9 @@
-import { managementApi } from '@/services/api/apiFactory';
+import { worksApi } from '@/services/api/apiFactory';
 import { extractErrorMessage } from '@/utils/errorHandler';
 import type { ScheduleTask } from '@/modules/shared/types';
 import { USE_MOCK, delay, genId, getList, setList } from './mockStore';
 
-const base = (workId: string) => `/liderum/api/works/${workId}/schedule`;
+const base = (workId: string) => `/works/${workId}/schedule`;
 
 export interface DependencyValidationResult {
   ok: boolean;
@@ -14,7 +14,7 @@ export class ScheduleService {
   static async list(workId: string): Promise<ScheduleTask[]> {
     if (USE_MOCK) return delay(this.computeBlocked([...getList('schedule', workId)]));
     try {
-      const { data } = await managementApi.get<ScheduleTask[]>(base(workId));
+      const { data } = await worksApi.get<ScheduleTask[]>(base(workId));
       return this.computeBlocked(data);
     } catch (error) {
       throw new Error(extractErrorMessage(error));
@@ -32,7 +32,7 @@ export class ScheduleService {
       return delay(created);
     }
     try {
-      const { data } = await managementApi.post<ScheduleTask>(base(workId), created);
+      const { data } = await worksApi.post<ScheduleTask>(`${base(workId)}/tasks`, created);
       return data;
     } catch (error) {
       throw new Error(extractErrorMessage(error));
@@ -58,7 +58,7 @@ export class ScheduleService {
       return delay(merged);
     }
     try {
-      const { data } = await managementApi.put<ScheduleTask>(`${base(workId)}/${taskId}`, patch);
+      const { data } = await worksApi.put<ScheduleTask>(`${base(workId)}/tasks/${taskId}`, patch);
       return data;
     } catch (error) {
       throw new Error(extractErrorMessage(error));
@@ -74,7 +74,7 @@ export class ScheduleService {
       return delay(undefined);
     }
     try {
-      await managementApi.delete(`${base(workId)}/${taskId}`);
+      await worksApi.delete(`${base(workId)}/tasks/${taskId}`);
     } catch (error) {
       throw new Error(extractErrorMessage(error));
     }

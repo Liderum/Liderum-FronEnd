@@ -6,7 +6,7 @@ export interface ApiConfig {
   USERS: {
     BASE_URL: string;
   };
-  MANAGEMENT: {
+  WORKS: {
     BASE_URL: string;
   };
   RBAC: {
@@ -43,8 +43,8 @@ const developmentConfig: ApiConfig = {
   USERS: {
     BASE_URL: import.meta.env.VITE_USERS_API_URL || 'http://localhost:5065/liderum/api/user',
   },
-  MANAGEMENT: {
-    BASE_URL: import.meta.env.VITE_MANAGEMENT_API_URL || 'https://localhost:7036',
+  WORKS: {
+    BASE_URL: import.meta.env.VITE_WORKS_API_URL || 'http://localhost:5003/api/v1',
   },
   RBAC: {
     BASE_URL: import.meta.env.VITE_RBAC_API_URL || 'http://localhost:5065/liderum/api/rbac',
@@ -59,8 +59,8 @@ const stagingConfig: ApiConfig = {
   USERS: {
     BASE_URL: import.meta.env.VITE_USERS_API_URL || 'http://localhost:5001/liderum/api/user',
   },
-  MANAGEMENT: {
-    BASE_URL: import.meta.env.VITE_MANAGEMENT_API_URL || 'https://localhost:7036',
+  WORKS: {
+    BASE_URL: import.meta.env.VITE_WORKS_API_URL || 'http://localhost:5003/api/v1',
   },
   RBAC: {
     BASE_URL: import.meta.env.VITE_RBAC_API_URL || 'http://localhost:5001/liderum/api/rbac',
@@ -75,8 +75,8 @@ const productionConfig: ApiConfig = {
   USERS: {
     BASE_URL: import.meta.env.VITE_USERS_API_URL || '',
   },
-  MANAGEMENT: {
-    BASE_URL: import.meta.env.VITE_MANAGEMENT_API_URL || '',
+  WORKS: {
+    BASE_URL: import.meta.env.VITE_WORKS_API_URL || '',
   },
   RBAC: {
     BASE_URL: import.meta.env.VITE_RBAC_API_URL || '',

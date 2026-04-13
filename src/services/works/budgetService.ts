@@ -1,15 +1,15 @@
-import { managementApi } from '@/services/api/apiFactory';
+import { worksApi } from '@/services/api/apiFactory';
 import { extractErrorMessage } from '@/utils/errorHandler';
 import type { BudgetItem, BudgetRevision } from '@/modules/shared/types';
 import { mockStore, USE_MOCK, delay, genId, nowIso, getList, setList } from './mockStore';
 
-const base = (workId: string) => `/liderum/api/works/${workId}/budget`;
+const base = (workId: string) => `/works/${workId}/budget`;
 
 export class BudgetService {
   static async list(workId: string): Promise<BudgetItem[]> {
     if (USE_MOCK) return delay([...getList('budget', workId)]);
     try {
-      const { data } = await managementApi.get<BudgetItem[]>(base(workId));
+      const { data } = await worksApi.get<BudgetItem[]>(base(workId));
       return data;
     } catch (error) {
       throw new Error(extractErrorMessage(error));
@@ -24,7 +24,7 @@ export class BudgetService {
       return delay(created);
     }
     try {
-      const { data } = await managementApi.post<BudgetItem>(base(workId), payload);
+      const { data } = await worksApi.post<BudgetItem>(`${base(workId)}/items`, payload);
       return data;
     } catch (error) {
       throw new Error(extractErrorMessage(error));
@@ -47,7 +47,7 @@ export class BudgetService {
       return delay(updated);
     }
     try {
-      const { data } = await managementApi.put<BudgetItem>(`${base(workId)}/${itemId}`, patch);
+      const { data } = await worksApi.put<BudgetItem>(`${base(workId)}/items/${itemId}`, patch);
       return data;
     } catch (error) {
       throw new Error(extractErrorMessage(error));
@@ -61,7 +61,7 @@ export class BudgetService {
       return delay(undefined);
     }
     try {
-      await managementApi.delete(`${base(workId)}/${itemId}`);
+      await worksApi.delete(`${base(workId)}/items/${itemId}`);
     } catch (error) {
       throw new Error(extractErrorMessage(error));
     }
@@ -72,7 +72,7 @@ export class BudgetService {
       return delay([...(mockStore.budgetRevisions[workId] ?? [])]);
     }
     try {
-      const { data } = await managementApi.get<BudgetRevision[]>(`${base(workId)}/revisions`);
+      const { data } = await worksApi.get<BudgetRevision[]>(`${base(workId)}/revisions`);
       return data;
     } catch (error) {
       throw new Error(extractErrorMessage(error));
@@ -103,7 +103,7 @@ export class BudgetService {
       return delay(revision);
     }
     try {
-      const { data } = await managementApi.post<BudgetRevision>(`${base(workId)}/revisions`, {
+      const { data } = await worksApi.post<BudgetRevision>(`${base(workId)}/revisions`, {
         reason,
         totalPlanned,
         totalActual,

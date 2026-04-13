@@ -1,13 +1,13 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
-  Plus, Search, Filter, Building2, ArrowRight, MapPin,
-  Calendar, User, LayoutGrid, List,
+  Plus, Search, Building2, ArrowRight, MapPin,
+  Calendar, LayoutGrid, List, Loader2,
 } from 'lucide-react';
 import type { Work, WorkStatus } from '@/modules/shared/types';
-import { STATUS_CONFIG, RISK_CONFIG } from '@/modules/shared/types';
-import { mockWorks } from '@/modules/shared/data/mockData';
+import { STATUS_CONFIG } from '@/modules/shared/types';
+import { WorksService } from '@/services/works/worksService';
 
 const CSS = `
 .wl{font-family:'DM Sans',sans-serif;color:var(--ink,#1A1814);display:flex;flex-direction:column;gap:20px;}
@@ -80,10 +80,27 @@ export default function WorksListPage() {
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState<FilterKey>('todas');
   const [view, setView] = useState<'grid' | 'list'>('grid');
+  const [works, setWorks] = useState<Work[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const filtered = mockWorks.filter(w => {
+  useEffect(() => {
+    WorksService.list()
+      .then(setWorks)
+      .catch(() => setWorks([]))
+      .finally(() => setLoading(false));
+  }, []);
+
+  if (loading) {
+    return (
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', padding: 80 }}>
+        <Loader2 size={28} className="animate-spin" style={{ color: 'var(--gold, #B8922A)' }} />
+      </div>
+    );
+  }
+
+  const filtered = works.filter(w => {
     const matchSearch = w.name.toLowerCase().includes(search.toLowerCase()) ||
-      w.client.toLowerCase().includes(search.toLowerCase());
+      (w.address ?? '').toLowerCase().includes(search.toLowerCase());
     const matchFilter = filter === 'todas' || w.status === filter;
     return matchSearch && matchFilter;
   });
@@ -98,7 +115,7 @@ export default function WorksListPage() {
             <div className="wl-tag">Portfolio</div>
             <h1 className="wl-title">Obras</h1>
           </div>
-          <button className="wl-btn-new" onClick={() => navigate('/works')}>
+          <button className="wl-btn-new" onClick={() => navigate('/works/new')}>
             <Plus size={15} /> Nova Obra
           </button>
         </div>
@@ -152,8 +169,9 @@ export default function WorksListPage() {
 }
 
 function WorkCard({ work, index, onClick }: { work: Work; index: number; onClick: () => void }) {
-  const statusCfg = STATUS_CONFIG[work.status];
-  const riskCfg = RISK_CONFIG[work.riskLevel];
+  const statusCfg = STATUS_CONFIG[work.status] ?? STATUS_CONFIG.planejada;
+  const marginPct = work.marginPercent ?? (work.totalBudget > 0 ? (work.margin / work.totalBudget) * 100 : 0);
+  const executionPct = work.totalBudget > 0 ? Math.min(100, Math.round((work.currentCost / work.totalBudget) * 100)) : 0;
 
   return (
     <motion.div
@@ -167,7 +185,7 @@ function WorkCard({ work, index, onClick }: { work: Work; index: number; onClick
       <div className="wl-card-top">
         <div>
           <div className="wl-card-name">{work.name}</div>
-          <div className="wl-card-client">{work.client}</div>
+          <div className="wl-card-client">{work.address}</div>
         </div>
         <span style={{
           display: 'inline-flex',
@@ -188,35 +206,37 @@ function WorkCard({ work, index, onClick }: { work: Work; index: number; onClick
 
       <div className="wl-card-meta">
         <div className="wl-card-meta-row">
-          <User size={12} /> {work.responsible}
+          <MapPin size={12} /> {work.address}
         </div>
         <div className="wl-card-meta-row">
-          <MapPin size={12} /> {work.currentStage}
+          <Calendar size={12} /> Início: {new Date(work.startDate).toLocaleDateString('pt-BR')}
         </div>
-        <div className="wl-card-meta-row">
-          <Calendar size={12} /> Prazo: {new Date(work.deadline).toLocaleDateString('pt-BR')}
-        </div>
+        {work.expectedEndDate && (
+          <div className="wl-card-meta-row">
+            <Calendar size={12} /> Prazo: {new Date(work.expectedEndDate).toLocaleDateString('pt-BR')}
+          </div>
+        )}
       </div>
 
-      {/* Progress */}
+      {/* Execução (custo executado vs orçamento) */}
       <div className="wl-card-progress">
         <div className="wl-card-progress-bar">
           <div
             className="wl-card-progress-fill"
             style={{
-              width: `${work.percentComplete}%`,
-              background: getProgressColor(work.percentComplete),
+              width: `${executionPct}%`,
+              background: getProgressColor(100 - executionPct),
             }}
           />
         </div>
-        <span style={{ fontFamily: 'var(--font-numeric)', fontVariantNumeric: 'tabular-nums', fontSize: 12, fontWeight: 600, color: 'var(--ink2)' }}>{work.percentComplete}%</span>
+        <span style={{ fontFamily: 'var(--font-numeric)', fontVariantNumeric: 'tabular-nums', fontSize: 12, fontWeight: 600, color: 'var(--ink2)' }}>{executionPct}%</span>
       </div>
 
       {/* Footer */}
       <div className="wl-card-footer">
         <div>
           <div className="wl-card-cost">{formatCurrency(work.currentCost)}</div>
-          <div className="wl-card-cost-label">de {formatCurrency(work.plannedCost)} previsto</div>
+          <div className="wl-card-cost-label">de {formatCurrency(work.totalBudget)} previsto</div>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <span style={{
@@ -224,12 +244,13 @@ function WorkCard({ work, index, onClick }: { work: Work; index: number; onClick
             fontWeight: 600,
             padding: '2px 7px',
             borderRadius: 8,
-            background: riskCfg.bg,
-            color: riskCfg.color,
+            background: marginPct >= 20 ? '#E8F5E9' : marginPct >= 0 ? '#FFF8E1' : '#FDEDEC',
+            color: marginPct >= 20 ? '#1E8449' : marginPct >= 0 ? '#B7770D' : '#C0392B',
             textTransform: 'uppercase',
             letterSpacing: '0.3px',
+            fontVariantNumeric: 'tabular-nums',
           }}>
-            Risco {riskCfg.label}
+            Margem {marginPct.toFixed(0)}%
           </span>
           <div className="wl-card-arrow">
             Detalhe <ArrowRight size={12} />

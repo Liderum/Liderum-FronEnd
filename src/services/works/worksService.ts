@@ -1,77 +1,84 @@
-import { managementApi } from '@/services/api/apiFactory';
+import { worksApi } from '@/services/api/apiFactory';
 import { extractErrorMessage } from '@/utils/errorHandler';
-import type { Work } from '@/modules/shared/types';
-import { mockStore, USE_MOCK, delay, genId, nowIso } from './mockStore';
+import type { Work, WorkStatus, CreateWorkDto } from '@/modules/shared/types';
+import { Console } from 'console';
 
-const BASE = '/liderum/api/works';
+const BASE = '/works';
+
+// Mapeamento do StatusLabel do backend para o WorkStatus do frontend
+const STATUS_MAP: Record<string, WorkStatus> = {
+  Planning: 'planejada',
+  InProgress: 'em_andamento',
+  Paused: 'pausada',
+  Completed: 'concluida',
+  Cancelled: 'pausada',
+};
+
+function mapWork(raw: Record<string, unknown>): Work {
+  const statusLabel = (raw.statusLabel as string) ?? '';
+  return {
+    id: String(raw.id),
+    name: String(raw.name ?? ''),
+    description: raw.description as string | undefined,
+    address: String(raw.address ?? ''),
+    status: STATUS_MAP[statusLabel] ?? 'planejada',
+    statusLabel,
+    startDate: String(raw.startDate ?? ''),
+    expectedEndDate: raw.expectedEndDate as string | undefined,
+    actualEndDate: raw.actualEndDate as string | undefined,
+    totalBudget: Number(raw.totalBudget ?? 0),
+    currentCost: Number(raw.currentCost ?? 0),
+    margin: Number(raw.margin ?? 0),
+    marginPercent: Number(raw.marginPercent ?? 0),
+    customerId: raw.customerId as string | undefined,
+    responsibleUserId: raw.responsibleUserId as string | undefined,
+    createdAt: raw.createdAt as string | undefined,
+    updatedAt: raw.updatedAt as string | undefined,
+  };
+}
 
 export class WorksService {
   static async list(): Promise<Work[]> {
-    if (USE_MOCK) return delay([...mockStore.works]);
     try {
-      const { data } = await managementApi.get<Work[]>(BASE);
-      return data;
+      const { data } = await worksApi.get(BASE);
+      const items = Array.isArray(data) ? data : data?.items ?? [];
+      return items.map(mapWork);
     } catch (error) {
       throw new Error(extractErrorMessage(error));
     }
   }
 
   static async getById(id: string): Promise<Work | undefined> {
-    if (USE_MOCK) return delay(mockStore.works.find((w) => w.id === id));
     try {
-      const { data } = await managementApi.get<Work>(`${BASE}/${id}`);
-      return data;
+      const { data } = await worksApi.get(`${BASE}/${id}`);
+      return mapWork(data);
     } catch (error) {
       throw new Error(extractErrorMessage(error));
     }
   }
 
-  static async create(payload: Omit<Work, 'id'>): Promise<Work> {
-    if (USE_MOCK) {
-      const created: Work = { ...payload, id: genId('w') };
-      mockStore.works.push(created);
-      return delay(created);
-    }
+  static async create(payload: CreateWorkDto): Promise<Work> {
     try {
-      const { data } = await managementApi.post<Work>(BASE, payload);
-      return data;
+      const { data } = await worksApi.post(BASE, payload);
+      return mapWork(data);
     } catch (error) {
       throw new Error(extractErrorMessage(error));
     }
   }
 
   static async update(id: string, patch: Partial<Work>): Promise<Work> {
-    if (USE_MOCK) {
-      const idx = mockStore.works.findIndex((w) => w.id === id);
-      if (idx < 0) throw new Error('Obra não encontrada');
-      mockStore.works[idx] = { ...mockStore.works[idx], ...patch };
-      return delay(mockStore.works[idx]);
-    }
     try {
-      const { data } = await managementApi.put<Work>(`${BASE}/${id}`, patch);
-      return data;
+      const { data } = await worksApi.put(`${BASE}/${id}`, patch);
+      return mapWork(data);
     } catch (error) {
       throw new Error(extractErrorMessage(error));
     }
   }
 
-  static async addCost(id: string, amount: number, _reason: string): Promise<Work> {
-    if (USE_MOCK) {
-      const idx = mockStore.works.findIndex((w) => w.id === id);
-      if (idx < 0) throw new Error('Obra não encontrada');
-      mockStore.works[idx] = {
-        ...mockStore.works[idx],
-        currentCost: mockStore.works[idx].currentCost + amount,
-      };
-      return delay(mockStore.works[idx]);
-    }
+  static async addCost(id: string, amount: number, reason: string): Promise<Work> {
     try {
-      const { data } = await managementApi.post<Work>(`${BASE}/${id}/cost`, {
-        amount,
-        reason: _reason,
-        at: nowIso(),
-      });
-      return data;
+      const { data } = await worksApi.post(`${BASE}/${id}/cost`, { amount, reason });
+      return mapWork(data);
     } catch (error) {
       throw new Error(extractErrorMessage(error));
     }

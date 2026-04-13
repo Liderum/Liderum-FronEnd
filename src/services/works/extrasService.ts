@@ -1,10 +1,10 @@
-import { managementApi } from '@/services/api/apiFactory';
+import { worksApi } from '@/services/api/apiFactory';
 import { extractErrorMessage } from '@/utils/errorHandler';
 import type { ExtraRequest, ExtraStatus } from '@/modules/shared/types';
 import { mockStore, USE_MOCK, delay, genId, nowIso, getList, setList } from './mockStore';
 import { WorksService } from './worksService';
 
-const base = (workId: string) => `/liderum/api/works/${workId}/extras`;
+const base = (workId: string) => `/works/${workId}/extras`;
 
 export interface CreateExtraInput {
   title: string;
@@ -20,7 +20,7 @@ export class ExtrasService {
   static async list(workId: string): Promise<ExtraRequest[]> {
     if (USE_MOCK) return delay([...getList('extras', workId)]);
     try {
-      const { data } = await managementApi.get<ExtraRequest[]>(base(workId));
+      const { data } = await worksApi.get<ExtraRequest[]>(base(workId));
       return data;
     } catch (error) {
       throw new Error(extractErrorMessage(error));
@@ -36,7 +36,7 @@ export class ExtrasService {
       return delay(all);
     }
     try {
-      const { data } = await managementApi.get<ExtraRequest[]>('/liderum/api/extras');
+      const { data } = await worksApi.get<ExtraRequest[]>('/extras');
       return data;
     } catch (error) {
       throw new Error(extractErrorMessage(error));
@@ -72,7 +72,7 @@ export class ExtrasService {
       return delay(created);
     }
     try {
-      const { data } = await managementApi.post<ExtraRequest>(base(workId), created);
+      const { data } = await worksApi.post<ExtraRequest>(base(workId), created);
       return data;
     } catch (error) {
       throw new Error(extractErrorMessage(error));
@@ -116,9 +116,9 @@ export class ExtrasService {
       return delay(updated);
     }
     try {
-      const { data } = await managementApi.post<ExtraRequest>(
-        `${base(workId)}/${extraId}/transition`,
-        { to, note },
+      const { data } = await worksApi.patch<ExtraRequest>(
+        `${base(workId)}/${extraId}/status`,
+        { newStatus: to, note },
       );
       return data;
     } catch (error) {
@@ -150,8 +150,8 @@ export class ExtrasService {
       return delay(updated);
     }
     try {
-      const { data } = await managementApi.post<ExtraRequest>(
-        `${base(workId)}/${extraId}/client-approval`,
+      const { data } = await worksApi.post<ExtraRequest>(
+        `${base(workId)}/${extraId}/client-approval-request`,
         {},
       );
       return data;
@@ -198,7 +198,7 @@ export class ExtrasService {
       return delay(updated);
     }
     try {
-      const { data } = await managementApi.post<ExtraRequest>(
+      const { data } = await worksApi.post<ExtraRequest>(
         `${base(workId)}/${extraId}/client-decision`,
         { decision, clientName, note },
       );

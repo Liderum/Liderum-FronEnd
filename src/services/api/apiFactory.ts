@@ -118,6 +118,8 @@ class ApiFactory {
 
 export const authApiInstance = authApi;
 export const usersApi = ApiFactory.getInstance('USERS');
-export const managementApi = ApiFactory.getInstance('MANAGEMENT');
+export const worksApi = ApiFactory.getInstance('WORKS');
 export const rbacApi = ApiFactory.getInstance('RBAC');
+/** @deprecated Use worksApi instead */
+export const managementApi = worksApi;
 export default authApiInstance;

@@ -31,9 +31,9 @@ export const EnvironmentExample: React.FC = () => {
               </code>
             </li>
             <li>
-              <strong>Gestão:</strong>
+              <strong>Obras:</strong>
               <code className="ml-2 bg-gray-200 px-2 py-1 rounded">
-                {currentConfig.MANAGEMENT.BASE_URL}
+                {currentConfig.WORKS.BASE_URL}
               </code>
             </li>
           </ul>
@@ -42,10 +42,10 @@ export const EnvironmentExample: React.FC = () => {
         <div>
           <h3 className="text-lg font-semibold">Como usar em serviços:</h3>
           <pre className="bg-gray-800 text-green-400 p-4 rounded overflow-x-auto">
-{`import { managementApi } from '@/services/api/apiFactory';
+{`import { worksApi } from '@/services/api/apiFactory';
 
 // A instância já vem configurada com a URL correta
-const response = await managementApi.get('/liderum/api/Profile');`}
+const response = await worksApi.get('/works');`}
           </pre>
         </div>
 

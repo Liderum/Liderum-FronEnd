@@ -57,7 +57,7 @@ export function genId(prefix: string): string {
 }
 
 export const USE_MOCK =
-  (import.meta.env.VITE_USE_MOCK ?? 'true').toString().toLowerCase() !== 'false';
+  (import.meta.env.VITE_USE_MOCK ?? 'false').toString().toLowerCase() === 'true';
 
 export function nowIso(): string {
   return new Date().toISOString();

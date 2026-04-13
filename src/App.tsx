@@ -24,6 +24,7 @@ import DashboardPage from './modules/dashboard/pages/DashboardPage';
 
 // Modules — Works
 import WorksListPage from './modules/works/pages/WorksListPage';
+import NewWorkPage from './modules/works/pages/NewWorkPage';
 import { WorkLayout } from './modules/works/components/WorkLayout';
 import WorkOverviewPage from './modules/works/pages/WorkOverviewPage';
 
@@ -80,6 +81,14 @@ function AppContent() {
         element={<PrivateRoute requiredPermission="works.view"><DashboardLayout /></PrivateRoute>}
       >
         <Route index element={<WorksListPage />} />
+      </Route>
+
+      {/* Works — New (antes de :id para não colidir) */}
+      <Route
+        path="/works/new"
+        element={<PrivateRoute requiredPermission="works.create"><DashboardLayout /></PrivateRoute>}
+      >
+        <Route index element={<NewWorkPage />} />
       </Route>
 
       {/* Works — Detail with tabs */}

@@ -1,4 +1,4 @@
-import { managementApi } from './api/apiFactory';
+import { worksApi } from './api/apiFactory';
 import { extractErrorMessage } from '@/utils/errorHandler';
 import {
   Company,
@@ -18,7 +18,7 @@ import {
 export class CompanyService {
   static async list(): Promise<Company[]> {
     try {
-      const response = await managementApi.get<Company[]>('/liderum/api/Companies');
+      const response = await worksApi.get<Company[]>('/companies');
       return response.data;
     } catch (error) {
       const message = extractErrorMessage(error);
@@ -28,7 +28,7 @@ export class CompanyService {
 
   static async getById(id: number): Promise<Company> {
     try {
-      const response = await managementApi.get<Company>(`/liderum/api/Companies/${id}`);
+      const response = await worksApi.get<Company>(`/companies/${id}`);
       return response.data;
     } catch (error) {
       const message = extractErrorMessage(error);
@@ -38,7 +38,7 @@ export class CompanyService {
 
   static async create(payload: CreateCompanyDto): Promise<Company> {
     try {
-      const response = await managementApi.post<Company>('/liderum/api/Companies', payload);
+      const response = await worksApi.post<Company>('/companies', payload);
       return response.data;
     } catch (error) {
       const message = extractErrorMessage(error);
@@ -48,7 +48,7 @@ export class CompanyService {
 
   static async update(id: number, payload: UpdateCompanyDto): Promise<void> {
     try {
-      await managementApi.put(`/liderum/api/Companies/${id}`, payload);
+      await worksApi.put(`/companies/${id}`, payload);
     } catch (error) {
       const message = extractErrorMessage(error);
       throw new Error(message);
@@ -60,8 +60,8 @@ export class CompanyService {
 export class CustomerService {
   static async list(companyId: number): Promise<Customer[]> {
     try {
-      const response = await managementApi.get<Customer[]>(
-        `/liderum/api/companies/${companyId}/customers`
+      const response = await worksApi.get<Customer[]>(
+        `/companies/${companyId}/customers`
       );
       return response.data;
     } catch (error) {
@@ -72,8 +72,8 @@ export class CustomerService {
 
   static async getById(companyId: number, id: number): Promise<Customer> {
     try {
-      const response = await managementApi.get<Customer>(
-        `/liderum/api/companies/${companyId}/customers/${id}`
+      const response = await worksApi.get<Customer>(
+        `/companies/${companyId}/customers/${id}`
       );
       return response.data;
     } catch (error) {
@@ -84,8 +84,8 @@ export class CustomerService {
 
   static async create(companyId: number, payload: CreateCustomerDto): Promise<Customer> {
     try {
-      const response = await managementApi.post<Customer>(
-        `/liderum/api/companies/${companyId}/customers`,
+      const response = await worksApi.post<Customer>(
+        `/companies/${companyId}/customers`,
         payload
       );
       return response.data;
@@ -101,8 +101,8 @@ export class CustomerService {
     payload: UpdateCustomerDto
   ): Promise<void> {
     try {
-      await managementApi.put(
-        `/liderum/api/companies/${companyId}/customers/${id}`,
+      await worksApi.put(
+        `/companies/${companyId}/customers/${id}`,
         payload
       );
     } catch (error) {
@@ -113,7 +113,7 @@ export class CustomerService {
 
   static async delete(companyId: number, id: number): Promise<void> {
     try {
-      await managementApi.delete(`/liderum/api/companies/${companyId}/customers/${id}`);
+      await worksApi.delete(`/companies/${companyId}/customers/${id}`);
     } catch (error) {
       const message = extractErrorMessage(error);
       throw new Error(message);
@@ -125,8 +125,8 @@ export class CustomerService {
 export class SupplierService {
   static async list(companyId: number): Promise<Supplier[]> {
     try {
-      const response = await managementApi.get<Supplier[]>(
-        `/liderum/api/companies/${companyId}/suppliers`
+      const response = await worksApi.get<Supplier[]>(
+        `/companies/${companyId}/suppliers`
       );
       return response.data;
     } catch (error) {
@@ -137,8 +137,8 @@ export class SupplierService {
 
   static async getById(companyId: number, id: number): Promise<Supplier> {
     try {
-      const response = await managementApi.get<Supplier>(
-        `/liderum/api/companies/${companyId}/suppliers/${id}`
+      const response = await worksApi.get<Supplier>(
+        `/companies/${companyId}/suppliers/${id}`
       );
       return response.data;
     } catch (error) {
@@ -149,8 +149,8 @@ export class SupplierService {
 
   static async create(companyId: number, payload: CreateSupplierDto): Promise<Supplier> {
     try {
-      const response = await managementApi.post<Supplier>(
-        `/liderum/api/companies/${companyId}/suppliers`,
+      const response = await worksApi.post<Supplier>(
+        `/companies/${companyId}/suppliers`,
         payload
       );
       return response.data;
@@ -166,8 +166,8 @@ export class SupplierService {
     payload: UpdateSupplierDto
   ): Promise<void> {
     try {
-      await managementApi.put(
-        `/liderum/api/companies/${companyId}/suppliers/${id}`,
+      await worksApi.put(
+        `/companies/${companyId}/suppliers/${id}`,
         payload
       );
     } catch (error) {
@@ -178,7 +178,7 @@ export class SupplierService {
 
   static async delete(companyId: number, id: number): Promise<void> {
     try {
-      await managementApi.delete(`/liderum/api/companies/${companyId}/suppliers/${id}`);
+      await worksApi.delete(`/companies/${companyId}/suppliers/${id}`);
     } catch (error) {
       const message = extractErrorMessage(error);
       throw new Error(message);
@@ -190,7 +190,7 @@ export class SupplierService {
 export class ProfileService {
   static async get(): Promise<Profile> {
     try {
-      const response = await managementApi.get<Profile>('/liderum/api/Profile');
+      const response = await worksApi.get<Profile>('/profile');
       return response.data;
     } catch (error) {
       const message = extractErrorMessage(error);
@@ -200,7 +200,7 @@ export class ProfileService {
 
   static async update(payload: UpdateMyProfileDto): Promise<void> {
     try {
-      await managementApi.put('/liderum/api/Profile', payload);
+      await worksApi.put('/profile', payload);
     } catch (error) {
       const message = extractErrorMessage(error);
       throw new Error(message);
@@ -212,7 +212,7 @@ export class ProfileService {
       const formData = new FormData();
       formData.append('Avatar', file);
       formData.append('RowVersion', rowVersion);
-      await managementApi.put('/liderum/api/Profile/avatar', formData, {
+      await worksApi.put('/profile/avatar', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
@@ -225,7 +225,7 @@ export class ProfileService {
 
   static async deleteAvatar(): Promise<void> {
     try {
-      await managementApi.delete('/liderum/api/Profile/avatar');
+      await worksApi.delete('/profile/avatar');
     } catch (error) {
       const message = extractErrorMessage(error);
       throw new Error(message);

@@ -1,4 +1,4 @@
-import { managementApi } from '@/services/api/apiFactory';
+import { worksApi } from '@/services/api/apiFactory';
 import { extractErrorMessage } from '@/utils/errorHandler';
 import type {
   Incident,
@@ -8,7 +8,7 @@ import type {
 } from '@/modules/shared/types';
 import { mockStore, USE_MOCK, delay, genId, nowIso, getList, setList } from './mockStore';
 
-const base = (workId: string) => `/liderum/api/works/${workId}/incidents`;
+const base = (workId: string) => `/works/${workId}/incidents`;
 
 export interface CreateIncidentInput {
   title: string;
@@ -36,7 +36,7 @@ export class IncidentsService {
       items = [...getList('incidents', workId)];
     } else {
       try {
-        const { data } = await managementApi.get<Incident[]>(base(workId), { params: filter });
+        const { data } = await worksApi.get<Incident[]>(base(workId), { params: filter });
         items = data;
       } catch (error) {
         throw new Error(extractErrorMessage(error));
@@ -70,7 +70,7 @@ export class IncidentsService {
       return delay(all);
     }
     try {
-      const { data } = await managementApi.get<Incident[]>('/liderum/api/incidents');
+      const { data } = await worksApi.get<Incident[]>('/incidents');
       return data;
     } catch (error) {
       throw new Error(extractErrorMessage(error));
@@ -104,7 +104,7 @@ export class IncidentsService {
       return delay(created);
     }
     try {
-      const { data } = await managementApi.post<Incident>(base(workId), created);
+      const { data } = await worksApi.post<Incident>(base(workId), created);
       return data;
     } catch (error) {
       throw new Error(extractErrorMessage(error));
@@ -139,9 +139,9 @@ export class IncidentsService {
       return delay(updated);
     }
     try {
-      const { data } = await managementApi.post<Incident>(
-        `${base(workId)}/${incidentId}/transition`,
-        { to, note },
+      const { data } = await worksApi.patch<Incident>(
+        `${base(workId)}/${incidentId}/status`,
+        { newStatus: to, resolution: note, notes: note },
       );
       return data;
     } catch (error) {

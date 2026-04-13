@@ -1,12 +1,13 @@
-import { Outlet, NavLink, useParams, useLocation } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { Outlet, NavLink, useParams, useLocation, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
   LayoutDashboard, CalendarClock, DollarSign, FilePlus2, BookOpen, ShieldAlert,
-  ArrowLeft, MapPin, User, Building2,
+  ArrowLeft, MapPin, User, Building2, Loader2,
 } from 'lucide-react';
-import { mockWorks } from '@/modules/shared/data/mockData';
-import { STATUS_CONFIG, RISK_CONFIG } from '@/modules/shared/types';
-import { useNavigate } from 'react-router-dom';
+import type { Work } from '@/modules/shared/types';
+import { STATUS_CONFIG } from '@/modules/shared/types';
+import { WorksService } from '@/services/works/worksService';
 
 const CSS = `
 .wk{font-family:'DM Sans',sans-serif;color:var(--ink,#1A1814);display:flex;flex-direction:column;gap:20px;}
@@ -42,9 +43,39 @@ export function WorkLayout() {
   const { id } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
-  const work = mockWorks.find(w => w.id === id) || mockWorks[0];
-  const statusCfg = STATUS_CONFIG[work.status];
-  const riskCfg = RISK_CONFIG[work.riskLevel];
+  const [work, setWork] = useState<Work | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!id) return;
+    WorksService.getById(id)
+      .then((w) => setWork(w ?? null))
+      .catch(() => setWork(null))
+      .finally(() => setLoading(false));
+  }, [id]);
+
+  if (loading) {
+    return (
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', padding: 80 }}>
+        <Loader2 size={28} className="animate-spin" style={{ color: 'var(--gold, #B8922A)' }} />
+      </div>
+    );
+  }
+
+  if (!work) {
+    return (
+      <div style={{ textAlign: 'center', padding: 60, color: 'var(--ink3, #7A7670)' }}>
+        <Building2 size={40} style={{ marginBottom: 12 }} />
+        <div style={{ fontSize: 14, fontWeight: 500 }}>Obra não encontrada</div>
+        <button onClick={() => navigate('/works')} style={{ marginTop: 12, color: 'var(--gold, #B8922A)', background: 'none', border: 'none', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif" }}>
+          Voltar para obras
+        </button>
+      </div>
+    );
+  }
+
+  const statusCfg = STATUS_CONFIG[work.status] ?? STATUS_CONFIG.planejada;
+  const executionPct = work.totalBudget > 0 ? Math.min(100, Math.round((work.currentCost / work.totalBudget) * 100)) : 0;
 
   const basePath = `/works/${id}`;
 
@@ -66,7 +97,7 @@ export function WorkLayout() {
           <div className="wk-hero-top">
             <div>
               <div className="wk-hero-name">{work.name}</div>
-              <div className="wk-hero-client">{work.client}</div>
+              <div className="wk-hero-client">{work.address}</div>
             </div>
             <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
               <span style={{
@@ -79,28 +110,17 @@ export function WorkLayout() {
               }}>
                 ● {statusCfg.label}
               </span>
-              <span style={{
-                padding: '4px 12px',
-                borderRadius: 20,
-                fontSize: 11,
-                fontWeight: 500,
-                background: `${riskCfg.color}18`,
-                color: riskCfg.color,
-              }}>
-                Risco {riskCfg.label}
-              </span>
             </div>
           </div>
           <div className="wk-hero-meta">
-            <div className="wk-hero-meta-item"><User size={13} /> {work.responsible}</div>
             <div className="wk-hero-meta-item"><MapPin size={13} /> {work.address}</div>
-            <div className="wk-hero-meta-item"><Building2 size={13} /> {work.currentStage}</div>
+            <div className="wk-hero-meta-item"><Building2 size={13} /> {work.description || '—'}</div>
           </div>
           <div className="wk-hero-progress">
             <div className="wk-hero-progress-bar">
-              <div className="wk-hero-progress-fill" style={{ width: `${work.percentComplete}%` }} />
+              <div className="wk-hero-progress-fill" style={{ width: `${executionPct}%` }} />
             </div>
-            <span className="wk-hero-progress-label">{work.percentComplete}%</span>
+            <span className="wk-hero-progress-label">{executionPct}% executado</span>
           </div>
         </motion.div>
 

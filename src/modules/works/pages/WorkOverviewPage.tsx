@@ -76,18 +76,19 @@ export default function WorkOverviewPage() {
     return <div style={{ padding: 40, textAlign: 'center', color: '#7A7670' }}>Carregando…</div>;
   }
 
-  const variation = work.plannedCost === 0 ? 0 : ((work.currentCost - work.plannedCost) / work.plannedCost) * 100;
+  const variation = work.totalBudget === 0 ? 0 : ((work.currentCost - work.totalBudget) / work.totalBudget) * 100;
+  const marginPct = work.marginPercent ?? (work.totalBudget > 0 ? (work.margin / work.totalBudget) * 100 : 0);
   const pendingExtras = extras.filter((e) => e.status === 'pendente' || e.status === 'em_analise');
   const openIncidents = incidents.filter((i) => i.status !== 'resolvido' && i.status !== 'cancelado');
   const nextMilestones = tasks.filter((t) => t.status !== 'concluida').slice(0, 4);
   const lastLog = logs[0];
 
   const stats = [
-    { label: 'Custo Previsto', value: formatCurrency(work.plannedCost), icon: DollarSign, color: '#1A5276', bg: '#EBF5FB' },
+    { label: 'Orçamento Total', value: formatCurrency(work.totalBudget), icon: DollarSign, color: '#1A5276', bg: '#EBF5FB' },
     { label: 'Custo Realizado', value: formatCurrency(work.currentCost), icon: TrendingUp, color: variation > 0 ? '#C0392B' : '#1E8449', bg: variation > 0 ? '#FDEDEC' : '#E8F5E9' },
     { label: 'Variação', value: `${variation > 0 ? '+' : ''}${variation.toFixed(1)}%`, icon: Percent, color: variation > 0 ? '#C0392B' : '#1E8449', bg: variation > 0 ? '#FDEDEC' : '#E8F5E9' },
-    { label: 'Margem', value: `${work.margin}%`, icon: TrendingUp, color: work.margin > 0 ? '#1E8449' : '#C0392B', bg: work.margin > 0 ? '#E8F5E9' : '#FDEDEC' },
-    { label: 'Prazo', value: new Date(work.deadline).toLocaleDateString('pt-BR'), icon: Calendar, color: '#B7770D', bg: '#FFF8E1' },
+    { label: 'Margem', value: `${marginPct.toFixed(1)}%`, icon: TrendingUp, color: marginPct > 0 ? '#1E8449' : '#C0392B', bg: marginPct > 0 ? '#E8F5E9' : '#FDEDEC' },
+    { label: 'Prazo', value: work.expectedEndDate ? new Date(work.expectedEndDate).toLocaleDateString('pt-BR') : '—', icon: Calendar, color: '#B7770D', bg: '#FFF8E1' },
     { label: 'Extras Pendentes', value: pendingExtras.length, icon: AlertTriangle, color: '#E67E22', bg: '#FFF3E0' },
     { label: 'Incidentes Abertos', value: openIncidents.length, icon: ShieldAlert, color: openIncidents.length > 0 ? '#C0392B' : '#7A7670', bg: openIncidents.length > 0 ? '#FDEDEC' : '#F5F5F5' },
   ];

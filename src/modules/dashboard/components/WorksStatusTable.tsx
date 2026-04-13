@@ -26,7 +26,7 @@ export function WorksStatusTable({ works }: WorksStatusTableProps) {
         <table style={{ width: '100%', borderCollapse: 'collapse', fontFamily: "'DM Sans', sans-serif" }}>
           <thead>
             <tr style={{ borderBottom: '1px solid rgba(26,24,20,0.08)' }}>
-              {['Obra', 'Etapa', 'Progresso', 'Custo', 'Status', ''].map(h => (
+              {['Obra', 'Endereço', 'Execução', 'Custo', 'Status', ''].map(h => (
                 <th key={h} style={{
                   padding: '12px 16px',
                   fontSize: 10.5,
@@ -42,7 +42,8 @@ export function WorksStatusTable({ works }: WorksStatusTableProps) {
           </thead>
           <tbody>
             {works.map((work) => {
-              const statusCfg = STATUS_CONFIG[work.status];
+              const statusCfg = STATUS_CONFIG[work.status] ?? STATUS_CONFIG.planejada;
+              const execPct = work.totalBudget > 0 ? Math.min(100, Math.round((work.currentCost / work.totalBudget) * 100)) : 0;
               return (
                 <tr
                   key={work.id}
@@ -57,10 +58,10 @@ export function WorksStatusTable({ works }: WorksStatusTableProps) {
                 >
                   <td style={{ padding: '14px 16px' }}>
                     <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--ink, #1A1814)' }}>{work.name}</div>
-                    <div style={{ fontSize: 11.5, color: 'var(--ink3, #7A7670)', marginTop: 2 }}>{work.client}</div>
+                    <div style={{ fontSize: 11.5, color: 'var(--ink3, #7A7670)', marginTop: 2 }}>{work.address}</div>
                   </td>
                   <td style={{ padding: '14px 16px', fontSize: 12.5, color: 'var(--ink2, #3D3A34)' }}>
-                    {work.currentStage}
+                    {work.address}
                   </td>
                   <td style={{ padding: '14px 16px', minWidth: 120 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -72,15 +73,15 @@ export function WorksStatusTable({ works }: WorksStatusTableProps) {
                         overflow: 'hidden',
                       }}>
                         <div style={{
-                          width: `${work.percentComplete}%`,
+                          width: `${execPct}%`,
                           height: '100%',
                           borderRadius: 10,
-                          background: work.percentComplete >= 70 ? '#1E8449' : work.percentComplete >= 40 ? '#B8922A' : '#E67E22',
+                          background: execPct <= 30 ? '#1E8449' : execPct <= 70 ? '#B8922A' : '#E67E22',
                           transition: 'width 0.5s ease',
                         }} />
                       </div>
                       <span style={{ fontFamily: 'var(--font-numeric)', fontVariantNumeric: 'tabular-nums', fontSize: 11.5, fontWeight: 600, color: 'var(--ink2, #3D3A34)', minWidth: 32, textAlign: 'right' }}>
-                        {work.percentComplete}%
+                        {execPct}%
                       </span>
                     </div>
                   </td>

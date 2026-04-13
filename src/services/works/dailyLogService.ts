@@ -1,9 +1,9 @@
-import { managementApi } from '@/services/api/apiFactory';
+import { worksApi } from '@/services/api/apiFactory';
 import { extractErrorMessage } from '@/utils/errorHandler';
 import type { DailyLogEntry } from '@/modules/shared/types';
 import { USE_MOCK, delay, genId, getList, setList } from './mockStore';
 
-const base = (workId: string) => `/liderum/api/works/${workId}/daily-log`;
+const base = (workId: string) => `/works/${workId}/daily-logs`;
 
 export interface DailyLogFilter {
   from?: string;
@@ -19,7 +19,7 @@ export class DailyLogService {
       items = [...getList('dailyLogs', workId)];
     } else {
       try {
-        const { data } = await managementApi.get<DailyLogEntry[]>(base(workId), { params: filter });
+        const { data } = await worksApi.get<DailyLogEntry[]>(base(workId), { params: filter });
         items = data;
       } catch (error) {
         throw new Error(extractErrorMessage(error));
@@ -45,7 +45,7 @@ export class DailyLogService {
       return delay(created);
     }
     try {
-      const { data } = await managementApi.post<DailyLogEntry>(base(workId), payload);
+      const { data } = await worksApi.post<DailyLogEntry>(base(workId), payload);
       return data;
     } catch (error) {
       throw new Error(extractErrorMessage(error));
@@ -68,7 +68,7 @@ export class DailyLogService {
       return delay(updated);
     }
     try {
-      const { data } = await managementApi.put<DailyLogEntry>(`${base(workId)}/${entryId}`, patch);
+      const { data } = await worksApi.put<DailyLogEntry>(`${base(workId)}/${entryId}`, patch);
       return data;
     } catch (error) {
       throw new Error(extractErrorMessage(error));
@@ -82,7 +82,7 @@ export class DailyLogService {
       return delay(undefined);
     }
     try {
-      await managementApi.delete(`${base(workId)}/${entryId}`);
+      await worksApi.delete(`${base(workId)}/${entryId}`);
     } catch (error) {
       throw new Error(extractErrorMessage(error));
     }
@@ -99,7 +99,7 @@ export class DailyLogService {
     try {
       const formData = new FormData();
       formData.append('photo', file);
-      const { data } = await managementApi.post<{ url: string }>(`${base(_workId)}/photos`, formData, {
+      const { data } = await worksApi.post<{ url: string }>(`${base(_workId)}/photos`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
       return data.url;
