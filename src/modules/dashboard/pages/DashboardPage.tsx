@@ -69,7 +69,7 @@ export default function DashboardPage() {
   const activeWorks = works.filter((w) => w.status === 'em_andamento').length;
   const delayedWorks = works.filter((w) => w.status === 'atrasada').length;
   const completedThisMonth = works.filter((w) => w.status === 'concluida').length;
-  const totalPlanned = works.reduce((sum, w) => sum + w.plannedCost, 0);
+  const totalPlanned = works.reduce((sum, w) => sum + w.totalBudget, 0);
   const totalActual = works.reduce((sum, w) => sum + w.currentCost, 0);
   const avgMargin = works.length === 0 ? 0 : works.reduce((sum, w) => sum + w.margin, 0) / works.length;
   const pendingExtras = extras.filter((e) => e.status === 'pendente' || e.status === 'em_analise').length;
@@ -86,19 +86,19 @@ export default function DashboardPage() {
           workId: w.id,
           workName: w.name,
           type: 'prazo',
-          message: `Obra marcada como atrasada — ${w.currentStage} em ${w.percentComplete}%.`,
-          severity: w.riskLevel,
+          message: `Obra marcada como atrasada.`,
+          severity: 'alto',
           date: new Date().toISOString().slice(0, 10),
         });
       }
-      if (w.plannedCost > 0 && w.currentCost / w.plannedCost > 0.9 && w.status !== 'concluida') {
+      if (w.totalBudget > 0 && w.currentCost / w.totalBudget > 0.9 && w.status !== 'concluida') {
         alerts.push({
           id: `alert-budget-${w.id}`,
           workId: w.id,
           workName: w.name,
           type: 'orcamento',
-          message: `Custo realizado em ${((w.currentCost / w.plannedCost) * 100).toFixed(0)}% do previsto.`,
-          severity: w.currentCost > w.plannedCost ? 'critico' : 'alto',
+          message: `Custo realizado em ${((w.currentCost / w.totalBudget) * 100).toFixed(0)}% do previsto.`,
+          severity: w.currentCost > w.totalBudget ? 'critico' : 'alto',
           date: new Date().toISOString().slice(0, 10),
         });
       }

@@ -62,7 +62,6 @@ export default function NewWorkPage() {
   const [startDate, setStartDate] = useState('');
   const [expectedEndDate, setExpectedEndDate] = useState('');
   const [totalBudgetDisplay, setTotalBudgetDisplay] = useState('');
-  const [customerId, setCustomerId] = useState('');
 
   const handleBudgetChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setTotalBudgetDisplay(formatCurrencyInput(e.target.value));
@@ -79,14 +78,15 @@ export default function NewWorkPage() {
     const totalBudget = parseCurrencyToNumber(totalBudgetDisplay);
     if (totalBudget <= 0) { setError('Orçamento total deve ser maior que zero.'); return; }
 
+    // Envia datas sem sufixo Z para evitar conversão de fuso horário pelo browser.
+    // O backend trata "YYYY-MM-DDT00:00:00" como DateTime sem timezone especificado.
     const payload: CreateWorkDto = {
       name: name.trim(),
       description: description.trim() || undefined,
       address: address.trim(),
-      startDate: new Date(startDate).toISOString(),
-      expectedEndDate: expectedEndDate ? new Date(expectedEndDate).toISOString() : undefined,
+      startDate: startDate + 'T00:00:00',
+      expectedEndDate: expectedEndDate ? expectedEndDate + 'T00:00:00' : undefined,
       totalBudget,
-      customerId: customerId.trim() || '00000000-0000-0000-0000-000000000000',
     };
 
     try {
@@ -190,15 +190,6 @@ export default function NewWorkPage() {
               </div>
             </div>
 
-            <div className="nw-field">
-              <label className="nw-label">ID do Cliente</label>
-              <input
-                className="nw-input"
-                placeholder="GUID do cliente (opcional)"
-                value={customerId}
-                onChange={e => setCustomerId(e.target.value)}
-              />
-            </div>
           </div>
         </div>
 

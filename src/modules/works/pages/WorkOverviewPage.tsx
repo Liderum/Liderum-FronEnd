@@ -45,6 +45,15 @@ function formatCurrency(value: number) {
   return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 }).format(value);
 }
 
+// Formata "YYYY-MM-DD" → "DD/MM/YYYY" sem usar o construtor Date(),
+// evitando conversão de fuso horário que causaria exibir um dia a menos no Brasil.
+function formatDate(dateStr: string | undefined): string {
+  if (!dateStr) return '—';
+  const d = dateStr.substring(0, 10);
+  const [year, month, day] = d.split('-');
+  return `${day}/${month}/${year}`;
+}
+
 export default function WorkOverviewPage() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -88,7 +97,7 @@ export default function WorkOverviewPage() {
     { label: 'Custo Realizado', value: formatCurrency(work.currentCost), icon: TrendingUp, color: variation > 0 ? '#C0392B' : '#1E8449', bg: variation > 0 ? '#FDEDEC' : '#E8F5E9' },
     { label: 'Variação', value: `${variation > 0 ? '+' : ''}${variation.toFixed(1)}%`, icon: Percent, color: variation > 0 ? '#C0392B' : '#1E8449', bg: variation > 0 ? '#FDEDEC' : '#E8F5E9' },
     { label: 'Margem', value: `${marginPct.toFixed(1)}%`, icon: TrendingUp, color: marginPct > 0 ? '#1E8449' : '#C0392B', bg: marginPct > 0 ? '#E8F5E9' : '#FDEDEC' },
-    { label: 'Prazo', value: work.expectedEndDate ? new Date(work.expectedEndDate).toLocaleDateString('pt-BR') : '—', icon: Calendar, color: '#B7770D', bg: '#FFF8E1' },
+    { label: 'Prazo', value: formatDate(work.expectedEndDate), icon: Calendar, color: '#B7770D', bg: '#FFF8E1' },
     { label: 'Extras Pendentes', value: pendingExtras.length, icon: AlertTriangle, color: '#E67E22', bg: '#FFF3E0' },
     { label: 'Incidentes Abertos', value: openIncidents.length, icon: ShieldAlert, color: openIncidents.length > 0 ? '#C0392B' : '#7A7670', bg: openIncidents.length > 0 ? '#FDEDEC' : '#F5F5F5' },
   ];
@@ -133,7 +142,7 @@ export default function WorkOverviewPage() {
                     <div className="wo-milestone-info">
                       <div className="wo-milestone-name">{task.name}</div>
                       <div className="wo-milestone-date">
-                        {new Date(task.startDate).toLocaleDateString('pt-BR')} — {new Date(task.endDate).toLocaleDateString('pt-BR')}
+                        {formatDate(task.startDate)} — {formatDate(task.endDate)}
                         <span style={{ marginLeft: 8, fontSize: 10.5, padding: '1px 7px', borderRadius: 8, background: statusCfg.bg, color: statusCfg.color, fontWeight: 500 }}>
                           {statusCfg.label}
                         </span>
@@ -172,7 +181,7 @@ export default function WorkOverviewPage() {
                       <div style={{ flex: 1 }}>
                         <div style={{ fontSize: 12.5, fontWeight: 500 }}>{inc.title}</div>
                         <div style={{ fontSize: 11, color: '#7A7670', marginTop: 2 }}>
-                          {sevCfg.label} • {inc.reportedBy} • {new Date(inc.reportedAt).toLocaleDateString('pt-BR')}
+                          {sevCfg.label} • {inc.reportedBy} • {formatDate(inc.reportedAt)}
                         </div>
                       </div>
                     </div>
@@ -222,7 +231,7 @@ export default function WorkOverviewPage() {
               ) : (
                 <div>
                   <div style={{ fontSize: 11, color: '#7A7670', fontWeight: 500, textTransform: 'uppercase', letterSpacing: 0.4 }}>
-                    <BookOpen size={11} style={{ display: 'inline', verticalAlign: 'middle' }} /> {new Date(lastLog.date).toLocaleDateString('pt-BR')} — {lastLog.responsible}
+                    <BookOpen size={11} style={{ display: 'inline', verticalAlign: 'middle' }} /> {formatDate(lastLog.date)} — {lastLog.responsible}
                   </div>
                   <div style={{ fontSize: 13, marginTop: 8, lineHeight: 1.5 }}>{lastLog.description}</div>
                   {lastLog.problems && (

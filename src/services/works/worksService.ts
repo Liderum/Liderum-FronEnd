@@ -1,18 +1,25 @@
 import { worksApi } from '@/services/api/apiFactory';
 import { extractErrorMessage } from '@/utils/errorHandler';
 import type { Work, WorkStatus, CreateWorkDto } from '@/modules/shared/types';
-import { Console } from 'console';
 
 const BASE = '/works';
 
-// Mapeamento do StatusLabel do backend para o WorkStatus do frontend
+// Mapeamento do StatusLabel do backend (enum name) para o WorkStatus do frontend
 const STATUS_MAP: Record<string, WorkStatus> = {
   Planning: 'planejada',
   InProgress: 'em_andamento',
   Paused: 'pausada',
   Completed: 'concluida',
-  Cancelled: 'pausada',
+  Cancelled: 'cancelada',
 };
+
+// Extrai apenas a parte da data (YYYY-MM-DD) de uma string ISO para evitar
+// conversão de fuso horário ao usar o construtor Date() do JavaScript.
+function normalizeDate(raw: unknown): string | undefined {
+  if (raw == null) return undefined;
+  const str = String(raw);
+  return str.length >= 10 ? str.substring(0, 10) : str;
+}
 
 function mapWork(raw: Record<string, unknown>): Work {
   const statusLabel = (raw.statusLabel as string) ?? '';
@@ -23,17 +30,17 @@ function mapWork(raw: Record<string, unknown>): Work {
     address: String(raw.address ?? ''),
     status: STATUS_MAP[statusLabel] ?? 'planejada',
     statusLabel,
-    startDate: String(raw.startDate ?? ''),
-    expectedEndDate: raw.expectedEndDate as string | undefined,
-    actualEndDate: raw.actualEndDate as string | undefined,
+    startDate: normalizeDate(raw.startDate) ?? '',
+    expectedEndDate: normalizeDate(raw.expectedEndDate),
+    actualEndDate: normalizeDate(raw.actualEndDate),
     totalBudget: Number(raw.totalBudget ?? 0),
     currentCost: Number(raw.currentCost ?? 0),
     margin: Number(raw.margin ?? 0),
     marginPercent: Number(raw.marginPercent ?? 0),
     customerId: raw.customerId as string | undefined,
     responsibleUserId: raw.responsibleUserId as string | undefined,
-    createdAt: raw.createdAt as string | undefined,
-    updatedAt: raw.updatedAt as string | undefined,
+    createdAt: normalizeDate(raw.createdAt),
+    updatedAt: normalizeDate(raw.updatedAt),
   };
 }
 

@@ -58,29 +58,31 @@ interface NavSection {
   items: NavItem[];
 }
 
+// Os valores de "permission" devem coincidir com os claims "permissions"
+// emitidos no JWT pela Security API (definidos em WorksPermissions.cs e no seed SQL).
 const navSections: NavSection[] = [
   {
     label: 'Operação',
     items: [
-      { name: 'Dashboard', href: '/home', icon: Home, permission: 'dashboard.view' },
-      { name: 'Obras', href: '/works', icon: Building2, badge: '7', permission: 'works.view' },
+      { name: 'Dashboard', href: '/home', icon: Home, permission: 'dashboard.read' },
+      { name: 'Obras', href: '/works', icon: Building2, permission: 'works.read' },
     ],
   },
   {
     label: 'Gestão de Obras',
     items: [
-      { name: 'Cronograma', href: '/works/1/schedule', icon: CalendarClock, permission: 'schedule.view' },
-      { name: 'Orçamento', href: '/works/1/budget', icon: DollarSign, permission: 'budget.view' },
-      { name: 'Extras', href: '/works/1/extras', icon: FilePlus2, badge: '3', permission: 'extras.view' },
-      { name: 'Diário de Obra', href: '/works/1/daily-log', icon: BookOpen, permission: 'daily-log.view' },
+      { name: 'Cronograma', href: '/works', icon: CalendarClock, permission: 'schedule.read' },
+      { name: 'Orçamento', href: '/works', icon: DollarSign, permission: 'budget.read' },
+      { name: 'Extras', href: '/works', icon: FilePlus2, permission: 'extras.read' },
+      { name: 'Diário de Obra', href: '/works', icon: BookOpen, permission: 'dailylogs.read' },
     ],
   },
   {
     label: 'Cadastros',
     items: [
-      { name: 'Empresas', href: '/management/companies', icon: Building, permission: 'companies.view' },
-      { name: 'Clientes', href: '/management/customers', icon: Users, permission: 'customers.view' },
-      { name: 'Fornecedores', href: '/management/suppliers', icon: Truck, permission: 'suppliers.view' },
+      { name: 'Empresas', href: '/management/companies', icon: Building, permission: 'companies.read' },
+      { name: 'Clientes', href: '/management/customers', icon: Users, permission: 'customers.read' },
+      { name: 'Fornecedores', href: '/management/suppliers', icon: Truck, permission: 'suppliers.read' },
     ],
   },
   {

@@ -125,11 +125,7 @@ export default function BudgetPage() {
       setEditingId(null);
       return;
     }
-    const updated = await BudgetService.update(workId, item.id, {
-      actualCost: parsed,
-      revisedAt: new Date().toISOString(),
-      revisedBy: user?.name ?? user?.email ?? 'usuário',
-    });
+    const updated = await BudgetService.update(workId, item, parsed);
     setItems((prev) => prev.map((i) => (i.id === item.id ? updated : i)));
     setEditingId(null);
   };

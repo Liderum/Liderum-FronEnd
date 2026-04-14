@@ -65,6 +65,13 @@ function formatCurrency(value: number) {
   return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 }).format(value);
 }
 
+function formatDate(dateStr: string | undefined): string {
+  if (!dateStr) return '—';
+  const d = dateStr.substring(0, 10);
+  const [year, month, day] = d.split('-');
+  return `${day}/${month}/${year}`;
+}
+
 type FilterKey = 'todas' | ExtraStatus;
 
 const FILTERS: { key: FilterKey; label: string }[] = [
@@ -281,7 +288,7 @@ export default function ExtrasPage() {
                   <div className="ex-card-desc">{extra.description}</div>
                   <div className="ex-card-meta">
                     <div className="ex-card-meta-item">
-                      <Calendar size={12} /> <span className="ex-card-meta-value">{new Date(extra.requestDate).toLocaleDateString('pt-BR')}</span>
+                      <Calendar size={12} /> <span className="ex-card-meta-value">{formatDate(extra.requestDate)}</span>
                     </div>
                     <div className="ex-card-meta-item">
                       <Clock size={12} /> Prazo: <span className="ex-card-meta-value">{extra.scheduleImpact}</span>
@@ -339,7 +346,7 @@ export default function ExtrasPage() {
                               <div className="ex-history-user">{h.user}</div>
                               {h.notes && <div className="ex-history-notes">"{h.notes}"</div>}
                             </div>
-                            <div className="ex-history-date">{new Date(h.date).toLocaleDateString('pt-BR')}</div>
+                            <div className="ex-history-date">{formatDate(h.date)}</div>
                           </div>
                         ))}
                       </div>

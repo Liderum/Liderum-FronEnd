@@ -17,7 +17,7 @@ export const PERMISSION_MAP: ModulePermissions[] = [
     label: 'Dashboard',
     icon: 'LayoutDashboard',
     permissions: [
-      { key: 'dashboard.view', label: 'Visualizar', description: 'Ver dashboard e KPIs' },
+      { key: 'dashboard.read', label: 'Visualizar', description: 'Ver dashboard e KPIs' },
     ],
   },
   {
@@ -25,8 +25,7 @@ export const PERMISSION_MAP: ModulePermissions[] = [
     label: 'Obras',
     icon: 'Building2',
     permissions: [
-      { key: 'works.view', label: 'Listar', description: 'Ver lista de obras' },
-      { key: 'works.read', label: 'Detalhar', description: 'Ver detalhes de uma obra' },
+      { key: 'works.read', label: 'Listar / Detalhar', description: 'Ver lista e detalhes de obras' },
       { key: 'works.create', label: 'Criar', description: 'Criar nova obra' },
       { key: 'works.update', label: 'Editar', description: 'Editar obra existente' },
       { key: 'works.delete', label: 'Excluir', description: 'Excluir obra' },
@@ -37,9 +36,8 @@ export const PERMISSION_MAP: ModulePermissions[] = [
     label: 'Cronograma',
     icon: 'CalendarClock',
     permissions: [
-      { key: 'schedule.view', label: 'Visualizar', description: 'Ver cronograma de obra' },
-      { key: 'schedule.create', label: 'Criar', description: 'Criar tarefa no cronograma' },
-      { key: 'schedule.update', label: 'Editar', description: 'Editar tarefa' },
+      { key: 'schedule.read', label: 'Visualizar', description: 'Ver cronograma de obra' },
+      { key: 'schedule.write', label: 'Criar / Editar', description: 'Criar e editar tarefas' },
       { key: 'schedule.delete', label: 'Excluir', description: 'Excluir tarefa' },
     ],
   },
@@ -48,11 +46,11 @@ export const PERMISSION_MAP: ModulePermissions[] = [
     label: 'Orçamento',
     icon: 'DollarSign',
     permissions: [
-      { key: 'budget.view', label: 'Visualizar', description: 'Ver orçamento' },
-      { key: 'budget.create', label: 'Criar', description: 'Criar item de orçamento' },
-      { key: 'budget.update', label: 'Editar', description: 'Editar item de orçamento' },
+      { key: 'budget.read', label: 'Visualizar', description: 'Ver orçamento' },
+      { key: 'budget.write', label: 'Criar / Editar', description: 'Criar e editar itens de orçamento' },
       { key: 'budget.delete', label: 'Excluir', description: 'Excluir item de orçamento' },
-      { key: 'budget.export', label: 'Exportar', description: 'Exportar orçamento' },
+      { key: 'budget.revisions.read', label: 'Ver revisões', description: 'Ver histórico de revisões' },
+      { key: 'budget.revisions.write', label: 'Criar revisão', description: 'Criar revisão orçamentária' },
     ],
   },
   {
@@ -60,21 +58,43 @@ export const PERMISSION_MAP: ModulePermissions[] = [
     label: 'Extras',
     icon: 'FilePlus2',
     permissions: [
-      { key: 'extras.view', label: 'Visualizar', description: 'Ver solicitações extras' },
+      { key: 'extras.read', label: 'Visualizar', description: 'Ver solicitações extras' },
       { key: 'extras.create', label: 'Criar', description: 'Criar solicitação extra' },
       { key: 'extras.approve', label: 'Aprovar', description: 'Aprovar/rejeitar solicitação' },
-      { key: 'extras.delete', label: 'Excluir', description: 'Excluir solicitação extra' },
+      { key: 'extras.client.approval', label: 'Aprovação do cliente', description: 'Enviar e registrar decisão do cliente' },
+      { key: 'extras.attachments', label: 'Anexos', description: 'Gerenciar anexos de extras' },
     ],
   },
   {
-    module: 'daily-log',
+    module: 'dailylogs',
     label: 'Diário de Obra',
     icon: 'BookOpen',
     permissions: [
-      { key: 'daily-log.view', label: 'Visualizar', description: 'Ver diário de obra' },
-      { key: 'daily-log.create', label: 'Criar', description: 'Criar registro no diário' },
-      { key: 'daily-log.update', label: 'Editar', description: 'Editar registro' },
-      { key: 'daily-log.delete', label: 'Excluir', description: 'Excluir registro' },
+      { key: 'dailylogs.read', label: 'Visualizar', description: 'Ver diário de obra' },
+      { key: 'dailylogs.create', label: 'Criar', description: 'Criar registro no diário' },
+      { key: 'dailylogs.update', label: 'Editar', description: 'Editar registro' },
+      { key: 'dailylogs.delete', label: 'Excluir', description: 'Excluir registro' },
+      { key: 'dailylogs.photos', label: 'Fotos', description: 'Gerenciar fotos do diário' },
+    ],
+  },
+  {
+    module: 'incidents',
+    label: 'Incidentes',
+    icon: 'ShieldAlert',
+    permissions: [
+      { key: 'incidents.read', label: 'Visualizar', description: 'Ver incidentes' },
+      { key: 'incidents.create', label: 'Registrar', description: 'Registrar novo incidente' },
+      { key: 'incidents.update', label: 'Atualizar', description: 'Atualizar status do incidente' },
+      { key: 'incidents.photos', label: 'Fotos', description: 'Gerenciar fotos do incidente' },
+    ],
+  },
+  {
+    module: 'riskalerts',
+    label: 'Alertas de Risco',
+    icon: 'AlertTriangle',
+    permissions: [
+      { key: 'riskalerts.read', label: 'Visualizar', description: 'Ver alertas de risco' },
+      { key: 'riskalerts.create', label: 'Criar', description: 'Criar alerta de risco' },
     ],
   },
   {
@@ -82,7 +102,7 @@ export const PERMISSION_MAP: ModulePermissions[] = [
     label: 'Empresas',
     icon: 'Building',
     permissions: [
-      { key: 'companies.view', label: 'Listar', description: 'Ver lista de empresas' },
+      { key: 'companies.read', label: 'Listar / Detalhar', description: 'Ver lista de empresas' },
       { key: 'companies.create', label: 'Criar', description: 'Criar empresa' },
       { key: 'companies.update', label: 'Editar', description: 'Editar empresa' },
       { key: 'companies.delete', label: 'Excluir', description: 'Excluir empresa' },
@@ -93,7 +113,7 @@ export const PERMISSION_MAP: ModulePermissions[] = [
     label: 'Clientes',
     icon: 'Users',
     permissions: [
-      { key: 'customers.view', label: 'Listar', description: 'Ver lista de clientes' },
+      { key: 'customers.read', label: 'Listar / Detalhar', description: 'Ver lista de clientes' },
       { key: 'customers.create', label: 'Criar', description: 'Criar cliente' },
       { key: 'customers.update', label: 'Editar', description: 'Editar cliente' },
       { key: 'customers.delete', label: 'Excluir', description: 'Excluir cliente' },
@@ -104,7 +124,7 @@ export const PERMISSION_MAP: ModulePermissions[] = [
     label: 'Fornecedores',
     icon: 'Truck',
     permissions: [
-      { key: 'suppliers.view', label: 'Listar', description: 'Ver lista de fornecedores' },
+      { key: 'suppliers.read', label: 'Listar / Detalhar', description: 'Ver lista de fornecedores' },
       { key: 'suppliers.create', label: 'Criar', description: 'Criar fornecedor' },
       { key: 'suppliers.update', label: 'Editar', description: 'Editar fornecedor' },
       { key: 'suppliers.delete', label: 'Excluir', description: 'Excluir fornecedor' },
@@ -129,16 +149,6 @@ export const PERMISSION_MAP: ModulePermissions[] = [
     permissions: [
       { key: 'settings.view', label: 'Visualizar', description: 'Ver configurações' },
       { key: 'settings.update', label: 'Alterar', description: 'Alterar configurações gerais' },
-      { key: 'settings.profile.update', label: 'Editar Perfil', description: 'Editar perfil próprio' },
-    ],
-  },
-  {
-    module: 'payments',
-    label: 'Pagamentos',
-    icon: 'CreditCard',
-    permissions: [
-      { key: 'payments.view', label: 'Visualizar', description: 'Ver planos e pagamentos' },
-      { key: 'payments.manage', label: 'Gerenciar', description: 'Gerenciar pagamentos e assinaturas' },
     ],
   },
 ];

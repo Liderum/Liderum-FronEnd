@@ -78,7 +78,7 @@ function AppContent() {
       {/* Works — List */}
       <Route
         path="/works"
-        element={<PrivateRoute requiredPermission="works.view"><DashboardLayout /></PrivateRoute>}
+        element={<PrivateRoute requiredPermission="works.read"><DashboardLayout /></PrivateRoute>}
       >
         <Route index element={<WorksListPage />} />
       </Route>
@@ -111,9 +111,9 @@ function AppContent() {
         path="/management"
         element={<PrivateRoute><DashboardLayout /></PrivateRoute>}
       >
-        <Route path="companies" element={<PrivateRoute requiredPermission="companies.view"><Companies /></PrivateRoute>} />
-        <Route path="customers" element={<PrivateRoute requiredPermission="customers.view"><Customers /></PrivateRoute>} />
-        <Route path="suppliers" element={<PrivateRoute requiredPermission="suppliers.view"><Suppliers /></PrivateRoute>} />
+        <Route path="companies" element={<PrivateRoute requiredPermission="companies.read"><Companies /></PrivateRoute>} />
+        <Route path="customers" element={<PrivateRoute requiredPermission="customers.read"><Customers /></PrivateRoute>} />
+        <Route path="suppliers" element={<PrivateRoute requiredPermission="suppliers.read"><Suppliers /></PrivateRoute>} />
         <Route path="users" element={<PrivateRoute requiredPermission="users.view"><Users /></PrivateRoute>} />
         <Route path="rbac" element={<PrivateRoute requiredPermission="users.rbac.manage"><RbacAdmin /></PrivateRoute>} />
       </Route>

@@ -39,8 +39,9 @@ function endOfMonth(d: Date) {
 export default function GanttView({ tasks }: Props) {
   const computed = useMemo(() => {
     if (tasks.length === 0) return null;
-    const starts = tasks.map((t) => new Date(t.startDate));
-    const ends = tasks.map((t) => new Date(t.endDate));
+    // Usa "T00:00:00" sem Z para interpretar como hora local e evitar conversão de fuso horário
+    const starts = tasks.map((t) => new Date(t.startDate.substring(0, 10) + 'T00:00:00'));
+    const ends = tasks.map((t) => new Date(t.endDate.substring(0, 10) + 'T00:00:00'));
     const minDate = startOfMonth(new Date(Math.min(...starts.map((d) => d.getTime()))));
     const maxDate = endOfMonth(new Date(Math.max(...ends.map((d) => d.getTime()))));
     const totalDays = Math.max(1, daysBetween(minDate, maxDate));
@@ -74,8 +75,8 @@ export default function GanttView({ tasks }: Props) {
           </div>
         </div>
         {tasks.map((task) => {
-          const start = new Date(task.startDate);
-          const end = new Date(task.endDate);
+          const start = new Date(task.startDate.substring(0, 10) + 'T00:00:00');
+          const end = new Date(task.endDate.substring(0, 10) + 'T00:00:00');
           const offsetDays = daysBetween(minDate, start);
           const durationDays = Math.max(1, daysBetween(start, end));
           const left = (offsetDays / totalDays) * 100;

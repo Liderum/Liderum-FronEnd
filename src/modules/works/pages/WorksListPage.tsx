@@ -61,6 +61,15 @@ function formatCurrency(value: number) {
   return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 }).format(value);
 }
 
+// Formata "YYYY-MM-DD" → "DD/MM/YYYY" sem usar o construtor Date(),
+// evitando conversão de fuso horário que causaria exibir um dia a menos no Brasil.
+function formatDate(dateStr: string | undefined): string {
+  if (!dateStr) return '—';
+  const d = dateStr.substring(0, 10);
+  const [year, month, day] = d.split('-');
+  return `${day}/${month}/${year}`;
+}
+
 function getProgressColor(pct: number) {
   if (pct >= 70) return '#1E8449';
   if (pct >= 40) return '#B8922A';
@@ -209,11 +218,11 @@ function WorkCard({ work, index, onClick }: { work: Work; index: number; onClick
           <MapPin size={12} /> {work.address}
         </div>
         <div className="wl-card-meta-row">
-          <Calendar size={12} /> Início: {new Date(work.startDate).toLocaleDateString('pt-BR')}
+          <Calendar size={12} /> Início: {formatDate(work.startDate)}
         </div>
         {work.expectedEndDate && (
           <div className="wl-card-meta-row">
-            <Calendar size={12} /> Prazo: {new Date(work.expectedEndDate).toLocaleDateString('pt-BR')}
+            <Calendar size={12} /> Prazo: {formatDate(work.expectedEndDate)}
           </div>
         )}
       </div>

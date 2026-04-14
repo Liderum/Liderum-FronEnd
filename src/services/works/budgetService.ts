@@ -5,12 +5,28 @@ import { mockStore, USE_MOCK, delay, genId, nowIso, getList, setList } from './m
 
 const base = (workId: string) => `/works/${workId}/budget`;
 
+function mapBudgetItem(raw: any): BudgetItem {
+  return {
+    id: String(raw.id ?? ''),
+    category: raw.category ?? '',
+    description: raw.description ?? '',
+    plannedCost: Number(raw.totalPrice ?? 0),
+    actualCost: Number(raw.effectiveActualCost ?? 0),
+    unit: raw.unit ?? '',
+    quantity: Number(raw.quantity ?? 0),
+    unitPrice: Number(raw.unitPrice ?? 0),
+    budgetStatus: typeof raw.status === 'string' ? raw.status : 'Planned',
+  };
+}
+
 export class BudgetService {
   static async list(workId: string): Promise<BudgetItem[]> {
     if (USE_MOCK) return delay([...getList('budget', workId)]);
     try {
-      const { data } = await worksApi.get<BudgetItem[]>(base(workId));
-      return data;
+      const { data } = await worksApi.get<any>(base(workId));
+      // A API retorna BudgetSummaryDto com campo "items"
+      const items: any[] = Array.isArray(data) ? data : (data?.items ?? []);
+      return items.map(mapBudgetItem);
     } catch (error) {
       throw new Error(extractErrorMessage(error));
     }
@@ -24,31 +40,47 @@ export class BudgetService {
       return delay(created);
     }
     try {
-      const { data } = await worksApi.post<BudgetItem>(`${base(workId)}/items`, payload);
-      return data;
+      const { data } = await worksApi.post<any>(`${base(workId)}/items`, {
+        description: payload.description,
+        category: payload.category,
+        unit: payload.unit ?? 'un',
+        quantity: payload.quantity ?? 1,
+        unitPrice: payload.unitPrice ?? payload.plannedCost,
+      });
+      return mapBudgetItem(data);
     } catch (error) {
       throw new Error(extractErrorMessage(error));
     }
   }
 
+  // Atualiza apenas o custo realizado de um item já existente.
+  // Reenvia todos os campos obrigatórios do backend a partir do item em memória.
   static async update(
     workId: string,
-    itemId: string,
-    patch: Partial<BudgetItem>,
+    item: BudgetItem,
+    newActualCost: number,
   ): Promise<BudgetItem> {
     if (USE_MOCK) {
       const list = getList('budget', workId);
-      const idx = list.findIndex((i) => i.id === itemId);
+      const idx = list.findIndex((i) => i.id === item.id);
       if (idx < 0) throw new Error('Item de orçamento não encontrado');
-      const updated = { ...list[idx], ...patch };
+      const updated = { ...list[idx], actualCost: newActualCost };
       const next = [...list];
       next[idx] = updated;
       setList<BudgetItem>('budget', workId, next);
       return delay(updated);
     }
     try {
-      const { data } = await worksApi.put<BudgetItem>(`${base(workId)}/items/${itemId}`, patch);
-      return data;
+      const { data } = await worksApi.put<any>(`${base(workId)}/items/${item.id}`, {
+        description: item.description,
+        category: item.category,
+        unit: item.unit ?? 'un',
+        quantity: item.quantity ?? 1,
+        unitPrice: item.unitPrice ?? item.plannedCost,
+        status: item.budgetStatus ?? 'Planned',
+        actualCost: newActualCost,
+      });
+      return mapBudgetItem(data);
     } catch (error) {
       throw new Error(extractErrorMessage(error));
     }

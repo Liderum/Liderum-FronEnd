@@ -1,4 +1,4 @@
-export type WorkStatus = 'em_andamento' | 'atrasada' | 'concluida' | 'pausada' | 'planejada';
+export type WorkStatus = 'em_andamento' | 'atrasada' | 'concluida' | 'pausada' | 'planejada' | 'cancelada';
 export type ExtraStatus = 'pendente' | 'aprovado' | 'rejeitado' | 'em_analise';
 export type RiskLevel = 'baixo' | 'medio' | 'alto' | 'critico';
 export type TaskStatus = 'concluida' | 'em_andamento' | 'pendente' | 'bloqueada' | 'atrasada';
@@ -33,7 +33,6 @@ export interface CreateWorkDto {
   startDate: string;
   expectedEndDate?: string;
   totalBudget: number;
-  customerId: string;
   responsibleUserId?: string;
 }
 
@@ -55,6 +54,11 @@ export interface BudgetItem {
   description: string;
   plannedCost: number;
   actualCost: number;
+  // campos necessários para reconstruir o payload de atualização
+  unit?: string;
+  quantity?: number;
+  unitPrice?: number;
+  budgetStatus?: string;
   revisionNumber?: number;
   revisedAt?: string;
   revisedBy?: string;
@@ -166,6 +170,7 @@ export const STATUS_CONFIG: Record<WorkStatus, { label: string; color: string; b
   concluida: { label: 'Concluída', color: '#1A5276', bg: '#EBF5FB' },
   pausada: { label: 'Pausada', color: '#B7770D', bg: '#FFF8E1' },
   planejada: { label: 'Planejada', color: '#7A7670', bg: '#F5F5F5' },
+  cancelada: { label: 'Cancelada', color: '#6B6B6B', bg: '#EEEEEE' },
 };
 
 export const RISK_CONFIG: Record<RiskLevel, { label: string; color: string; bg: string }> = {

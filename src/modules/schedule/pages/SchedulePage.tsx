@@ -87,6 +87,13 @@ const emptyForm: FormState = {
   dependencies: [],
 };
 
+function formatDate(dateStr: string | undefined): string {
+  if (!dateStr) return '—';
+  const d = dateStr.substring(0, 10);
+  const [year, month, day] = d.split('-');
+  return `${day}/${month}/${year}`;
+}
+
 export default function SchedulePage() {
   const { id } = useParams();
   const workId = id ?? '1';
@@ -244,7 +251,7 @@ export default function SchedulePage() {
                       <div className="sc-task-info">
                         <div className="sc-task-name">{task.name}</div>
                         <div className="sc-task-dates">
-                          {new Date(task.startDate).toLocaleDateString('pt-BR')} → {new Date(task.endDate).toLocaleDateString('pt-BR')}
+                          {formatDate(task.startDate)} → {formatDate(task.endDate)}
                           <span className="sc-task-responsible">• {task.responsible}</span>
                           {task.dependencies.length > 0 && (
                             <span className="sc-task-deps-label">{task.dependencies.length} dep.</span>

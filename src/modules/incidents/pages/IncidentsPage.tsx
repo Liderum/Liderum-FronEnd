@@ -63,6 +63,13 @@ const emptyForm = {
   relatedExtraId: '',
 };
 
+function formatDate(dateStr: string | undefined): string {
+  if (!dateStr) return '—';
+  const d = dateStr.substring(0, 10);
+  const [year, month, day] = d.split('-');
+  return `${day}/${month}/${year}`;
+}
+
 export default function IncidentsPage() {
   const { id } = useParams();
   const workId = id ?? '1';
@@ -285,7 +292,7 @@ export default function IncidentsPage() {
                   <div className="inc-card-meta">
                     <span>{catCfg.label}</span>
                     <span><User size={11} style={{ display: 'inline', verticalAlign: 'middle' }} /> {incident.reportedBy}</span>
-                    <span>{new Date(incident.reportedAt).toLocaleDateString('pt-BR')}</span>
+                    <span>{formatDate(incident.reportedAt)}</span>
                     {incident.assignedTo && <span>Atribuído: {incident.assignedTo}</span>}
                     {relatedTask && <span>Tarefa: {relatedTask.name}</span>}
                     {relatedExtra && <span>Extra: {relatedExtra.title}</span>}

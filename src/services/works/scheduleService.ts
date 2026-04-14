@@ -1,9 +1,57 @@
 import { worksApi } from '@/services/api/apiFactory';
 import { extractErrorMessage } from '@/utils/errorHandler';
-import type { ScheduleTask } from '@/modules/shared/types';
+import type { ScheduleTask, TaskStatus } from '@/modules/shared/types';
 import { USE_MOCK, delay, genId, getList, setList } from './mockStore';
 
 const base = (workId: string) => `/works/${workId}/schedule`;
+
+// Backend ScheduleTaskStatus (string com JsonStringEnumConverter) → frontend TaskStatus
+const TASK_STATUS_FROM_BACKEND: Record<string, TaskStatus> = {
+  Pending: 'pendente',
+  InProgress: 'em_andamento',
+  Completed: 'concluida',
+  Delayed: 'atrasada',
+  Blocked: 'bloqueada',
+  Cancelled: 'pendente',
+};
+
+// Frontend TaskStatus → backend ScheduleTaskStatus string
+const TASK_STATUS_TO_BACKEND: Record<TaskStatus, string> = {
+  pendente: 'Pending',
+  em_andamento: 'InProgress',
+  concluida: 'Completed',
+  atrasada: 'Delayed',
+  bloqueada: 'Blocked',
+};
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function mapScheduleTask(raw: any): ScheduleTask {
+  return {
+    id: String(raw.id ?? ''),
+    name: raw.name ?? '',
+    startDate: raw.startDate ? String(raw.startDate).substring(0, 10) : '',
+    endDate: raw.endDate ? String(raw.endDate).substring(0, 10) : '',
+    progress: Number(raw.progress ?? 0),
+    dependencies: Array.isArray(raw.dependencies) ? raw.dependencies.map(String) : [],
+    responsible: raw.responsibleUserId ? String(raw.responsibleUserId) : '',
+    status: TASK_STATUS_FROM_BACKEND[String(raw.status)] ?? 'pendente',
+    stage: raw.description ?? '',
+  };
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function toBackendTaskPayload(task: Partial<ScheduleTask>): any {
+  const payload: any = {};
+  if (task.name != null) payload.name = task.name;
+  if (task.startDate != null) payload.startDate = task.startDate + 'T00:00:00';
+  if (task.endDate != null) payload.endDate = task.endDate + 'T00:00:00';
+  if (task.progress != null) payload.progress = task.progress;
+  if (task.dependencies != null) payload.dependencies = task.dependencies;
+  if (task.status != null) payload.status = TASK_STATUS_TO_BACKEND[task.status] ?? 'Pending';
+  if (task.stage != null) payload.description = task.stage;
+  payload.order = 0;
+  return payload;
+}
 
 export interface DependencyValidationResult {
   ok: boolean;
@@ -14,8 +62,9 @@ export class ScheduleService {
   static async list(workId: string): Promise<ScheduleTask[]> {
     if (USE_MOCK) return delay(this.computeBlocked([...getList('schedule', workId)]));
     try {
-      const { data } = await worksApi.get<ScheduleTask[]>(base(workId));
-      return this.computeBlocked(data);
+      const { data } = await worksApi.get<any>(base(workId));
+      const raw: any[] = Array.isArray(data) ? data : (data?.items ?? []);
+      return this.computeBlocked(raw.map(mapScheduleTask));
     } catch (error) {
       throw new Error(extractErrorMessage(error));
     }
@@ -32,8 +81,8 @@ export class ScheduleService {
       return delay(created);
     }
     try {
-      const { data } = await worksApi.post<ScheduleTask>(`${base(workId)}/tasks`, created);
-      return data;
+      const { data } = await worksApi.post<any>(`${base(workId)}/tasks`, toBackendTaskPayload(payload));
+      return mapScheduleTask(data);
     } catch (error) {
       throw new Error(extractErrorMessage(error));
     }
@@ -58,8 +107,8 @@ export class ScheduleService {
       return delay(merged);
     }
     try {
-      const { data } = await worksApi.put<ScheduleTask>(`${base(workId)}/tasks/${taskId}`, patch);
-      return data;
+      const { data } = await worksApi.put<any>(`${base(workId)}/tasks/${taskId}`, toBackendTaskPayload(merged));
+      return mapScheduleTask(data);
     } catch (error) {
       throw new Error(extractErrorMessage(error));
     }
