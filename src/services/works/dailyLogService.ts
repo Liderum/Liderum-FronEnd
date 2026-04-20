@@ -1,14 +1,35 @@
 import { worksApi } from '@/services/api/apiFactory';
+import { API_CONFIG } from '@/config/api';
 import { extractErrorMessage } from '@/utils/errorHandler';
 import type { DailyLogEntry } from '@/modules/shared/types';
 import { USE_MOCK, delay, genId, getList, setList } from './mockStore';
 
 const base = (workId: string) => `/works/${workId}/daily-logs`;
 
-// Mapeia DailyLogEntryDto do backend para DailyLogEntry do frontend.
-// O backend usa nomes de campo técnicos (activities, issues, notes, authorId).
+// Constrói URL absoluta a partir do storagePath relativo da API
+const FILE_BASE =
+  import.meta.env.VITE_FILE_SERVER_URL ||
+  API_CONFIG.WORKS.BASE_URL.replace(/\/api\/v1\/?$/, '');
+
+export function buildPhotoUrl(storagePath: string): string {
+  if (!storagePath) return '';
+  if (
+    storagePath.startsWith('http') ||
+    storagePath.startsWith('data:') ||
+    storagePath.startsWith('blob:')
+  ) {
+    return storagePath;
+  }
+  return `${FILE_BASE}/${storagePath}`;
+}
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function mapDailyLog(raw: any): DailyLogEntry {
+  const photos: string[] = Array.isArray(raw.photos)
+    ? // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      raw.photos.map((p: any) => buildPhotoUrl(p.storagePath ?? p.fileName ?? ''))
+    : [];
+
   return {
     id: String(raw.id ?? ''),
     date: raw.date ? String(raw.date).substring(0, 10) : '',
@@ -18,19 +39,16 @@ function mapDailyLog(raw: any): DailyLogEntry {
     responsible: raw.authorId ? String(raw.authorId) : '',
     weather: raw.weather ?? undefined,
     workersCount: raw.workersCount != null ? Number(raw.workersCount) : undefined,
-    photos: [],
+    photos,
   };
 }
 
-// Converte DailyLogEntry do frontend para o payload esperado pelo backend.
-// "weather" é obrigatório no backend (NotEmpty); usa "Não informado" como fallback.
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function toBackendPayload(entry: Omit<DailyLogEntry, 'id'>): any {
+function toBackendPayload(entry: Partial<DailyLogEntry>): any {
   return {
-    date: entry.date,
     weather: entry.weather || 'Não informado',
     workersCount: entry.workersCount ?? 0,
-    activities: entry.description,
+    activities: entry.description ?? '',
     issues: entry.problems ?? null,
     notes: entry.actions ?? null,
   };
@@ -41,6 +59,18 @@ export interface DailyLogFilter {
   to?: string;
   responsible?: string;
   withProblemsOnly?: boolean;
+  page?: number;
+  pageSize?: number;
+}
+
+export interface DailyLogPageResult {
+  items: DailyLogEntry[];
+  totalCount: number;
+  page: number;
+  pageSize: number;
+  totalPages: number;
+  hasNextPage: boolean;
+  hasPreviousPage: boolean;
 }
 
 export class DailyLogService {
@@ -50,8 +80,11 @@ export class DailyLogService {
       items = [...getList('dailyLogs', workId)];
     } else {
       try {
-        const { data } = await worksApi.get<any>(base(workId), { params: filter });
-        // A API retorna PagedResult<DailyLogEntryDto> com campo "items"
+        const params: Record<string, unknown> = {
+          page: filter?.page ?? 1,
+          pageSize: filter?.pageSize ?? 20,
+        };
+        const { data } = await worksApi.get<any>(base(workId), { params });
         const raw: any[] = Array.isArray(data) ? data : (data?.items ?? []);
         items = raw.map(mapDailyLog);
       } catch (error) {
@@ -69,6 +102,63 @@ export class DailyLogService {
     return USE_MOCK ? delay(items) : items;
   }
 
+  static async listPaged(
+    workId: string,
+    page = 1,
+    pageSize = 20,
+  ): Promise<DailyLogPageResult> {
+    if (USE_MOCK) {
+      const all = [...getList('dailyLogs', workId)].sort((a, b) =>
+        a.date < b.date ? 1 : -1,
+      );
+      const totalCount = all.length;
+      const totalPages = Math.ceil(totalCount / pageSize) || 1;
+      const start = (page - 1) * pageSize;
+      const items = all.slice(start, start + pageSize);
+      return delay({
+        items,
+        totalCount,
+        page,
+        pageSize,
+        totalPages,
+        hasNextPage: page < totalPages,
+        hasPreviousPage: page > 1,
+      });
+    }
+    try {
+      const { data } = await worksApi.get<any>(base(workId), {
+        params: { page, pageSize },
+      });
+      const raw: any[] = Array.isArray(data) ? data : (data?.items ?? []);
+      return {
+        items: raw.map(mapDailyLog),
+        totalCount: data?.totalCount ?? raw.length,
+        page: data?.page ?? page,
+        pageSize: data?.pageSize ?? pageSize,
+        totalPages: data?.totalPages ?? 1,
+        hasNextPage: data?.hasNextPage ?? false,
+        hasPreviousPage: data?.hasPreviousPage ?? false,
+      };
+    } catch (error) {
+      throw new Error(extractErrorMessage(error));
+    }
+  }
+
+  static async getById(workId: string, entryId: string): Promise<DailyLogEntry> {
+    if (USE_MOCK) {
+      const list = getList('dailyLogs', workId);
+      const found = list.find((i) => i.id === entryId);
+      if (!found) throw new Error('Registro não encontrado');
+      return delay(found);
+    }
+    try {
+      const { data } = await worksApi.get<any>(`${base(workId)}/${entryId}`);
+      return mapDailyLog(data);
+    } catch (error) {
+      throw new Error(extractErrorMessage(error));
+    }
+  }
+
   static async create(workId: string, payload: Omit<DailyLogEntry, 'id'>): Promise<DailyLogEntry> {
     if (USE_MOCK) {
       const created: DailyLogEntry = { ...payload, id: genId('d') };
@@ -77,7 +167,11 @@ export class DailyLogService {
       return delay(created);
     }
     try {
-      const { data } = await worksApi.post<any>(base(workId), toBackendPayload(payload));
+      const body = {
+        date: payload.date,
+        ...toBackendPayload(payload),
+      };
+      const { data } = await worksApi.post<any>(base(workId), body);
       return mapDailyLog(data);
     } catch (error) {
       throw new Error(extractErrorMessage(error));
@@ -100,7 +194,10 @@ export class DailyLogService {
       return delay(updated);
     }
     try {
-      const { data } = await worksApi.put<any>(`${base(workId)}/${entryId}`, toBackendPayload(patch as Omit<DailyLogEntry, 'id'>));
+      const { data } = await worksApi.put<any>(
+        `${base(workId)}/${entryId}`,
+        toBackendPayload(patch),
+      );
       return mapDailyLog(data);
     } catch (error) {
       throw new Error(extractErrorMessage(error));
@@ -110,7 +207,11 @@ export class DailyLogService {
   static async remove(workId: string, entryId: string): Promise<void> {
     if (USE_MOCK) {
       const list = getList('dailyLogs', workId);
-      setList<DailyLogEntry>('dailyLogs', workId, list.filter((i) => i.id !== entryId));
+      setList<DailyLogEntry>(
+        'dailyLogs',
+        workId,
+        list.filter((i) => i.id !== entryId),
+      );
       return delay(undefined);
     }
     try {
@@ -120,7 +221,16 @@ export class DailyLogService {
     }
   }
 
-  static async uploadPhoto(_workId: string, file: File): Promise<string> {
+  /**
+   * Upload de foto vinculada a um registro específico.
+   * POST /api/v1/works/{workId}/daily-logs/{entryId}/photos
+   */
+  static async uploadPhoto(
+    workId: string,
+    entryId: string,
+    file: File,
+    caption?: string,
+  ): Promise<string> {
     if (USE_MOCK) {
       return new Promise((resolve) => {
         const reader = new FileReader();
@@ -131,10 +241,47 @@ export class DailyLogService {
     try {
       const formData = new FormData();
       formData.append('photo', file);
-      const { data } = await worksApi.post<{ url: string }>(`${base(_workId)}/photos`, formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
+      if (caption) formData.append('caption', caption);
+      const { data } = await worksApi.post<any>(
+        `${base(workId)}/${entryId}/photos`,
+        formData,
+        { headers: { 'Content-Type': 'multipart/form-data' } },
+      );
+      return buildPhotoUrl(data.storagePath ?? data.fileName ?? '');
+    } catch (error) {
+      throw new Error(extractErrorMessage(error));
+    }
+  }
+
+  /**
+   * Exporta o diário como PDF para download.
+   * GET /api/v1/works/{workId}/daily-logs/export/pdf
+   */
+  static async exportPdf(workId: string, from?: string, to?: string): Promise<void> {
+    if (USE_MOCK) {
+      alert('Export de PDF não disponível em modo mock.');
+      return;
+    }
+    try {
+      const params: Record<string, string> = {};
+      if (from) params.from = from;
+      if (to) params.to = to;
+
+      const res = await worksApi.get(`${base(workId)}/export/pdf`, {
+        params,
+        responseType: 'blob',
       });
-      return data.url;
+
+      const blob = new Blob([res.data], { type: 'application/pdf' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      const today = new Date().toISOString().substring(0, 10);
+      a.href = url;
+      a.download = `diario-${workId}-${today}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setTimeout(() => URL.revokeObjectURL(url), 5000);
     } catch (error) {
       throw new Error(extractErrorMessage(error));
     }

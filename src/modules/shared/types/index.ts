@@ -126,6 +126,7 @@ export interface Incident {
   reportedBy: string;
   reportedAt: string;
   assignedTo?: string;
+  deadline?: string;
   resolvedAt?: string;
   resolution?: string;
   photos: string[];

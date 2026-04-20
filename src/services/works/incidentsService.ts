@@ -6,9 +6,10 @@ import type {
   IncidentSeverity,
   IncidentStatus,
 } from '@/modules/shared/types';
+import { buildPhotoUrl } from './dailyLogService';
 import { mockStore, USE_MOCK, delay, genId, nowIso, getList, setList } from './mockStore';
 
-// Mapeamentos de enum do backend (string com JsonStringEnumConverter ou inteiro como fallback)
+// Mapeamentos de enum do backend
 const INCIDENT_STATUS_MAP: Record<string, IncidentStatus> = {
   Aberto: 'aberto', Open: 'aberto', '1': 'aberto',
   EmAndamento: 'em_andamento', InProgress: 'em_andamento', '2': 'em_andamento',
@@ -68,13 +69,16 @@ function mapIncident(raw: any): Incident {
     reportedBy: String(raw.reportedBy ?? ''),
     reportedAt: raw.reportedAt ? String(raw.reportedAt).substring(0, 10) : '',
     assignedTo: raw.assignedTo ? String(raw.assignedTo) : undefined,
+    deadline: raw.deadline ? String(raw.deadline).substring(0, 10) : undefined,
     resolvedAt: raw.resolvedAt ? String(raw.resolvedAt).substring(0, 10) : undefined,
     resolution: raw.resolution ?? undefined,
     relatedTaskId: raw.relatedTaskId ? String(raw.relatedTaskId) : undefined,
     relatedExtraId: raw.relatedExtraId ? String(raw.relatedExtraId) : undefined,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     photos: Array.isArray(raw.photos)
-      ? raw.photos.map((p: any) => String(p.storagePath ?? p.fileName ?? ''))
+      ? raw.photos.map((p: any) => buildPhotoUrl(p.storagePath ?? p.fileName ?? ''))
       : [],
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     history: Array.isArray(raw.history)
       ? raw.history.map((h: any) => ({
           date: h.occurredAt ? String(h.occurredAt).substring(0, 10) : '',
@@ -95,6 +99,7 @@ export interface CreateIncidentInput {
   severity: IncidentSeverity;
   reportedBy: string;
   assignedTo?: string;
+  deadline?: string;
   photos?: string[];
   relatedTaskId?: string;
   relatedExtraId?: string;
@@ -114,7 +119,12 @@ export class IncidentsService {
       items = [...getList('incidents', workId)];
     } else {
       try {
-        const { data } = await worksApi.get(base(workId), { params: filter });
+        const params: Record<string, string> = {};
+        if (filter?.category) params.category = INCIDENT_CATEGORY_TO_BACKEND[filter.category];
+        if (filter?.severity) params.severity = INCIDENT_SEVERITY_TO_BACKEND[filter.severity];
+        if (filter?.status) params.status = INCIDENT_STATUS_TO_BACKEND[filter.status];
+
+        const { data } = await worksApi.get(base(workId), { params });
         const raw = Array.isArray(data) ? data : data?.items ?? [];
         items = raw.map(mapIncident);
       } catch (error) {
@@ -170,6 +180,7 @@ export class IncidentsService {
       reportedBy: input.reportedBy,
       reportedAt: now,
       assignedTo: input.assignedTo,
+      deadline: input.deadline,
       photos: input.photos ?? [],
       relatedTaskId: input.relatedTaskId,
       relatedExtraId: input.relatedExtraId,
@@ -190,6 +201,7 @@ export class IncidentsService {
         category: INCIDENT_CATEGORY_TO_BACKEND[input.category],
         severity: INCIDENT_SEVERITY_TO_BACKEND[input.severity],
         assignedTo: input.assignedTo ?? null,
+        deadline: input.deadline ?? null,
         relatedTaskId: input.relatedTaskId ?? null,
         relatedExtraId: input.relatedExtraId ?? null,
       });
@@ -205,6 +217,7 @@ export class IncidentsService {
     to: IncidentStatus,
     user: string,
     note?: string,
+    resolution?: string,
   ): Promise<Incident> {
     if (USE_MOCK) {
       const list = getList('incidents', workId);
@@ -215,7 +228,8 @@ export class IncidentsService {
         ...current,
         status: to,
         resolvedAt: to === 'resolvido' ? nowIso() : current.resolvedAt,
-        resolution: to === 'resolvido' ? note ?? current.resolution : current.resolution,
+        resolution:
+          to === 'resolvido' ? resolution ?? note ?? current.resolution : current.resolution,
         history: [
           ...current.history,
           { date: nowIso(), action: `Status alterado para ${to}`, user, notes: note },
@@ -231,11 +245,41 @@ export class IncidentsService {
         `${base(workId)}/${incidentId}/status`,
         {
           newStatus: INCIDENT_STATUS_TO_BACKEND[to],
-          resolution: to === 'resolvido' ? note : null,
-          notes: note,
+          resolution: to === 'resolvido' ? (resolution ?? null) : null,
+          notes: note ?? null,
         },
       );
       return mapIncident(data);
+    } catch (error) {
+      throw new Error(extractErrorMessage(error));
+    }
+  }
+
+  /**
+   * Upload de foto para a ocorrência.
+   * POST /api/v1/works/{workId}/incidents/{incidentId}/photos
+   */
+  static async uploadPhoto(
+    workId: string,
+    incidentId: string,
+    file: File,
+  ): Promise<string> {
+    if (USE_MOCK) {
+      return new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result as string);
+        reader.readAsDataURL(file);
+      });
+    }
+    try {
+      const formData = new FormData();
+      formData.append('photo', file);
+      const { data } = await worksApi.post<any>(
+        `${base(workId)}/${incidentId}/photos`,
+        formData,
+        { headers: { 'Content-Type': 'multipart/form-data' } },
+      );
+      return buildPhotoUrl(data.storagePath ?? data.fileName ?? '');
     } catch (error) {
       throw new Error(extractErrorMessage(error));
     }
