@@ -36,16 +36,30 @@ export interface CreateWorkDto {
   responsibleUserId?: string;
 }
 
+export type DependencyType = 'FinishToStart' | 'StartToStart';
+
+export interface TaskDependency {
+  dependsOnTaskId: string;
+  type: DependencyType;
+}
+
 export interface ScheduleTask {
   id: string;
+  workId?: string;
   name: string;
+  description: string;
   startDate: string;
   endDate: string;
+  actualStartDate?: string;
+  actualEndDate?: string;
   progress: number;
-  dependencies: string[];
-  responsible: string;
   status: TaskStatus;
-  stage: string;
+  responsibleUserId?: string;
+  parentTaskId?: string;
+  order: number;
+  dependencies: TaskDependency[];
+  isAtRisk: boolean;
+  daysUntilDeadline?: number;
 }
 
 export interface BudgetItem {
