@@ -1,7 +1,7 @@
 import { worksApi } from '@/services/api/apiFactory';
 import { API_CONFIG } from '@/config/api';
 import { extractErrorMessage } from '@/utils/errorHandler';
-import type { DailyLogEntry } from '@/modules/shared/types';
+import type { DailyLogEntry, DailyLogOccurrence } from '@/modules/shared/types';
 import { USE_MOCK, delay, genId, getList, setList } from './mockStore';
 
 const base = (workId: string) => `/works/${workId}/daily-logs`;
@@ -30,6 +30,17 @@ function mapDailyLog(raw: any): DailyLogEntry {
       raw.photos.map((p: any) => buildPhotoUrl(p.storagePath ?? p.fileName ?? ''))
     : [];
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const occurrences: DailyLogOccurrence[] = Array.isArray(raw.occurrences)
+    ? // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      raw.occurrences.map((o: any) => ({
+        id: String(o.id ?? ''),
+        description: o.description ?? '',
+        responsible: o.responsible ?? '',
+        deadline: o.deadline ? String(o.deadline).substring(0, 10) : '',
+      }))
+    : [];
+
   return {
     id: String(raw.id ?? ''),
     date: raw.date ? String(raw.date).substring(0, 10) : '',
@@ -40,6 +51,7 @@ function mapDailyLog(raw: any): DailyLogEntry {
     weather: raw.weather ?? undefined,
     workersCount: raw.workersCount != null ? Number(raw.workersCount) : undefined,
     photos,
+    occurrences: occurrences.length > 0 ? occurrences : undefined,
   };
 }
 
@@ -51,6 +63,11 @@ function toBackendPayload(entry: Partial<DailyLogEntry>): any {
     activities: entry.description ?? '',
     issues: entry.problems ?? null,
     notes: entry.actions ?? null,
+    occurrences: entry.occurrences?.map((o) => ({
+      description: o.description,
+      responsible: o.responsible,
+      deadline: o.deadline,
+    })) ?? null,
   };
 }
 

@@ -44,7 +44,7 @@ const developmentConfig: ApiConfig = {
     BASE_URL: import.meta.env.VITE_USERS_API_URL || 'http://localhost:5065/liderum/api/user',
   },
   WORKS: {
-    BASE_URL: import.meta.env.VITE_WORKS_API_URL || 'http://localhost:5003/api/v1',
+    BASE_URL: import.meta.env.VITE_WORKS_API_URL || 'https://localhost:7141/api/v1',
   },
   RBAC: {
     BASE_URL: import.meta.env.VITE_RBAC_API_URL || 'http://localhost:5065/liderum/api/rbac',

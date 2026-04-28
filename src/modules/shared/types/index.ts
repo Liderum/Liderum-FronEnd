@@ -103,6 +103,13 @@ export interface ExtraHistoryEntry {
   notes?: string;
 }
 
+export interface DailyLogOccurrence {
+  id: string;
+  description: string;
+  responsible: string;
+  deadline: string;
+}
+
 export interface DailyLogEntry {
   id: string;
   date: string;
@@ -113,6 +120,7 @@ export interface DailyLogEntry {
   photos: string[];
   weather?: string;
   workersCount?: number;
+  occurrences?: DailyLogOccurrence[];
 }
 
 export interface Incident {

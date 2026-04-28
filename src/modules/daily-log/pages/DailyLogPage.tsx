@@ -4,12 +4,12 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   CloudSun, Users, Camera, AlertTriangle, Wrench, Plus, X, Upload,
   Filter, FileDown, Pencil, Trash2, Loader2, BookOpen, ChevronLeft,
-  ChevronRight, CheckCircle, NotebookPen,
+  ChevronRight, CheckCircle, NotebookPen, CalendarClock,
 } from 'lucide-react';
 import { DailyLogService } from '@/services/works';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import type { DailyLogEntry } from '@/modules/shared/types';
+import type { DailyLogEntry, DailyLogOccurrence } from '@/modules/shared/types';
 
 /* ─── CSS ─────────────────────────────────────────────────────────────── */
 const CSS = `
@@ -93,6 +93,16 @@ const CSS = `
 /* Export modal */
 .dl-export-row{display:flex;gap:12px;align-items:flex-end;margin-bottom:16px;flex-wrap:wrap;}
 .dl-export-field{flex:1;min-width:140px;}
+
+/* Occurrences */
+.dl-occ-list{display:flex;flex-direction:column;gap:8px;margin-bottom:14px;}
+.dl-occ-item{background:rgba(184,146,42,0.05);border:1px solid rgba(184,146,42,0.18);border-radius:8px;padding:10px 12px;display:grid;grid-template-columns:1fr 1fr auto;gap:8px;align-items:start;}
+.dl-occ-item.card{grid-template-columns:1fr;background:#FFF8E1;border-color:rgba(184,146,42,0.25);}
+.dl-occ-add{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--gold,#B8922A);cursor:pointer;background:none;border:1px dashed rgba(184,146,42,0.4);border-radius:7px;padding:6px 12px;font-family:'DM Sans',sans-serif;transition:all 0.15s;margin-bottom:14px;}
+.dl-occ-add:hover{background:rgba(184,146,42,0.06);}
+.dl-occ-row{display:grid;grid-template-columns:1fr 1fr 160px auto;gap:8px;align-items:end;background:rgba(184,146,42,0.04);border:1px solid rgba(184,146,42,0.18);border-radius:8px;padding:10px 12px;margin-bottom:8px;}
+.dl-occ-del{width:28px;height:28px;border-radius:6px;border:1px solid rgba(192,57,43,0.2);background:#FDEDEC;color:#C0392B;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.dl-occ-del:hover{background:#f8d5d0;}
 `;
 
 /* ─── Helpers ─────────────────────────────────────────────────────────── */
@@ -125,6 +135,18 @@ interface FormState {
   problems: string;
   actions: string;
 }
+
+interface OccurrenceFormItem {
+  description: string;
+  responsible: string;
+  deadline: string;
+}
+
+const emptyOccurrence = (): OccurrenceFormItem => ({
+  description: '',
+  responsible: '',
+  deadline: '',
+});
 
 const emptyForm: FormState = {
   date: new Date().toISOString().slice(0, 10),
@@ -165,6 +187,7 @@ export default function DailyLogPage() {
   const [modalMode, setModalMode] = useState<ModalMode>(null);
   const [editingEntry, setEditingEntry] = useState<DailyLogEntry | null>(null);
   const [form, setForm] = useState<FormState>(emptyForm);
+  const [occurrenceForms, setOccurrenceForms] = useState<OccurrenceFormItem[]>([]);
   const [pendingPhotos, setPendingPhotos] = useState<File[]>([]);
   const [pendingPhotosPreviews, setPendingPhotosPreviews] = useState<string[]>([]);
   const [uploadingPhotos, setUploadingPhotos] = useState(false);
@@ -223,6 +246,7 @@ export default function DailyLogPage() {
   /* ── Modal helpers ── */
   const openCreate = () => {
     setForm(emptyForm);
+    setOccurrenceForms([]);
     setPendingPhotos([]);
     setPendingPhotosPreviews([]);
     setEditingEntry(null);
@@ -238,6 +262,13 @@ export default function DailyLogPage() {
       problems: entry.problems ?? '',
       actions: entry.actions ?? '',
     });
+    setOccurrenceForms(
+      entry.occurrences?.map((o) => ({
+        description: o.description,
+        responsible: o.responsible,
+        deadline: o.deadline,
+      })) ?? [],
+    );
     setPendingPhotos([]);
     setPendingPhotosPreviews([]);
     setEditingEntry(entry);
@@ -247,6 +278,7 @@ export default function DailyLogPage() {
   const closeModal = () => {
     setModalMode(null);
     setEditingEntry(null);
+    setOccurrenceForms([]);
     setPendingPhotos([]);
     setPendingPhotosPreviews([]);
   };
@@ -292,6 +324,9 @@ export default function DailyLogPage() {
     if (!form.description.trim()) return;
     setSaving(true);
     try {
+      const validOccurrences = occurrenceForms.filter(
+        (o) => o.description.trim() && o.responsible.trim() && o.deadline,
+      );
       const created = await DailyLogService.create(workId, {
         date: form.date,
         description: form.description.trim(),
@@ -301,6 +336,9 @@ export default function DailyLogPage() {
         problems: form.problems.trim() || undefined,
         actions: form.actions.trim() || undefined,
         photos: [],
+        occurrences: validOccurrences.length > 0
+          ? validOccurrences.map((o) => ({ id: '', description: o.description.trim(), responsible: o.responsible.trim(), deadline: o.deadline }))
+          : undefined,
       });
       setEntries((prev) => [created, ...prev]);
       setTotalCount((n) => n + 1);
@@ -330,12 +368,21 @@ export default function DailyLogPage() {
     if (!editingEntry || !form.description.trim()) return;
     setSaving(true);
     try {
+      const validOccurrences = occurrenceForms.filter(
+        (o) => o.description.trim() && o.responsible.trim() && o.deadline,
+      );
       const updated = await DailyLogService.update(workId, editingEntry.id, {
         description: form.description.trim(),
         weather: form.weather || undefined,
         workersCount: form.workersCount ? Number(form.workersCount) : undefined,
         problems: form.problems.trim() || undefined,
         actions: form.actions.trim() || undefined,
+        occurrences: validOccurrences.map((o) => ({
+          id: '',
+          description: o.description.trim(),
+          responsible: o.responsible.trim(),
+          deadline: o.deadline,
+        })),
       });
       setEntries((prev) => prev.map((e) => (e.id === editingEntry.id ? updated : e)));
       if (pendingPhotos.length > 0) await uploadPhotosToEntry(editingEntry.id);
@@ -643,6 +690,30 @@ export default function DailyLogPage() {
                       </div>
                     )}
 
+                    {entry.occurrences && entry.occurrences.length > 0 && (
+                      <div>
+                        <div style={{ fontSize: 10.5, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.6px', color: '#7A7670', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 5 }}>
+                          <CalendarClock size={11} /> Ocorrências ({entry.occurrences.length})
+                        </div>
+                        <div className="dl-occ-list">
+                          {entry.occurrences.map((occ: DailyLogOccurrence, oi: number) => (
+                            <div key={oi} className="dl-occ-item card">
+                              <div style={{ fontSize: 12.5, color: '#1A1814', marginBottom: 4 }}>{occ.description}</div>
+                              <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
+                                <span style={{ fontSize: 11, color: '#7A7670' }}>
+                                  <strong style={{ color: '#B8922A' }}>Responsável:</strong> {occ.responsible}
+                                </span>
+                                <span style={{ fontSize: 11, color: '#7A7670' }}>
+                                  <strong style={{ color: '#B8922A' }}>Prazo:</strong>{' '}
+                                  {occ.deadline ? new Date(occ.deadline + 'T12:00:00').toLocaleDateString('pt-BR') : '—'}
+                                </span>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
                     {entry.photos.length > 0 && (
                       <div>
                         <div style={{ fontSize: 10.5, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.6px', color: '#7A7670', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 5 }}>
@@ -788,6 +859,69 @@ export default function DailyLogPage() {
                 onChange={(e) => setForm({ ...form, actions: e.target.value })}
                 placeholder="Notas adicionais, ações tomadas… (opcional)"
               />
+
+              <label className="dl-label">Ocorrências / Pendências</label>
+              {occurrenceForms.map((occ, idx) => (
+                <div key={idx} className="dl-occ-row">
+                  <div>
+                    <label className="dl-label" style={{ marginBottom: 3 }}>Descrição *</label>
+                    <input
+                      className="dl-input"
+                      style={{ marginBottom: 0 }}
+                      value={occ.description}
+                      onChange={(e) => {
+                        const next = [...occurrenceForms];
+                        next[idx] = { ...next[idx], description: e.target.value };
+                        setOccurrenceForms(next);
+                      }}
+                      placeholder="Descreva a ocorrência…"
+                    />
+                  </div>
+                  <div>
+                    <label className="dl-label" style={{ marginBottom: 3 }}>Responsável *</label>
+                    <input
+                      className="dl-input"
+                      style={{ marginBottom: 0 }}
+                      value={occ.responsible}
+                      onChange={(e) => {
+                        const next = [...occurrenceForms];
+                        next[idx] = { ...next[idx], responsible: e.target.value };
+                        setOccurrenceForms(next);
+                      }}
+                      placeholder="Nome do responsável…"
+                    />
+                  </div>
+                  <div>
+                    <label className="dl-label" style={{ marginBottom: 3 }}>Prazo *</label>
+                    <input
+                      className="dl-input"
+                      style={{ marginBottom: 0 }}
+                      type="date"
+                      value={occ.deadline}
+                      onChange={(e) => {
+                        const next = [...occurrenceForms];
+                        next[idx] = { ...next[idx], deadline: e.target.value };
+                        setOccurrenceForms(next);
+                      }}
+                    />
+                  </div>
+                  <button
+                    type="button"
+                    className="dl-occ-del"
+                    onClick={() => setOccurrenceForms((prev) => prev.filter((_, i) => i !== idx))}
+                    title="Remover"
+                  >
+                    <X size={12} />
+                  </button>
+                </div>
+              ))}
+              <button
+                type="button"
+                className="dl-occ-add"
+                onClick={() => setOccurrenceForms((prev) => [...prev, emptyOccurrence()])}
+              >
+                <Plus size={12} /> Adicionar ocorrência
+              </button>
 
               <label className="dl-label">Fotos</label>
               <div className="dl-photo-upload">
