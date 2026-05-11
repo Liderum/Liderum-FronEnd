@@ -90,4 +90,24 @@ export class WorksService {
       throw new Error(extractErrorMessage(error));
     }
   }
+
+  static async lookupCep(cep: string): Promise<CepResult> {
+    try {
+      const { data } = await worksApi.get(`${BASE}/cep/${cep}`);
+      if (!data.isSuccess) {
+        throw new Error(data.error ?? 'CEP não encontrado.');
+      }
+      return data.value as CepResult;
+    } catch (error) {
+      throw new Error(extractErrorMessage(error));
+    }
+  }
+}
+
+export interface CepResult {
+  zipCode: string;
+  street: string;
+  neighborhood: string;
+  city: string;
+  state: string;
 }

@@ -10,7 +10,7 @@ export interface Work {
   id: string;
   name: string;
   description?: string;
-  address: string;
+  address: AddressDto | string;
   status: WorkStatus;
   statusLabel?: string;
   startDate: string;
@@ -26,14 +26,25 @@ export interface Work {
   updatedAt?: string;
 }
 
+export interface AddressDto {
+  zipCode: string;
+  street: string;
+  number: string;
+  neighborhood: string;
+  city: string;
+  state: string;
+  complement?: string | null;
+}
+
 export interface CreateWorkDto {
   name: string;
-  description?: string;
-  address: string;
+  description?: string | null;
+  address: AddressDto;
   startDate: string;
-  expectedEndDate?: string;
+  expectedEndDate?: string | null;
   totalBudget: number;
-  responsibleUserId?: string;
+  customerId?: string | null;
+  responsibleUserId?: string | null;
 }
 
 export interface ScheduleTask {
