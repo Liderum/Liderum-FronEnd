@@ -4,14 +4,11 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite --mode development",
-    "dev:prod": "vite --mode production",
-    "build": "vite build --mode production",
-    "build:dev": "vite build --mode development",
-    "build:staging": "vite build --mode staging",
+    "dev": "vite --mode dsv",
+    "build": "vite build --mode prd",
+    "build:dsv": "vite build --mode dsv",
     "lint": "eslint .",
     "preview": "vite preview",
-    "preview:prod": "vite preview --mode production",
     "serve": "node server.js",
     "start": "node server.js"
   },

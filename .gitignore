@@ -372,8 +372,7 @@ FodyWeavers.xsd
 .env
 .env.local
 .env.*.local
-.env.staging
-.env.production
+.env.prd
 
 # Vite build output
 dist/

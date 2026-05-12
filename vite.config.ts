@@ -29,7 +29,7 @@ export default defineConfig(({ mode }) => {
     },
     plugins: [
       react(),
-      mode === 'development' && componentTagger(),
+      mode === 'dsv' && componentTagger(),
     ].filter(Boolean),
     resolve: {
       alias: {
@@ -38,10 +38,10 @@ export default defineConfig(({ mode }) => {
     },
     build: {
       outDir: 'dist',
-      // Sourcemap em development e staging — facilita debug sem expor em produção
-      sourcemap: mode !== 'production',
-      // Minificação em staging e produção — reduz tamanho do bundle
-      minify: mode !== 'development' ? 'esbuild' : false,
+      // Sourcemap em dsv — facilita debug sem expor em prd
+      sourcemap: mode !== 'prd',
+      // Minificação em prd — reduz tamanho do bundle
+      minify: mode === 'prd' ? 'esbuild' : false,
       rollupOptions: {
         output: {
           // Code splitting manual: isola vendors grandes para cache eficiente no browser
