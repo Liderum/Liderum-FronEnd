@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite --mode dsv",
     "build": "vite build --mode prd",
+    "build:prd": "vite build --mode prd",
     "build:dsv": "vite build --mode dsv",
     "lint": "eslint .",
     "preview": "vite preview",

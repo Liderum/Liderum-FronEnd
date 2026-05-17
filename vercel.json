@@ -1,5 +1,5 @@
 {
-  "buildCommand": "npm run build:${VITE_APP_ENV:-prd}",
+  "buildCommand": "npm run build:prd",
   "rewrites": [
     {
       "source": "/(.*)",
