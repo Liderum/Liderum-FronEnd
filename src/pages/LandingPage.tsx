@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSessionCleanup } from '@/hooks/useSessionCleanup';
 
-const PRICES = { p1: [399, 319], p2: [899, 719], p3: [1799, 1439] } as const;
+const PRICES = { p1: [97, 77], p2: [197, 157] } as const;
 
 const features = [
   { icon: '🏗️', title: 'Gestão de Obras', text: 'Acompanhe todas as suas obras em tempo real — etapas, prazos, progresso e responsáveis em uma visão única e centralizada.' },
@@ -13,10 +13,10 @@ const features = [
   { icon: '🛡️', title: 'Alertas de Risco', text: 'Monitoramento contínuo de prazos, custos e qualidade com alertas classificados por severidade para que nenhum problema passe despercebido.' }
 ];
 
-const testimonials = [
-  { initial: 'M', name: 'Marcos Oliveira', role: 'Diretor de Engenharia · Construtora Horizonte', text: 'Antes gerenciávamos 12 obras em planilhas separadas. Com a Liderum, temos visão consolidada de todas em tempo real. Já identificamos 3 desvios orçamentários que nos poupariam R$200k.' },
-  { initial: 'A', name: 'Ana Beatriz Costa', role: 'Engenheira Civil · ABL Construções', text: 'O diário de obra digital mudou nosso jogo. Registro no canteiro com foto em 2 minutos, e a diretoria acompanha tudo sem precisar de ligação ou WhatsApp.' },
-  { initial: 'R', name: 'Roberto Mendes', role: 'CEO · Construtora Nova Era', text: 'A gestão de extras sozinha já se pagou. Antes perdíamos margem com aditivos mal documentados. Agora cada centavo tem rastreabilidade e aprovação formal.' }
+const earlyBenefits = [
+  { icon: '🔒', title: 'Acesso completo desde o início', text: 'Todos os módulos disponíveis já no primeiro dia — sem bloqueio de funcionalidades durante o período de acesso antecipado.' },
+  { icon: '💬', title: 'Canal direto com os fundadores', text: 'Reporte o que falta, o que incomoda, o que poderia ser melhor. Seu feedback molda diretamente o roadmap da plataforma.' },
+  { icon: '📌', title: 'Preço travado para sempre', text: 'Quem entrar agora garante o preço atual independente dos reajustes futuros — enquanto a plataforma cresce, o seu custo não.' }
 ];
 
 const painItems = [
@@ -256,7 +256,7 @@ export function LandingPage() {
             Lide<span>rum</span>
           </button>
           <ul className="ldr-navlinks">
-            {[['ldr-features', 'Produto'], ['ldr-how', 'Como funciona'], ['ldr-pricing', 'Preços'], ['ldr-testi', 'Clientes']].map(([id, label]) => (
+            {[['ldr-features', 'Produto'], ['ldr-how', 'Como funciona'], ['ldr-pricing', 'Preços']].map(([id, label]) => (
               <li key={id}><button type="button" onClick={() => scrollTo(id)}>{label}</button></li>
             ))}
           </ul>
@@ -311,21 +311,21 @@ export function LandingPage() {
           <div className="ldr-proof-inner">
             <div className="ldr-proof-metrics">
               {[
-                { val: '+', num: '340', label: 'obras gerenciadas na plataforma' },
-                { val: 'R$', num: '2,8B', label: 'em valor total de obras monitoradas' },
-                { val: '-', num: '34%', label: 'de redução em desvios de orçamento' },
-                { val: '', num: '99,8', label: 'de uptime garantido', suffix: '%' }
+                { val: '', num: '6', label: 'módulos integrados nativamente', suffix: '' },
+                { val: '', num: '100%', label: 'isolamento de dados por empresa (multi-tenant)', suffix: '' },
+                { val: '', num: 'RBAC', label: 'permissões granulares por usuário e papel', suffix: '' },
+                { val: '', num: '< 1h', label: 'para cadastrar sua primeira obra', suffix: '' }
               ].map((m, i) => (
                 <div key={m.label} className={`ldr-metric ldr-reveal${i > 0 ? ` ldr-d${i}` : ''}`}>
-                  <span className="ldr-metric-val">{m.val}<span>{m.num}</span>{m.suffix ?? ''}</span>
+                  <span className="ldr-metric-val">{m.val}<span>{m.num}</span>{m.suffix}</span>
                   <div className="ldr-metric-label">{m.label}</div>
                 </div>
               ))}
             </div>
-            <div className="ldr-proof-logos">
-              {['Construtora Horizonte', 'ABL Construções', 'Nova Era Engenharia', 'Grupo Patrimar', 'MRV Regional'].map((name) => (
-                <div key={name} className="ldr-logo-pill">{name}</div>
-              ))}
+            <div style={{ textAlign: 'center', marginTop: '8px' }}>
+              <span style={{ display: 'inline-block', background: 'var(--gold-light)', color: 'var(--gold)', border: '1px solid rgba(184,146,42,0.25)', borderRadius: '8px', padding: '10px 24px', fontSize: '13px', fontWeight: 500 }}>
+                ✦ Plataforma em acesso antecipado — entre agora e trave seu preço para sempre
+              </span>
             </div>
           </div>
         </div>
@@ -391,21 +391,28 @@ export function LandingPage() {
           </div>
         </section>
 
-        <section className="ldr-section" id="ldr-testi" style={{ background: 'var(--cream)' }}>
+        <section className="ldr-section" id="ldr-early" style={{ background: 'var(--ink)' }}>
           <div className="ldr-section-inner">
-            <div className="ldr-section-tag">Depoimentos</div>
-            <h2 className="ldr-h2">Quem controla obras com a Liderum<br /><em>não volta</em> para a planilha</h2>
+            <div style={{ textAlign: 'center', marginBottom: '56px' }}>
+              <div className="ldr-section-tag" style={{ color: 'var(--gold2)' }}>Acesso antecipado</div>
+              <h2 className="ldr-h2" style={{ color: '#fff' }}>Seja um dos primeiros a controlar<br /><em>obras com inteligência</em></h2>
+              <p className="ldr-section-sub" style={{ margin: '0 auto', color: 'rgba(255,255,255,0.5)', textAlign: 'center' }}>
+                A Liderum está crescendo. Não temos dezenas de clientes para mostrar — temos um produto sólido e honesto, construído para durar. Estamos procurando as primeiras construtoras que querem crescer junto com a gente.
+              </p>
+            </div>
             <div className="ldr-tgrid">
-              {testimonials.map((t, i) => (
-                <div key={t.name} className={`ldr-tcard ldr-reveal${i > 0 ? ` ldr-d${i + 1}` : ''}`}>
-                  <div className="ldr-tquote">"</div>
-                  <p className="ldr-ttext">"{t.text}"</p>
-                  <div className="ldr-tauthor">
-                    <div className="ldr-tavatar">{t.initial}</div>
-                    <div><div className="ldr-tname">{t.name}</div><div className="ldr-trole">{t.role}</div></div>
-                  </div>
+              {earlyBenefits.map((b, i) => (
+                <div key={b.title} className={`ldr-tcard ldr-reveal${i > 0 ? ` ldr-d${i + 1}` : ''}`} style={{ background: 'rgba(255,255,255,0.05)', borderColor: 'rgba(255,255,255,0.1)' }}>
+                  <div style={{ fontSize: '32px', marginBottom: '16px' }}>{b.icon}</div>
+                  <div className="ldr-tname" style={{ fontSize: '16px', fontFamily: "'Cormorant Garamond', serif", fontWeight: 700, marginBottom: '10px', color: '#fff' }}>{b.title}</div>
+                  <p style={{ fontSize: '14px', color: 'rgba(255,255,255,0.6)', lineHeight: 1.65 }}>{b.text}</p>
                 </div>
               ))}
+            </div>
+            <div style={{ textAlign: 'center', marginTop: '48px' }}>
+              <button type="button" className="ldr-btn-gold" onClick={() => navigate('/contact')}>
+                Quero ser um early adopter →
+              </button>
             </div>
           </div>
         </section>
@@ -434,47 +441,39 @@ export function LandingPage() {
               </div>
             </div>
             <div className="ldr-plans">
-              {[
-                {
-                  key: 'p1' as const,
-                  name: 'Essencial',
-                  desc: 'Para construtoras com até 5 obras simultâneas',
-                  items: ['Até 5 obras ativas', 'Dashboard executivo', 'Cronograma e orçamento', 'Diário de obra digital', 'Suporte via chat'],
-                  btnClass: 'light',
-                  btnLabel: 'Começar grátis'
-                },
-                {
-                  key: 'p2' as const,
-                  name: 'Crescimento',
-                  desc: '',
-                  featured: true,
-                  items: ['Até 20 obras ativas', 'Todos os módulos', 'Gestão de extras e aditivos', 'Alertas de risco automáticos', 'API para integrações', 'Suporte prioritário'],
-                  btnClass: 'gold',
-                  btnLabel: 'Começar grátis'
-                },
-                {
-                  key: 'p3' as const,
-                  name: 'Enterprise',
-                  desc: 'Para operações de grande porte',
-                  items: ['Obras ilimitadas', 'Multi-empresa (multi-tenant)', 'Permissões granulares', 'SLA 99,9% garantido', 'Implantação assistida', 'Gerente de conta exclusivo'],
-                  btnClass: 'light',
-                  btnLabel: 'Falar com vendas'
-                }
-              ].map((plan, i) => (
-                <div key={plan.key} className={`ldr-plan ldr-reveal${plan.featured ? ' featured' : ''}${i > 0 ? ` ldr-d${i + 1}` : ''}`}>
-                  {plan.featured && <div className="ldr-plan-badge">✦ Mais popular</div>}
-                  <div className="ldr-plan-name">{plan.name}</div>
-                  <div className="ldr-plan-desc">{plan.featured ? <span style={{ color: 'rgba(255,255,255,0.5)' }}>Para construtoras em crescimento</span> : plan.desc}</div>
-                  <div className="ldr-plan-price">{price(plan.key)}</div>
-                  <div className="ldr-plan-period">{period}</div>
-                  <ul className="ldr-plan-features">
-                    {plan.items.map((f) => <li key={f}>{f}</li>)}
-                  </ul>
-                  <button type="button" className={`ldr-plan-btn ${plan.btnClass}`} onClick={() => navigate('/contact')}>
-                    {plan.btnLabel}
-                  </button>
-                </div>
-              ))}
+              <div className="ldr-plan ldr-reveal">
+                <div className="ldr-plan-name">Essencial</div>
+                <div className="ldr-plan-desc">Para construtoras com até 5 obras simultâneas</div>
+                <div className="ldr-plan-price">{price('p1')}</div>
+                <div className="ldr-plan-period">{period}</div>
+                <ul className="ldr-plan-features">
+                  {['Até 5 obras ativas', 'Dashboard executivo', 'Cronograma por etapas', 'Orçamento previsto × realizado', 'Diário de obra com fotos', 'Suporte via chat'].map((f) => <li key={f}>{f}</li>)}
+                </ul>
+                <button type="button" className="ldr-plan-btn light" onClick={() => navigate('/contact')}>Começar grátis</button>
+              </div>
+
+              <div className="ldr-plan featured ldr-reveal ldr-d2">
+                <div className="ldr-plan-badge">✦ Mais completo</div>
+                <div className="ldr-plan-name">Crescimento</div>
+                <div className="ldr-plan-desc"><span style={{ color: 'rgba(255,255,255,0.5)' }}>Para construtoras que gerenciam múltiplos projetos</span></div>
+                <div className="ldr-plan-price">{price('p2')}</div>
+                <div className="ldr-plan-period">{period}</div>
+                <ul className="ldr-plan-features">
+                  {['Obras ilimitadas', 'Todos os módulos do Essencial', 'Gestão de extras e aditivos', 'Registro de incidentes e ocorrências', 'Múltiplos usuários com perfis de acesso', 'Suporte prioritário'].map((f) => <li key={f}>{f}</li>)}
+                </ul>
+                <button type="button" className="ldr-plan-btn gold" onClick={() => navigate('/contact')}>Começar grátis</button>
+              </div>
+
+              <div className="ldr-plan ldr-reveal ldr-d3">
+                <div className="ldr-plan-name">Enterprise</div>
+                <div className="ldr-plan-desc">Para grupos com múltiplas empresas e obras</div>
+                <div className="ldr-plan-price" style={{ fontSize: '28px', paddingTop: '10px' }}>Sob consulta</div>
+                <div className="ldr-plan-period" style={{ marginBottom: '28px' }}>Preço personalizado para sua operação</div>
+                <ul className="ldr-plan-features">
+                  {['Tudo do Crescimento', 'Multi-empresa (multi-tenant)', 'RBAC — permissões granulares por papel', 'Integração via API', 'Implantação assistida', 'Gerente de conta dedicado'].map((f) => <li key={f}>{f}</li>)}
+                </ul>
+                <button type="button" className="ldr-plan-btn light" onClick={() => navigate('/contact')}>Falar com a equipe</button>
+              </div>
             </div>
           </div>
         </section>
