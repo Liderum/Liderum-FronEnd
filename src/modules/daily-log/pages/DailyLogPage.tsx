@@ -6,6 +6,7 @@ import {
   Filter, FileDown, Pencil, Trash2, Loader2, BookOpen, ChevronLeft,
   ChevronRight, CheckCircle, NotebookPen, CalendarClock,
 } from 'lucide-react';
+import { LdSelect } from '@/components/LdSelect';
 import { DailyLogService } from '@/services/works';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
@@ -811,16 +812,12 @@ export default function DailyLogPage() {
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
                 <div>
                   <label className="dl-label">Clima</label>
-                  <select
-                    className="dl-input"
+                  <LdSelect
                     value={form.weather}
-                    onChange={(e) => setForm({ ...form, weather: e.target.value })}
-                  >
-                    <option value="">— Selecionar —</option>
-                    {WEATHER_OPTIONS.map((w) => (
-                      <option key={w} value={w}>{w}</option>
-                    ))}
-                  </select>
+                    onChange={(val) => setForm({ ...form, weather: val })}
+                    options={WEATHER_OPTIONS.map((w) => ({ value: w, label: w }))}
+                    style={{ marginBottom: 14 }}
+                  />
                 </div>
                 <div>
                   <label className="dl-label">Efetivo (trabalhadores)</label>

@@ -5,8 +5,17 @@ import {
   LayoutDashboard, CalendarClock, DollarSign, FilePlus2, BookOpen, ShieldAlert,
   ArrowLeft, MapPin, User, Building2, Loader2,
 } from 'lucide-react';
-import type { Work } from '@/modules/shared/types';
+import type { Work, AddressDto } from '@/modules/shared/types';
 import { STATUS_CONFIG } from '@/modules/shared/types';
+
+function formatAddress(address: AddressDto | string): string {
+  if (!address) return '—';
+  if (typeof address === 'string') return address || '—';
+  const { street, number, neighborhood, city, state } = address;
+  return [street, number ? `nº ${number}` : null, neighborhood, city, state]
+    .filter(Boolean)
+    .join(', ') || '—';
+}
 import { WorksService } from '@/services/works/worksService';
 
 const CSS = `
@@ -97,7 +106,7 @@ export function WorkLayout() {
           <div className="wk-hero-top">
             <div>
               <div className="wk-hero-name">{work.name}</div>
-              <div className="wk-hero-client">{work.address}</div>
+              {work.description && <div className="wk-hero-client">{work.description}</div>}
             </div>
             <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
               <span style={{
@@ -113,7 +122,7 @@ export function WorkLayout() {
             </div>
           </div>
           <div className="wk-hero-meta">
-            <div className="wk-hero-meta-item"><MapPin size={13} /> {work.address}</div>
+            <div className="wk-hero-meta-item"><MapPin size={13} /> {formatAddress(work.address)}</div>
             <div className="wk-hero-meta-item"><Building2 size={13} /> {work.description || '—'}</div>
           </div>
           <div className="wk-hero-progress">

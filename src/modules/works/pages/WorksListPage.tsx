@@ -5,7 +5,7 @@ import {
   Plus, Search, Building2, ArrowRight, MapPin,
   Calendar, LayoutGrid, List, Loader2,
 } from 'lucide-react';
-import type { Work, WorkStatus } from '@/modules/shared/types';
+import type { Work, WorkStatus, AddressDto } from '@/modules/shared/types';
 import { STATUS_CONFIG } from '@/modules/shared/types';
 import { WorksService } from '@/services/works/worksService';
 
@@ -56,6 +56,16 @@ const FILTERS: { key: FilterKey; label: string }[] = [
   { key: 'atrasada', label: 'Atrasadas' },
   { key: 'concluida', label: 'Concluídas' },
 ];
+
+function formatAddress(address: AddressDto | string): string {
+  if (!address) return '—';
+  if (typeof address === 'string') return address || '—';
+  const { street, number, neighborhood, city, state } = address;
+  const parts = [street, number ? `nº ${number}` : null, neighborhood, city, state]
+    .filter(Boolean)
+    .join(', ');
+  return parts || '—';
+}
 
 function formatCurrency(value: number) {
   return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 }).format(value);
@@ -108,8 +118,9 @@ export default function WorksListPage() {
   }
 
   const filtered = works.filter(w => {
+    const addressStr = formatAddress(w.address).toLowerCase();
     const matchSearch = w.name.toLowerCase().includes(search.toLowerCase()) ||
-      (w.address ?? '').toLowerCase().includes(search.toLowerCase());
+      addressStr.includes(search.toLowerCase());
     const matchFilter = filter === 'todas' || w.status === filter;
     return matchSearch && matchFilter;
   });
@@ -194,7 +205,7 @@ function WorkCard({ work, index, onClick }: { work: Work; index: number; onClick
       <div className="wl-card-top">
         <div>
           <div className="wl-card-name">{work.name}</div>
-          <div className="wl-card-client">{work.address}</div>
+          <div className="wl-card-client">{work.customerId ? `Cliente: ${work.customerId}` : ''}</div>
         </div>
         <span style={{
           display: 'inline-flex',
@@ -215,7 +226,7 @@ function WorkCard({ work, index, onClick }: { work: Work; index: number; onClick
 
       <div className="wl-card-meta">
         <div className="wl-card-meta-row">
-          <MapPin size={12} /> {work.address}
+          <MapPin size={12} /> {formatAddress(work.address)}
         </div>
         <div className="wl-card-meta-row">
           <Calendar size={12} /> Início: {formatDate(work.startDate)}

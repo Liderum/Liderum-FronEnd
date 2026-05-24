@@ -6,6 +6,7 @@ import {
   User, Search, Camera, Upload, Loader2, Calendar, Clock, Trash2,
   AlertTriangle, ArrowRight,
 } from 'lucide-react';
+import { LdSelect } from '@/components/LdSelect';
 import { IncidentsService, ScheduleService, ExtrasService } from '@/services/works';
 import { useAuth } from '@/contexts/AuthContext';
 import type {
@@ -28,7 +29,6 @@ const CSS = `
 .inc-stat-label{font-size:10.5px;color:#7A7670;text-transform:uppercase;letter-spacing:0.3px;font-weight:500;}
 
 .inc-toolbar{background:#fff;border-radius:10px;border:1px solid rgba(26,24,20,0.08);padding:12px 16px;display:flex;gap:10px;flex-wrap:wrap;align-items:center;}
-.inc-select{padding:6px 10px;border-radius:6px;border:1px solid rgba(26,24,20,0.12);font-size:12px;font-family:'DM Sans',sans-serif;background:#fff;color:var(--ink);}
 .inc-search{padding:6px 10px 6px 32px;border-radius:6px;border:1px solid rgba(26,24,20,0.12);font-size:12px;font-family:'DM Sans',sans-serif;min-width:180px;background:#fff;color:var(--ink);}
 .inc-search-wrap{position:relative;}
 .inc-search-icon{position:absolute;left:10px;top:50%;transform:translateY(-50%);pointer-events:none;}
@@ -363,36 +363,30 @@ export default function IncidentsPage() {
               onChange={(e) => setSearch(e.target.value)}
             />
           </div>
-          <select
-            className="inc-select"
+          <LdSelect
+            size="sm"
             value={filterCategory}
-            onChange={(e) => setFilterCategory(e.target.value as IncidentCategory | '')}
-          >
-            <option value="">Todas categorias</option>
-            {Object.entries(INCIDENT_CATEGORY_CONFIG).map(([k, v]) => (
-              <option key={k} value={k}>{v.label}</option>
-            ))}
-          </select>
-          <select
-            className="inc-select"
+            onChange={(v) => setFilterCategory(v as IncidentCategory | '')}
+            placeholder="Todas categorias"
+            options={Object.entries(INCIDENT_CATEGORY_CONFIG).map(([k, v]) => ({ value: k, label: v.label }))}
+            style={{ minWidth: 150 }}
+          />
+          <LdSelect
+            size="sm"
             value={filterSeverity}
-            onChange={(e) => setFilterSeverity(e.target.value as IncidentSeverity | '')}
-          >
-            <option value="">Todas severidades</option>
-            {Object.entries(INCIDENT_SEVERITY_CONFIG).map(([k, v]) => (
-              <option key={k} value={k}>{v.label}</option>
-            ))}
-          </select>
-          <select
-            className="inc-select"
+            onChange={(v) => setFilterSeverity(v as IncidentSeverity | '')}
+            placeholder="Todas severidades"
+            options={Object.entries(INCIDENT_SEVERITY_CONFIG).map(([k, v]) => ({ value: k, label: v.label }))}
+            style={{ minWidth: 150 }}
+          />
+          <LdSelect
+            size="sm"
             value={filterStatus}
-            onChange={(e) => setFilterStatus(e.target.value as IncidentStatus | '')}
-          >
-            <option value="">Todos status</option>
-            {Object.entries(INCIDENT_STATUS_CONFIG).map(([k, v]) => (
-              <option key={k} value={k}>{v.label}</option>
-            ))}
-          </select>
+            onChange={(v) => setFilterStatus(v as IncidentStatus | '')}
+            placeholder="Todos status"
+            options={Object.entries(INCIDENT_STATUS_CONFIG).map(([k, v]) => ({ value: k, label: v.label }))}
+            style={{ minWidth: 140 }}
+          />
           {(filterCategory || filterSeverity || filterStatus || search) && (
             <button
               className="inc-btn sm"
@@ -668,27 +662,21 @@ export default function IncidentsPage() {
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
                 <div>
                   <label className="inc-label">Categoria *</label>
-                  <select
-                    className="inc-input"
+                  <LdSelect
                     value={form.category}
-                    onChange={(e) => setForm({ ...form, category: e.target.value as IncidentCategory })}
-                  >
-                    {Object.entries(INCIDENT_CATEGORY_CONFIG).map(([k, v]) => (
-                      <option key={k} value={k}>{v.label}</option>
-                    ))}
-                  </select>
+                    onChange={(v) => setForm({ ...form, category: v as IncidentCategory })}
+                    placeholder=""
+                    options={Object.entries(INCIDENT_CATEGORY_CONFIG).map(([k, v]) => ({ value: k, label: v.label }))}
+                  />
                 </div>
                 <div>
                   <label className="inc-label">Severidade *</label>
-                  <select
-                    className="inc-input"
+                  <LdSelect
                     value={form.severity}
-                    onChange={(e) => setForm({ ...form, severity: e.target.value as IncidentSeverity })}
-                  >
-                    {Object.entries(INCIDENT_SEVERITY_CONFIG).map(([k, v]) => (
-                      <option key={k} value={k}>{v.label}</option>
-                    ))}
-                  </select>
+                    onChange={(v) => setForm({ ...form, severity: v as IncidentSeverity })}
+                    placeholder=""
+                    options={Object.entries(INCIDENT_SEVERITY_CONFIG).map(([k, v]) => ({ value: k, label: v.label }))}
+                  />
                 </div>
               </div>
 
@@ -716,29 +704,21 @@ export default function IncidentsPage() {
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
                 <div>
                   <label className="inc-label">Tarefa relacionada</label>
-                  <select
-                    className="inc-input"
+                  <LdSelect
                     value={form.relatedTaskId}
-                    onChange={(e) => setForm({ ...form, relatedTaskId: e.target.value })}
-                  >
-                    <option value="">— Nenhuma —</option>
-                    {tasks.map((t) => (
-                      <option key={t.id} value={t.id}>{t.name}</option>
-                    ))}
-                  </select>
+                    onChange={(v) => setForm({ ...form, relatedTaskId: v })}
+                    placeholder="— Nenhuma —"
+                    options={tasks.map((t) => ({ value: t.id, label: t.name }))}
+                  />
                 </div>
                 <div>
                   <label className="inc-label">Extra relacionado</label>
-                  <select
-                    className="inc-input"
+                  <LdSelect
                     value={form.relatedExtraId}
-                    onChange={(e) => setForm({ ...form, relatedExtraId: e.target.value })}
-                  >
-                    <option value="">— Nenhum —</option>
-                    {extras.map((ex) => (
-                      <option key={ex.id} value={ex.id}>{ex.title}</option>
-                    ))}
-                  </select>
+                    onChange={(v) => setForm({ ...form, relatedExtraId: v })}
+                    placeholder="— Nenhum —"
+                    options={extras.map((ex) => ({ value: ex.id, label: ex.title }))}
+                  />
                 </div>
               </div>
 
