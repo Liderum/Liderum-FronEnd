@@ -7,6 +7,7 @@ import {
   AlertTriangle, ArrowRight,
 } from 'lucide-react';
 import { LdSelect } from '@/components/LdSelect';
+import { LdDateInput } from '@/components/LdDateInput';
 import { IncidentsService, ScheduleService, ExtrasService } from '@/services/works';
 import { useAuth } from '@/contexts/AuthContext';
 import type {
@@ -692,11 +693,9 @@ export default function IncidentsPage() {
                 </div>
                 <div>
                   <label className="inc-label">Prazo para resolução</label>
-                  <input
-                    className="inc-input"
-                    type="date"
+                  <LdDateInput
                     value={form.deadline}
-                    onChange={(e) => setForm({ ...form, deadline: e.target.value })}
+                    onChange={(v) => setForm({ ...form, deadline: v })}
                   />
                 </div>
               </div>

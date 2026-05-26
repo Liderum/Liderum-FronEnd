@@ -299,7 +299,21 @@ export class DailyLogService {
       a.click();
       document.body.removeChild(a);
       setTimeout(() => URL.revokeObjectURL(url), 5000);
-    } catch (error) {
+    } catch (error: any) {
+      // Quando responseType é 'blob', o corpo do erro também chega como Blob.
+      // É necessário ler o Blob como texto e parsear o JSON para obter a mensagem.
+      const responseData = error?.response?.data;
+      if (responseData instanceof Blob) {
+        try {
+          const text = await responseData.text();
+          const json = JSON.parse(text);
+          throw new Error(json.title ?? json.detail ?? 'Erro ao exportar PDF.');
+        } catch (parseErr) {
+          if (parseErr instanceof Error && parseErr.message !== 'Erro ao exportar PDF.') {
+            throw parseErr;
+          }
+        }
+      }
       throw new Error(extractErrorMessage(error));
     }
   }

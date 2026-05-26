@@ -9,6 +9,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { TASK_STATUS_CONFIG } from '@/modules/shared/types';
 import type { ScheduleTask, TaskStatus } from '@/modules/shared/types';
 import GanttView from '../components/GanttView';
+import { LdDateInput } from '@/components/LdDateInput';
 
 const CSS = `
 .sc{font-family:'DM Sans',sans-serif;color:var(--ink,#1A1814);display:flex;flex-direction:column;gap:18px;}
@@ -295,11 +296,11 @@ export default function SchedulePage() {
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
               <div>
                 <label className="sc-modal-label">Início</label>
-                <input className="sc-modal-input" type="date" value={form.startDate} onChange={(e) => setForm({ ...form, startDate: e.target.value })} />
+                <LdDateInput value={form.startDate} onChange={(v) => setForm({ ...form, startDate: v })} clearable={false} />
               </div>
               <div>
                 <label className="sc-modal-label">Fim</label>
-                <input className="sc-modal-input" type="date" value={form.endDate} onChange={(e) => setForm({ ...form, endDate: e.target.value })} />
+                <LdDateInput value={form.endDate} onChange={(v) => setForm({ ...form, endDate: v })} clearable={false} />
               </div>
             </div>
             <label className="sc-modal-label">Responsável</label>

@@ -272,7 +272,7 @@ export function Settings() {
   const tabs = [
     { id: 'general', label: 'Geral', icon: SettingsIcon },
     { id: 'notifications', label: 'Notificações', icon: Bell },
-    { id: 'payments', label: 'Pagamentos', icon: CreditCard },
+    /* { id: 'payments', label: 'Pagamentos', icon: CreditCard }, */
     { id: 'profile', label: 'Meu Perfil', icon: User },
   ];
 
@@ -410,134 +410,6 @@ export function Settings() {
                         <Switch checked={settings[item.field] as boolean} onCheckedChange={(v) => handleInputChange(item.field, v)} />
                       </div>
                     ))}
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* PAGAMENTOS */}
-            {activeTab === 'payments' && (
-              <div className="ld-section">
-                <div className="ld-card">
-                  <div className="ld-card-body">
-                    <h2 className="ld-h2"><CreditCard size={15} color="var(--gold)" /> Métodos de Pagamento</h2>
-                    <Tabs defaultValue="credit-card" className="w-full">
-                      <TabsList style={{ background: 'rgba(247,244,239,0.6)', border: '1px solid var(--bdr)' }}>
-                        <TabsTrigger value="credit-card">Cartão de Crédito</TabsTrigger>
-                        <TabsTrigger value="pix">PIX</TabsTrigger>
-                      </TabsList>
-
-                      <TabsContent value="credit-card" style={{ marginTop: 16 }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14, flexWrap: 'wrap', gap: 8 }}>
-                          <div>
-                            <div style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: 15, fontWeight: 700, color: 'var(--ink)' }}>Cartões Cadastrados</div>
-                            <div style={{ fontSize: 12, color: 'var(--ink3)' }}>Gerencie seus cartões de crédito</div>
-                          </div>
-                          <button className="ld-btn ld-btn-dark ld-btn-sm" onClick={() => { setEditingCard(null); setCreditCardModalOpen(true); }}>
-                            <Plus size={12} /> Adicionar Cartão
-                          </button>
-                        </div>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                          {settings.paymentMethods.find(m => m.type === 'credit_card')?.creditCards?.map((card) => (
-                            <div key={card.id} className="ld-payment-card">
-                              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                                  <div className="ld-card-logo">{card.brand.toUpperCase().slice(0, 2)}</div>
-                                  <div>
-                                    <div style={{ fontWeight: 600, fontSize: 13.5, color: 'var(--ink)', display: 'flex', alignItems: 'center', gap: 8 }}>
-                                      {card.cardNumber}
-                                      {card.isDefault && <span className="ld-badge ld-badge-gold">Padrão</span>}
-                                    </div>
-                                    <div style={{ fontSize: 12, color: 'var(--ink3)' }}>{card.cardholderName} · Expira {card.expiryDate}</div>
-                                  </div>
-                                </div>
-                                <div style={{ display: 'flex', gap: 6 }}>
-                                  <button className="ld-btn ld-btn-outline ld-btn-sm" onClick={() => { setEditingCard(card); setCreditCardModalOpen(true); }}>
-                                    <Edit size={11} />
-                                  </button>
-                                  <button className="ld-btn ld-btn-danger ld-btn-sm" onClick={() => deleteCreditCard(card.id)}>
-                                    <Trash2 size={11} />
-                                  </button>
-                                </div>
-                              </div>
-                            </div>
-                          )) || []}
-                        </div>
-                      </TabsContent>
-
-                      <TabsContent value="pix" style={{ marginTop: 16 }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14, flexWrap: 'wrap', gap: 8 }}>
-                          <div>
-                            <div style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: 15, fontWeight: 700, color: 'var(--ink)' }}>Chaves PIX</div>
-                            <div style={{ fontSize: 12, color: 'var(--ink3)' }}>Gerencie suas chaves PIX</div>
-                          </div>
-                          <button className="ld-btn ld-btn-dark ld-btn-sm" onClick={() => { setEditingPix(null); setPixModalOpen(true); }}>
-                            <Plus size={12} /> Adicionar Chave
-                          </button>
-                        </div>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                          {settings.paymentMethods.find(m => m.type === 'pix')?.pixKeys?.map((pix) => (
-                            <div key={pix.id} className="ld-payment-card">
-                              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                                <div style={{ flex: 1 }}>
-                                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-                                    <span className="ld-badge ld-badge-outline" style={{ textTransform: 'capitalize' }}>{pix.keyType}</span>
-                                    <span className={pix.isActive ? 'ld-badge ld-badge-green' : 'ld-badge ld-badge-gray'}>
-                                      {pix.isActive ? 'Ativa' : 'Inativa'}
-                                    </span>
-                                  </div>
-                                  <div style={{ fontWeight: 600, fontSize: 14, color: 'var(--ink)' }}>{pix.keyValue}</div>
-                                  <div style={{ fontSize: 12, color: 'var(--ink3)' }}>{pix.bankName} · {pix.accountHolder}</div>
-                                </div>
-                                <div style={{ display: 'flex', gap: 6 }}>
-                                  <button className="ld-btn ld-btn-outline ld-btn-sm" onClick={() => copyToClipboard(pix.keyValue)}>
-                                    <Copy size={11} />
-                                  </button>
-                                  <button className="ld-btn ld-btn-outline ld-btn-sm" onClick={() => { setEditingPix(pix); setPixModalOpen(true); }}>
-                                    <Edit size={11} />
-                                  </button>
-                                  <button className="ld-btn ld-btn-danger ld-btn-sm" onClick={() => deletePixKey(pix.id)}>
-                                    <Trash2 size={11} />
-                                  </button>
-                                </div>
-                              </div>
-                            </div>
-                          )) || []}
-                        </div>
-                      </TabsContent>
-                    </Tabs>
-                  </div>
-                </div>
-
-                {/* Histórico de Transações */}
-                <div className="ld-card">
-                  <div className="ld-card-body">
-                    <h2 className="ld-h2"><TrendingUp size={15} color="var(--gold)" /> Histórico de Transações</h2>
-                    {settings.paymentMethods.flatMap(m => m.transactions || [])
-                      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-                      .slice(0, 10)
-                      .map((tx) => (
-                        <div key={tx.id} className="ld-tx-item">
-                          <div className="ld-tx-ico" style={{ background: tx.method === 'credit_card' ? '#EBF5FB' : '#E8F5E9' }}>
-                            {tx.method === 'credit_card' ? <CreditCard size={15} color="#2980B9" /> : <Smartphone size={15} color="#27AE60" />}
-                          </div>
-                          <div style={{ flex: 1, minWidth: 0 }}>
-                            <div style={{ fontWeight: 500, fontSize: 13, color: 'var(--ink)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                              {tx.customer}
-                            </div>
-                            <div style={{ fontSize: 11.5, color: 'var(--ink3)' }}>{tx.description} · {tx.reference}</div>
-                          </div>
-                          <div style={{ textAlign: 'right' }}>
-                            <div style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: 15, fontWeight: 700, color: 'var(--ink)' }}>
-                              R$ {tx.amount.toFixed(2).replace('.', ',')}
-                            </div>
-                            <div style={{ marginTop: 2 }}>{getStatusBadge(tx.status)}</div>
-                            <div style={{ fontSize: 10.5, color: 'var(--ink3)', marginTop: 2 }}>
-                              {new Date(tx.date).toLocaleDateString('pt-BR')}
-                            </div>
-                          </div>
-                        </div>
-                      ))}
                   </div>
                 </div>
               </div>

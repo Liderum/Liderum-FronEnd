@@ -98,12 +98,12 @@ export function Header() {
 
         <div className="hd-right">
           <DropdownMenu>
-            <DropdownMenuTrigger asChild>
+            {/* <DropdownMenuTrigger asChild> 
               <button className="hd-icon-btn" aria-label="Notificações">
                 <Bell size={14} />
                 <span className="hd-badge">3</span>
               </button>
-            </DropdownMenuTrigger>
+            </DropdownMenuTrigger> */}
             <DropdownMenuContent align="end" style={{ padding: 0, borderRadius: 10, border: '1px solid rgba(26,24,20,0.09)', boxShadow: '0 8px 30px rgba(26,24,20,0.10)' }}>
               <div className="hd-notif-wrap">
                 <div className="hd-notif-header">

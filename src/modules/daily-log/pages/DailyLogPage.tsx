@@ -7,6 +7,7 @@ import {
   ChevronRight, CheckCircle, NotebookPen, CalendarClock,
 } from 'lucide-react';
 import { LdSelect } from '@/components/LdSelect';
+import { LdDateInput } from '@/components/LdDateInput';
 import { DailyLogService } from '@/services/works';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
@@ -419,6 +420,16 @@ export default function DailyLogPage() {
     try {
       await DailyLogService.exportPdf(workId, exportFrom || undefined, exportTo || undefined);
       setShowExport(false);
+      toast({ title: 'PDF gerado', description: 'O download foi iniciado automaticamente.' });
+    } catch (err: unknown) {
+      setShowExport(false);
+      setTimeout(() => {
+        toast({
+          title: 'Nenhum registro encontrado',
+          description: err instanceof Error ? err.message : 'Não há registros para o período informado.',
+          variant: 'destructive',
+        });
+      }, 150);
     } finally {
       setExporting(false);
     }
@@ -503,22 +514,20 @@ export default function DailyLogPage() {
         <div className="dl-filters">
           <Filter size={13} color="#7A7670" />
           <span style={{ fontSize: 11.5, color: '#7A7670', fontWeight: 500 }}>Filtros</span>
-          <input
-            type="date"
-            className="dl-filter-input"
+          <LdDateInput
+            size="sm"
             value={filterFrom}
-            onChange={(e) => setFilterFrom(e.target.value)}
-            aria-label="De"
-            title="De"
+            onChange={setFilterFrom}
+            placeholder="De"
+            style={{ width: 140 }}
           />
           <span style={{ fontSize: 11, color: '#7A7670' }}>até</span>
-          <input
-            type="date"
-            className="dl-filter-input"
+          <LdDateInput
+            size="sm"
             value={filterTo}
-            onChange={(e) => setFilterTo(e.target.value)}
-            aria-label="Até"
-            title="Até"
+            onChange={setFilterTo}
+            placeholder="Até"
+            style={{ width: 140 }}
           />
           <label className="dl-filter-chk">
             <input
@@ -800,11 +809,11 @@ export default function DailyLogPage() {
               {modalMode === 'create' && (
                 <>
                   <label className="dl-label">Data *</label>
-                  <input
-                    className="dl-input"
-                    type="date"
+                  <LdDateInput
                     value={form.date}
-                    onChange={(e) => setForm({ ...form, date: e.target.value })}
+                    onChange={(v) => setForm({ ...form, date: v })}
+                    clearable={false}
+                    style={{ marginBottom: 14 }}
                   />
                 </>
               )}
@@ -890,16 +899,14 @@ export default function DailyLogPage() {
                   </div>
                   <div>
                     <label className="dl-label" style={{ marginBottom: 3 }}>Prazo *</label>
-                    <input
-                      className="dl-input"
-                      style={{ marginBottom: 0 }}
-                      type="date"
+                    <LdDateInput
                       value={occ.deadline}
-                      onChange={(e) => {
+                      onChange={(v) => {
                         const next = [...occurrenceForms];
-                        next[idx] = { ...next[idx], deadline: e.target.value };
+                        next[idx] = { ...next[idx], deadline: v };
                         setOccurrenceForms(next);
                       }}
+                      clearable={false}
                     />
                   </div>
                   <button
@@ -1053,22 +1060,16 @@ export default function DailyLogPage() {
               <div className="dl-export-row">
                 <div className="dl-export-field">
                   <label className="dl-label">De</label>
-                  <input
-                    className="dl-input"
-                    style={{ marginBottom: 0 }}
-                    type="date"
+                  <LdDateInput
                     value={exportFrom}
-                    onChange={(e) => setExportFrom(e.target.value)}
+                    onChange={setExportFrom}
                   />
                 </div>
                 <div className="dl-export-field">
                   <label className="dl-label">Até</label>
-                  <input
-                    className="dl-input"
-                    style={{ marginBottom: 0 }}
-                    type="date"
+                  <LdDateInput
                     value={exportTo}
-                    onChange={(e) => setExportTo(e.target.value)}
+                    onChange={setExportTo}
                   />
                 </div>
               </div>

@@ -2,6 +2,7 @@ import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Loader2, Save, Search } from 'lucide-react';
 import type { CreateWorkDto } from '@/modules/shared/types';
+import { LdDateInput } from '@/components/LdDateInput';
 import { WorksService } from '@/services/works/worksService';
 
 const CSS = `
@@ -313,21 +314,18 @@ export default function NewWorkPage() {
           <div className="nw-grid">
             <div className="nw-field">
               <label className="nw-label">Data de Início <span>*</span></label>
-              <input
-                className="nw-input"
-                type="date"
+              <LdDateInput
                 value={startDate}
-                onChange={e => setStartDate(e.target.value)}
+                onChange={setStartDate}
+                clearable={false}
               />
             </div>
 
             <div className="nw-field">
               <label className="nw-label">Data Prevista de Término</label>
-              <input
-                className="nw-input"
-                type="date"
+              <LdDateInput
                 value={expectedEndDate}
-                onChange={e => setExpectedEndDate(e.target.value)}
+                onChange={setExpectedEndDate}
               />
             </div>
 
