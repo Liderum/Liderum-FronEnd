@@ -21,6 +21,16 @@
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:site" content="@liderum" />
   <meta name="twitter:image" content="/logo.svg" />
+
+  <script>
+    (function () {
+      try {
+        var pref = localStorage.getItem('liderum:theme');
+        var dark = pref === 'dark' || (pref !== 'light' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+        if (dark) document.documentElement.classList.add('dark');
+      } catch (e) {}
+    })();
+  </script>
 </head>
 
 <body>

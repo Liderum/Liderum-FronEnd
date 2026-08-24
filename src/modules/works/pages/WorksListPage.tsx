@@ -15,20 +15,20 @@ const CSS = `
 .wl-title-wrap{}
 .wl-tag{font-size:10px;font-weight:600;letter-spacing:1.6px;text-transform:uppercase;color:var(--gold,#B8922A);margin-bottom:4px;}
 .wl-title{font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:700;color:var(--ink,#1A1814);letter-spacing:-0.5px;}
-.wl-btn-new{display:inline-flex;align-items:center;gap:6px;padding:10px 20px;border-radius:9px;font-size:13px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;border:none;background:linear-gradient(135deg,var(--gold,#B8922A),var(--gold2,#D4A843));color:#fff;transition:all 0.2s;box-shadow:0 2px 10px rgba(184,146,42,0.25);}
+.wl-btn-new{display:inline-flex;align-items:center;gap:6px;padding:10px 20px;border-radius:9px;font-size:13px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;border:none;background:linear-gradient(135deg,var(--brand-gold),var(--brand-gold2));color:#fff;transition:all 0.2s;box-shadow:0 2px 10px rgba(184,146,42,0.25);}
 .wl-btn-new:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(184,146,42,0.35);}
 .wl-filters{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
-.wl-search{display:flex;align-items:center;gap:8px;padding:8px 14px;border-radius:8px;border:1px solid var(--bdr,rgba(26,24,20,0.10));background:#fff;flex:1;min-width:200px;max-width:360px;}
+.wl-search{display:flex;align-items:center;gap:8px;padding:8px 14px;border-radius:8px;border:1px solid var(--bdr,rgba(26,24,20,0.10));background:var(--card-bg,#fff);flex:1;min-width:200px;max-width:360px;}
 .wl-search input{border:none;outline:none;font-size:13px;font-family:'DM Sans',sans-serif;color:var(--ink,#1A1814);background:transparent;flex:1;min-width:0;}
 .wl-search input::placeholder{color:var(--ink3,#7A7670);}
-.wl-filter-btn{display:inline-flex;align-items:center;gap:5px;padding:7px 13px;border-radius:7px;font-size:12px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;border:1px solid var(--bdr,rgba(26,24,20,0.10));background:#fff;color:var(--ink3,#7A7670);transition:all 0.16s;}
+.wl-filter-btn{display:inline-flex;align-items:center;gap:5px;padding:7px 13px;border-radius:7px;font-size:12px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;border:1px solid var(--bdr,rgba(26,24,20,0.10));background:var(--card-bg,#fff);color:var(--ink3,#7A7670);transition:all 0.16s;}
 .wl-filter-btn:hover,.wl-filter-btn.active{border-color:var(--gold,#B8922A);color:var(--gold,#B8922A);background:rgba(184,146,42,0.05);}
 .wl-view-toggle{display:flex;border:1px solid var(--bdr,rgba(26,24,20,0.10));border-radius:7px;overflow:hidden;}
-.wl-view-btn{padding:7px 10px;background:#fff;border:none;cursor:pointer;color:var(--ink3,#7A7670);display:flex;align-items:center;transition:all 0.14s;}
+.wl-view-btn{padding:7px 10px;background:var(--card-bg,#fff);border:none;cursor:pointer;color:var(--ink3,#7A7670);display:flex;align-items:center;transition:all 0.14s;}
 .wl-view-btn.active{background:var(--cream,#F7F4EF);color:var(--gold,#B8922A);}
 .wl-view-btn+.wl-view-btn{border-left:1px solid var(--bdr,rgba(26,24,20,0.10));}
 .wl-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:16px;}
-.wl-card{background:#fff;border-radius:12px;border:1px solid var(--bdr,rgba(26,24,20,0.10));padding:22px 24px;cursor:pointer;transition:all 0.22s;position:relative;overflow:hidden;display:flex;flex-direction:column;gap:14px;box-shadow:0 2px 10px rgba(26,24,20,0.04);}
+.wl-card{background:var(--card-bg,#fff);border-radius:12px;border:1px solid var(--bdr,rgba(26,24,20,0.10));padding:22px 24px;cursor:pointer;transition:all 0.22s;position:relative;overflow:hidden;display:flex;flex-direction:column;gap:14px;box-shadow:0 2px 10px rgba(26,24,20,0.04);}
 .wl-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--gold,#B8922A),var(--gold2,#D4A843));transform:scaleX(0);transform-origin:left;transition:transform 0.22s;}
 .wl-card:hover::before{transform:scaleX(1);}
 .wl-card:hover{box-shadow:0 8px 30px rgba(26,24,20,0.10);transform:translateY(-2px);}

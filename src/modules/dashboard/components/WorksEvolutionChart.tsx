@@ -6,7 +6,7 @@ import { mockEvolutionData } from '@/modules/shared/data/mockData';
 export function WorksEvolutionChart() {
   return (
     <div style={{
-      background: '#fff',
+      background: 'var(--card-bg, #fff)',
       borderRadius: 12,
       border: '1px solid var(--bdr, rgba(26,24,20,0.10))',
       padding: '22px 24px',
@@ -33,8 +33,8 @@ export function WorksEvolutionChart() {
       <ResponsiveContainer width="100%" height={240}>
         <BarChart data={mockEvolutionData} margin={{ top: 5, right: 10, left: -10, bottom: 0 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="rgba(26,24,20,0.06)" />
-          <XAxis dataKey="month" tick={{ fontSize: 11, fill: '#7A7670' }} axisLine={false} tickLine={false} />
-          <YAxis tick={{ fontSize: 11, fill: '#7A7670' }} axisLine={false} tickLine={false} allowDecimals={false} />
+          <XAxis dataKey="month" tick={{ fontSize: 11, fill: 'var(--ink3, #7A7670)' }} axisLine={false} tickLine={false} />
+          <YAxis tick={{ fontSize: 11, fill: 'var(--ink3, #7A7670)' }} axisLine={false} tickLine={false} allowDecimals={false} />
           <Tooltip
             contentStyle={{ borderRadius: 8, border: '1px solid rgba(26,24,20,0.09)', fontSize: 12, fontFamily: "'DM Sans', sans-serif" }}
             formatter={(value: number, name: string) => {

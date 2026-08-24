@@ -13,7 +13,7 @@ import type { ExtraRequest, ExtraStatus } from '@/modules/shared/types';
 const CSS = `
 .ex{font-family:'DM Sans',sans-serif;color:var(--ink,#1A1814);display:flex;flex-direction:column;gap:18px;}
 .ex-summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;}
-.ex-summary-card{background:#fff;border-radius:10px;border:1px solid var(--bdr,rgba(26,24,20,0.10));padding:16px 18px;display:flex;align-items:center;gap:12px;box-shadow:0 2px 8px rgba(26,24,20,0.03);}
+.ex-summary-card{background:var(--card-bg,#fff);border-radius:10px;border:1px solid var(--bdr,rgba(26,24,20,0.10));padding:16px 18px;display:flex;align-items:center;gap:12px;box-shadow:0 2px 8px rgba(26,24,20,0.03);}
 .ex-summary-icon{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
 .ex-summary-val{font-family:var(--font-numeric);font-size:20px;font-weight:600;font-variant-numeric:tabular-nums lining-nums;color:var(--ink,#1A1814);}
 .ex-summary-label{font-size:10.5px;color:var(--ink3,#7A7670);font-weight:500;text-transform:uppercase;letter-spacing:0.3px;}
@@ -22,16 +22,16 @@ const CSS = `
 .ex-filter{padding:6px 12px;border-radius:7px;font-size:11.5px;font-weight:500;cursor:pointer;border:1px solid transparent;background:transparent;color:var(--ink3,#7A7670);font-family:'DM Sans',sans-serif;transition:all 0.14s;}
 .ex-filter:hover{background:var(--cream,#F7F4EF);}
 .ex-filter.active{background:rgba(184,146,42,0.08);color:var(--gold,#B8922A);border-color:rgba(184,146,42,0.15);}
-.ex-btn{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:8px;font-size:12px;font-weight:500;cursor:pointer;border:1px solid rgba(26,24,20,0.12);background:#fff;color:var(--ink,#1A1814);font-family:'DM Sans',sans-serif;transition:all 0.14s;}
+.ex-btn{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:8px;font-size:12px;font-weight:500;cursor:pointer;border:1px solid rgba(26,24,20,0.12);background:var(--card-bg,#fff);color:var(--ink,#1A1814);font-family:'DM Sans',sans-serif;transition:all 0.14s;}
 .ex-btn:hover{background:var(--cream,#F7F4EF);}
-.ex-btn.primary{background:var(--gold,#B8922A);color:#fff;border-color:var(--gold,#B8922A);}
+.ex-btn.primary{background:var(--brand-gold);color:#fff;border-color:var(--brand-gold);}
 .ex-btn.primary:hover{background:#a07e1f;}
 .ex-btn.approve{background:#1E8449;color:#fff;border-color:#1E8449;}
 .ex-btn.approve:hover{background:#196e3d;}
 .ex-btn.reject{background:#C0392B;color:#fff;border-color:#C0392B;}
 .ex-btn.reject:hover{background:#a03024;}
 .ex-btn:disabled{opacity:0.5;cursor:not-allowed;}
-.ex-card{background:#fff;border-radius:12px;border:1px solid var(--bdr,rgba(26,24,20,0.10));padding:0;overflow:hidden;box-shadow:0 2px 10px rgba(26,24,20,0.04);transition:all 0.18s;}
+.ex-card{background:var(--card-bg,#fff);border-radius:12px;border:1px solid var(--bdr,rgba(26,24,20,0.10));padding:0;overflow:hidden;box-shadow:0 2px 10px rgba(26,24,20,0.04);transition:all 0.18s;}
 .ex-card:hover{box-shadow:0 6px 24px rgba(26,24,20,0.08);}
 .ex-card-main{padding:20px 24px;cursor:pointer;display:flex;flex-direction:column;gap:12px;}
 .ex-card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;}
@@ -52,7 +52,7 @@ const CSS = `
 .ex-history-notes{font-size:11.5px;color:var(--ink3,#7A7670);font-style:italic;margin-top:3px;}
 .ex-history-date{font-size:10.5px;color:rgba(26,24,20,0.4);flex-shrink:0;margin-top:3px;}
 .ex-modal{position:fixed;inset:0;background:rgba(26,24,20,0.45);display:flex;align-items:center;justify-content:center;z-index:1000;padding:20px;}
-.ex-modal-card{background:#fff;border-radius:14px;max-width:560px;width:100%;padding:24px;box-shadow:0 20px 60px rgba(0,0,0,0.25);max-height:90vh;overflow-y:auto;}
+.ex-modal-card{background:var(--card-bg,#fff);border-radius:14px;max-width:560px;width:100%;padding:24px;box-shadow:0 20px 60px rgba(0,0,0,0.25);max-height:90vh;overflow-y:auto;}
 .ex-modal-title{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:700;color:var(--ink,#1A1814);margin-bottom:16px;}
 .ex-modal-label{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:var(--ink3,#7A7670);margin-bottom:6px;display:block;}
 .ex-modal-input{width:100%;padding:10px 12px;border-radius:8px;border:1px solid rgba(26,24,20,0.15);font-family:'DM Sans',sans-serif;font-size:13px;margin-bottom:14px;box-sizing:border-box;}
@@ -193,7 +193,7 @@ export default function ExtrasPage() {
 
   if (loading) {
     return (
-      <div style={{ padding: 40, textAlign: 'center', color: '#7A7670', fontFamily: 'DM Sans' }}>
+      <div style={{ padding: 40, textAlign: 'center', color: 'var(--ink3, #7A7670)', fontFamily: 'DM Sans' }}>
         Carregando extras…
       </div>
     );
@@ -259,7 +259,7 @@ export default function ExtrasPage() {
         </div>
 
         {filtered.length === 0 && (
-          <div style={{ padding: 40, textAlign: 'center', color: '#7A7670', background: '#fff', borderRadius: 12, border: '1px solid rgba(26,24,20,0.08)' }}>
+          <div style={{ padding: 40, textAlign: 'center', color: 'var(--ink3, #7A7670)', background: 'var(--card-bg, #fff)', borderRadius: 12, border: '1px solid rgba(26,24,20,0.08)' }}>
             Nenhum extra nesta visão.
           </div>
         )}

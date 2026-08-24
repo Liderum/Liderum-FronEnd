@@ -25,7 +25,7 @@ export function KpiCards({ kpis }: KpiCardsProps) {
           <div
             key={kpi.label}
             style={{
-              background: '#fff',
+              background: 'var(--card-bg, #fff)',
               borderRadius: 12,
               border: '1px solid var(--bdr, rgba(26,24,20,0.10))',
               padding: '18px 20px',

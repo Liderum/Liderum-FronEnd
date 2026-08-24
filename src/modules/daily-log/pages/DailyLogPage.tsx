@@ -21,10 +21,10 @@ const CSS = `
 .dl-title{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:700;color:var(--ink,#1A1814);}
 .dl-header-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
 
-.dl-btn{display:inline-flex;align-items:center;gap:6px;padding:9px 16px;border-radius:8px;font-size:12.5px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;border:1px solid rgba(26,24,20,0.12);background:#fff;color:var(--ink);transition:all 0.18s;white-space:nowrap;}
+.dl-btn{display:inline-flex;align-items:center;gap:6px;padding:9px 16px;border-radius:8px;font-size:12.5px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;border:1px solid rgba(26,24,20,0.12);background:var(--card-bg,#fff);color:var(--ink);transition:all 0.18s;white-space:nowrap;}
 .dl-btn:hover{background:var(--cream,#F7F4EF);}
 .dl-btn:disabled{opacity:0.5;cursor:not-allowed;}
-.dl-btn.primary{background:linear-gradient(135deg,var(--gold,#B8922A),var(--gold2,#D4A843));color:#fff;border:none;box-shadow:0 2px 10px rgba(184,146,42,0.25);}
+.dl-btn.primary{background:linear-gradient(135deg,var(--brand-gold),var(--brand-gold2));color:#fff;border:none;box-shadow:0 2px 10px rgba(184,146,42,0.25);}
 .dl-btn.primary:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(184,146,42,0.35);}
 .dl-btn.danger{background:#FDEDEC;color:#C0392B;border-color:rgba(192,57,43,0.2);}
 .dl-btn.danger:hover{background:#f8d5d0;}
@@ -33,20 +33,20 @@ const CSS = `
 .dl-btn.sm{padding:6px 12px;font-size:11.5px;}
 
 .dl-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;}
-.dl-stat{background:#fff;border-radius:10px;border:1px solid rgba(26,24,20,0.08);padding:14px 16px;display:flex;align-items:center;gap:10px;}
+.dl-stat{background:var(--card-bg,#fff);border-radius:10px;border:1px solid rgba(26,24,20,0.08);padding:14px 16px;display:flex;align-items:center;gap:10px;}
 .dl-stat-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
 .dl-stat-val{font-family:var(--font-numeric,'IBM Plex Sans');font-size:18px;font-weight:600;font-variant-numeric:tabular-nums lining-nums;}
-.dl-stat-label{font-size:10.5px;color:#7A7670;text-transform:uppercase;letter-spacing:0.3px;font-weight:500;}
+.dl-stat-label{font-size:10.5px;color:var(--ink3,#7A7670);text-transform:uppercase;letter-spacing:0.3px;font-weight:500;}
 
-.dl-filters{background:#fff;border-radius:10px;border:1px solid rgba(26,24,20,0.08);padding:12px 16px;display:flex;gap:12px;flex-wrap:wrap;align-items:center;}
-.dl-filter-input{padding:6px 10px;border-radius:6px;border:1px solid rgba(26,24,20,0.12);font-size:12px;font-family:'DM Sans',sans-serif;background:#fff;color:var(--ink);}
+.dl-filters{background:var(--card-bg,#fff);border-radius:10px;border:1px solid rgba(26,24,20,0.08);padding:12px 16px;display:flex;gap:12px;flex-wrap:wrap;align-items:center;}
+.dl-filter-input{padding:6px 10px;border-radius:6px;border:1px solid rgba(26,24,20,0.12);font-size:12px;font-family:'DM Sans',sans-serif;background:var(--card-bg,#fff);color:var(--ink);}
 .dl-filter-chk{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--ink);cursor:pointer;}
 
 .dl-timeline{position:relative;padding-left:24px;}
 .dl-timeline::before{content:'';position:absolute;left:9px;top:0;bottom:0;width:2px;background:rgba(26,24,20,0.08);border-radius:2px;}
 .dl-entry{position:relative;margin-bottom:20px;}
 .dl-entry-dot{position:absolute;left:-19px;top:20px;width:10px;height:10px;border-radius:50%;background:var(--gold,#B8922A);border:2px solid var(--cream,#F7F4EF);box-shadow:0 0 0 2px rgba(184,146,42,0.25);}
-.dl-entry-card{background:#fff;border-radius:12px;border:1px solid var(--bdr,rgba(26,24,20,0.10));box-shadow:0 2px 8px rgba(26,24,20,0.04);overflow:hidden;transition:box-shadow 0.18s;}
+.dl-entry-card{background:var(--card-bg,#fff);border-radius:12px;border:1px solid var(--bdr,rgba(26,24,20,0.10));box-shadow:0 2px 8px rgba(26,24,20,0.04);overflow:hidden;transition:box-shadow 0.18s;}
 .dl-entry-card:hover{box-shadow:0 6px 24px rgba(26,24,20,0.08);}
 
 .dl-entry-header{padding:14px 20px;border-bottom:1px solid rgba(26,24,20,0.06);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;}
@@ -67,30 +67,30 @@ const CSS = `
 .dl-photo:hover{transform:scale(1.04);}
 .dl-photo img{width:100%;height:100%;object-fit:cover;}
 
-.dl-empty{padding:48px 20px;text-align:center;background:#fff;border-radius:12px;border:1px solid rgba(26,24,20,0.08);}
+.dl-empty{padding:48px 20px;text-align:center;background:var(--card-bg,#fff);border-radius:12px;border:1px solid rgba(26,24,20,0.08);}
 .dl-empty-icon{width:48px;height:48px;border-radius:12px;background:rgba(184,146,42,0.08);display:flex;align-items:center;justify-content:center;margin:0 auto 12px;}
 
 .dl-pagination{display:flex;align-items:center;justify-content:center;gap:10px;padding:8px 0;}
-.dl-page-info{font-size:12px;color:#7A7670;}
+.dl-page-info{font-size:12px;color:var(--ink3,#7A7670);}
 
 /* Modal */
 .dl-overlay{position:fixed;inset:0;background:rgba(26,24,20,0.5);display:flex;align-items:center;justify-content:center;z-index:1000;padding:16px;backdrop-filter:blur(3px);}
-.dl-modal{background:#fff;border-radius:16px;max-width:620px;width:100%;padding:28px;box-shadow:0 24px 64px rgba(0,0,0,0.22);max-height:93vh;overflow-y:auto;}
+.dl-modal{background:var(--card-bg,#fff);border-radius:16px;max-width:620px;width:100%;padding:28px;box-shadow:0 24px 64px rgba(0,0,0,0.22);max-height:93vh;overflow-y:auto;}
 .dl-modal-title{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:700;margin-bottom:4px;color:var(--ink);}
-.dl-modal-subtitle{font-size:12px;color:#7A7670;margin-bottom:20px;}
+.dl-modal-subtitle{font-size:12px;color:var(--ink3,#7A7670);margin-bottom:20px;}
 
-.dl-label{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:#7A7670;margin-bottom:6px;display:block;}
-.dl-input{width:100%;padding:10px 12px;border-radius:8px;border:1px solid rgba(26,24,20,0.15);font-family:'DM Sans',sans-serif;font-size:13px;margin-bottom:14px;box-sizing:border-box;background:#fff;color:var(--ink);transition:border-color 0.15s;}
+.dl-label{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:var(--ink3,#7A7670);margin-bottom:6px;display:block;}
+.dl-input{width:100%;padding:10px 12px;border-radius:8px;border:1px solid rgba(26,24,20,0.15);font-family:'DM Sans',sans-serif;font-size:13px;margin-bottom:14px;box-sizing:border-box;background:var(--card-bg,#fff);color:var(--ink);transition:border-color 0.15s;}
 .dl-input:focus{outline:none;border-color:rgba(184,146,42,0.5);}
-.dl-textarea{width:100%;padding:10px 12px;border-radius:8px;border:1px solid rgba(26,24,20,0.15);font-family:'DM Sans',sans-serif;font-size:13px;min-height:72px;box-sizing:border-box;resize:vertical;margin-bottom:14px;background:#fff;color:var(--ink);transition:border-color 0.15s;}
+.dl-textarea{width:100%;padding:10px 12px;border-radius:8px;border:1px solid rgba(26,24,20,0.15);font-family:'DM Sans',sans-serif;font-size:13px;min-height:72px;box-sizing:border-box;resize:vertical;margin-bottom:14px;background:var(--card-bg,#fff);color:var(--ink);transition:border-color 0.15s;}
 .dl-textarea:focus{outline:none;border-color:rgba(184,146,42,0.5);}
 
 .dl-photo-upload{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;align-items:center;}
 .dl-photo-preview{width:64px;height:64px;border-radius:6px;object-fit:cover;border:1px solid rgba(26,24,20,0.1);}
-.dl-upload-label{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:8px;font-size:12px;font-weight:500;cursor:pointer;border:1px dashed rgba(26,24,20,0.25);background:rgba(26,24,20,0.02);color:#7A7670;transition:all 0.15s;font-family:'DM Sans',sans-serif;}
+.dl-upload-label{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:8px;font-size:12px;font-weight:500;cursor:pointer;border:1px dashed rgba(26,24,20,0.25);background:rgba(26,24,20,0.02);color:var(--ink3,#7A7670);transition:all 0.15s;font-family:'DM Sans',sans-serif;}
 .dl-upload-label:hover{border-color:rgba(184,146,42,0.5);color:var(--gold);background:rgba(184,146,42,0.04);}
 
-.dl-photo-uploading{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:#7A7670;}
+.dl-photo-uploading{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--ink3,#7A7670);}
 
 /* Export modal */
 .dl-export-row{display:flex;gap:12px;align-items:flex-end;margin-bottom:16px;flex-wrap:wrap;}
@@ -437,7 +437,7 @@ export default function DailyLogPage() {
 
   if (loading && entries.length === 0) {
     return (
-      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', padding: 60, color: '#7A7670' }}>
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', padding: 60, color: 'var(--ink3, #7A7670)' }}>
         <Loader2 size={22} className="animate-spin" style={{ marginRight: 10, color: 'var(--gold, #B8922A)' }} />
         <span style={{ fontFamily: 'DM Sans', fontSize: 13 }}>Carregando diário…</span>
       </div>
@@ -512,8 +512,8 @@ export default function DailyLogPage() {
 
         {/* ── Filters ── */}
         <div className="dl-filters">
-          <Filter size={13} color="#7A7670" />
-          <span style={{ fontSize: 11.5, color: '#7A7670', fontWeight: 500 }}>Filtros</span>
+          <Filter size={13} color="var(--ink3, #7A7670)" />
+          <span style={{ fontSize: 11.5, color: 'var(--ink3, #7A7670)', fontWeight: 500 }}>Filtros</span>
           <LdDateInput
             size="sm"
             value={filterFrom}
@@ -521,7 +521,7 @@ export default function DailyLogPage() {
             placeholder="De"
             style={{ width: 140 }}
           />
-          <span style={{ fontSize: 11, color: '#7A7670' }}>até</span>
+          <span style={{ fontSize: 11, color: 'var(--ink3, #7A7670)' }}>até</span>
           <LdDateInput
             size="sm"
             value={filterTo}
@@ -558,7 +558,7 @@ export default function DailyLogPage() {
               <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--ink)', marginBottom: 6 }}>
                 Nenhum registro encontrado
               </div>
-              <div style={{ fontSize: 12, color: '#7A7670', marginBottom: 16 }}>
+              <div style={{ fontSize: 12, color: 'var(--ink3, #7A7670)', marginBottom: 16 }}>
                 Nenhum registro corresponde aos filtros selecionados.
               </div>
               <button
@@ -588,7 +588,7 @@ export default function DailyLogPage() {
               <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 20, fontWeight: 700, color: 'var(--ink)', marginBottom: 8 }}>
                 Diário ainda sem registros
               </div>
-              <div style={{ fontSize: 13, color: '#7A7670', marginBottom: 24, maxWidth: 360, margin: '0 auto 24px' }}>
+              <div style={{ fontSize: 13, color: 'var(--ink3, #7A7670)', marginBottom: 24, maxWidth: 360, margin: '0 auto 24px' }}>
                 Documente as atividades diárias da obra, condições climáticas,
                 efetivo e intercorrências. Comece agora.
               </div>
@@ -670,7 +670,7 @@ export default function DailyLogPage() {
 
                     {entry.problems && (
                       <div className="dl-entry-section" style={{ background: '#FDEDEC' }}>
-                        <div className="dl-entry-section-icon" style={{ background: '#fff' }}>
+                        <div className="dl-entry-section-icon" style={{ background: 'var(--card-bg, #fff)' }}>
                           <AlertTriangle size={13} color="#C0392B" />
                         </div>
                         <div>
@@ -686,7 +686,7 @@ export default function DailyLogPage() {
 
                     {entry.actions && (
                       <div className="dl-entry-section" style={{ background: '#E8F5E9' }}>
-                        <div className="dl-entry-section-icon" style={{ background: '#fff' }}>
+                        <div className="dl-entry-section-icon" style={{ background: 'var(--card-bg, #fff)' }}>
                           <Wrench size={13} color="#1E8449" />
                         </div>
                         <div>
@@ -702,19 +702,19 @@ export default function DailyLogPage() {
 
                     {entry.occurrences && entry.occurrences.length > 0 && (
                       <div>
-                        <div style={{ fontSize: 10.5, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.6px', color: '#7A7670', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 5 }}>
+                        <div style={{ fontSize: 10.5, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.6px', color: 'var(--ink3, #7A7670)', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 5 }}>
                           <CalendarClock size={11} /> Ocorrências ({entry.occurrences.length})
                         </div>
                         <div className="dl-occ-list">
                           {entry.occurrences.map((occ: DailyLogOccurrence, oi: number) => (
                             <div key={oi} className="dl-occ-item card">
-                              <div style={{ fontSize: 12.5, color: '#1A1814', marginBottom: 4 }}>{occ.description}</div>
+                              <div style={{ fontSize: 12.5, color: 'var(--ink, #1A1814)', marginBottom: 4 }}>{occ.description}</div>
                               <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
-                                <span style={{ fontSize: 11, color: '#7A7670' }}>
-                                  <strong style={{ color: '#B8922A' }}>Responsável:</strong> {occ.responsible}
+                                <span style={{ fontSize: 11, color: 'var(--ink3, #7A7670)' }}>
+                                  <strong style={{ color: 'var(--gold, #B8922A)' }}>Responsável:</strong> {occ.responsible}
                                 </span>
-                                <span style={{ fontSize: 11, color: '#7A7670' }}>
-                                  <strong style={{ color: '#B8922A' }}>Prazo:</strong>{' '}
+                                <span style={{ fontSize: 11, color: 'var(--ink3, #7A7670)' }}>
+                                  <strong style={{ color: 'var(--gold, #B8922A)' }}>Prazo:</strong>{' '}
                                   {occ.deadline ? new Date(occ.deadline + 'T12:00:00').toLocaleDateString('pt-BR') : '—'}
                                 </span>
                               </div>
@@ -726,7 +726,7 @@ export default function DailyLogPage() {
 
                     {entry.photos.length > 0 && (
                       <div>
-                        <div style={{ fontSize: 10.5, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.6px', color: '#7A7670', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 5 }}>
+                        <div style={{ fontSize: 10.5, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.6px', color: 'var(--ink3, #7A7670)', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 5 }}>
                           <Camera size={11} /> Fotos ({entry.photos.length})
                         </div>
                         <div className="dl-photos">
@@ -740,7 +740,7 @@ export default function DailyLogPage() {
                                 <img src={photo} alt={`Foto ${pi + 1}`} />
                               ) : (
                                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%' }}>
-                                  <Camera size={20} color="#7A7670" />
+                                  <Camera size={20} color="var(--ink3, #7A7670)" />
                                 </div>
                               )}
                             </div>
@@ -941,7 +941,7 @@ export default function DailyLogPage() {
                   </div>
                 ))}
                 {modalMode === 'edit' && editingEntry && editingEntry.photos.length > 0 && (
-                  <div style={{ fontSize: 11, color: '#7A7670', alignSelf: 'center' }}>
+                  <div style={{ fontSize: 11, color: 'var(--ink3, #7A7670)', alignSelf: 'center' }}>
                     + {editingEntry.photos.length} foto(s) já anexada(s)
                   </div>
                 )}
@@ -1010,7 +1010,7 @@ export default function DailyLogPage() {
                   <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 18, fontWeight: 700 }}>
                     Excluir registro?
                   </div>
-                  <div style={{ fontSize: 12, color: '#7A7670', marginTop: 2 }}>
+                  <div style={{ fontSize: 12, color: 'var(--ink3, #7A7670)', marginTop: 2 }}>
                     Esta ação não pode ser desfeita. Fotos também serão removidas.
                   </div>
                 </div>

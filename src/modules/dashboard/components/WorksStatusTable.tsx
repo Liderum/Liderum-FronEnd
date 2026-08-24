@@ -25,7 +25,7 @@ export function WorksStatusTable({ works }: WorksStatusTableProps) {
 
   return (
     <div style={{
-      background: '#fff',
+      background: 'var(--card-bg, #fff)',
       borderRadius: 12,
       border: '1px solid var(--bdr, rgba(26,24,20,0.10))',
       boxShadow: '0 2px 10px rgba(26,24,20,0.04)',

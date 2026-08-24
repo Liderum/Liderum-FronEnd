@@ -1,12 +1,13 @@
 import { useAuth } from '../contexts/AuthContext';
+import { useTheme } from '../contexts/ThemeContext';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Bell, Settings, LogOut, User, ChevronDown, HelpCircle, AlertTriangle, Clock, CheckCircle } from 'lucide-react';
+import { Bell, Settings, LogOut, User, ChevronDown, HelpCircle, AlertTriangle, Clock, CheckCircle, Sun, Moon } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useToast } from "@/hooks/use-toast";
 
 const CSS = `
 @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;700&family=DM+Sans:wght@300;400;500&display=swap');
-.hd{font-family:'DM Sans',sans-serif;background:#fff;border-bottom:1px solid rgba(26,24,20,0.09);height:46px;display:flex;align-items:center;justify-content:space-between;padding:0 20px;position:sticky;top:0;z-index:40;}
+.hd{font-family:'DM Sans',sans-serif;background:var(--card-bg,#fff);border-bottom:1px solid var(--bdr,rgba(26,24,20,0.09));height:46px;display:flex;align-items:center;justify-content:space-between;padding:0 20px;position:sticky;top:0;z-index:40;}
 .hd-breadcrumb{display:flex;align-items:center;gap:6px;}
 .hd-bc-item{font-size:12px;color:var(--ink3,#7A7670);font-weight:400;}
 .hd-bc-sep{font-size:11px;color:rgba(26,24,20,0.25);}
@@ -73,9 +74,12 @@ const notifications = [
 
 export function Header() {
   const { user, signOut } = useAuth();
+  const { resolvedTheme, setPreference } = useTheme();
   const navigate = useNavigate();
   const location = useLocation();
   const { toast } = useToast();
+
+  const toggleTheme = () => setPreference(resolvedTheme === 'dark' ? 'light' : 'dark');
 
   const handleSignOut = () => {
     signOut();
@@ -131,6 +135,14 @@ export function Header() {
               </div>
             </DropdownMenuContent>
           </DropdownMenu>
+
+          <button
+            className="hd-icon-btn"
+            aria-label={resolvedTheme === 'dark' ? 'Ativar tema claro' : 'Ativar tema escuro'}
+            onClick={toggleTheme}
+          >
+            {resolvedTheme === 'dark' ? <Sun size={14} /> : <Moon size={14} />}
+          </button>
 
           <div className="hd-sep" />
 

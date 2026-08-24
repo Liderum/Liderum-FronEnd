@@ -12,17 +12,17 @@ import type { BudgetItem, BudgetRevision, Work } from '@/modules/shared/types';
 const CSS = `
 .bg{font-family:'DM Sans',sans-serif;color:var(--ink,#1A1814);display:flex;flex-direction:column;gap:18px;}
 .bg-summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;}
-.bg-stat{background:#fff;border-radius:12px;border:1px solid var(--bdr,rgba(26,24,20,0.10));padding:20px;display:flex;align-items:center;gap:14px;box-shadow:0 2px 10px rgba(26,24,20,0.04);position:relative;overflow:hidden;}
+.bg-stat{background:var(--card-bg,#fff);border-radius:12px;border:1px solid var(--bdr,rgba(26,24,20,0.10));padding:20px;display:flex;align-items:center;gap:14px;box-shadow:0 2px 10px rgba(26,24,20,0.04);position:relative;overflow:hidden;}
 .bg-stat-icon{width:42px;height:42px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
 .bg-stat-val{font-family:var(--font-numeric);font-size:24px;font-weight:600;font-variant-numeric:tabular-nums lining-nums;color:var(--ink,#1A1814);line-height:1.1;}
 .bg-stat-label{font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:0.4px;color:var(--ink3,#7A7670);margin-top:2px;}
 .bg-actions{display:flex;gap:8px;flex-wrap:wrap;}
-.bg-btn{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:8px;font-size:12px;font-weight:500;font-family:'DM Sans',sans-serif;cursor:pointer;border:1px solid rgba(26,24,20,0.12);background:#fff;color:var(--ink,#1A1814);transition:all 0.14s;}
+.bg-btn{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:8px;font-size:12px;font-weight:500;font-family:'DM Sans',sans-serif;cursor:pointer;border:1px solid rgba(26,24,20,0.12);background:var(--card-bg,#fff);color:var(--ink,#1A1814);transition:all 0.14s;}
 .bg-btn:hover{background:var(--cream,#F7F4EF);}
-.bg-btn.primary{background:var(--gold,#B8922A);color:#fff;border-color:var(--gold,#B8922A);}
+.bg-btn.primary{background:var(--brand-gold);color:#fff;border-color:var(--brand-gold);}
 .bg-btn.primary:hover{background:#a07e1f;}
 .bg-btn:disabled{opacity:0.5;cursor:not-allowed;}
-.bg-table-wrap{background:#fff;border-radius:12px;border:1px solid var(--bdr,rgba(26,24,20,0.10));box-shadow:0 2px 10px rgba(26,24,20,0.04);overflow:hidden;}
+.bg-table-wrap{background:var(--card-bg,#fff);border-radius:12px;border:1px solid var(--bdr,rgba(26,24,20,0.10));box-shadow:0 2px 10px rgba(26,24,20,0.04);overflow:hidden;}
 .bg-table-header{padding:16px 20px;border-bottom:1px solid rgba(26,24,20,0.06);display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;}
 .bg-table-title{font-family:'Cormorant Garamond',serif;font-size:17px;font-weight:700;color:var(--ink,#1A1814);}
 .bg-cat-tabs{display:flex;gap:4px;flex-wrap:wrap;}
@@ -41,7 +41,7 @@ const CSS = `
 .bg-total-label{font-size:10.5px;color:var(--ink3,#7A7670);text-transform:uppercase;letter-spacing:0.4px;font-weight:500;}
 .bg-edit-input{font-family:var(--font-numeric);font-variant-numeric:tabular-nums;padding:4px 8px;border-radius:6px;border:1px solid rgba(26,24,20,0.15);width:120px;text-align:right;font-size:12px;}
 .bg-modal{position:fixed;inset:0;background:rgba(26,24,20,0.45);display:flex;align-items:center;justify-content:center;z-index:1000;padding:20px;}
-.bg-modal-card{background:#fff;border-radius:14px;max-width:520px;width:100%;padding:24px;box-shadow:0 20px 60px rgba(0,0,0,0.25);}
+.bg-modal-card{background:var(--card-bg,#fff);border-radius:14px;max-width:520px;width:100%;padding:24px;box-shadow:0 20px 60px rgba(0,0,0,0.25);}
 .bg-modal-title{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:700;color:var(--ink,#1A1814);margin-bottom:8px;}
 .bg-modal-sub{font-size:12.5px;color:var(--ink3,#7A7670);margin-bottom:16px;}
 .bg-modal-label{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:var(--ink3,#7A7670);margin-bottom:6px;display:block;}
@@ -180,7 +180,7 @@ export default function BudgetPage() {
 
   if (loading) {
     return (
-      <div style={{ padding: 40, textAlign: 'center', color: '#7A7670', fontFamily: 'DM Sans' }}>
+      <div style={{ padding: 40, textAlign: 'center', color: 'var(--ink3, #7A7670)', fontFamily: 'DM Sans' }}>
         Carregando orçamento…
       </div>
     );
@@ -237,7 +237,7 @@ export default function BudgetPage() {
                       {formatCurrency(r.totalPlanned)} previsto / {formatCurrency(r.totalActual)} realizado
                     </span>
                     {' — '}
-                    <span style={{ color: '#7A7670' }}>{new Date(r.createdAt).toLocaleString('pt-BR')}</span>
+                    <span style={{ color: 'var(--ink3, #7A7670)' }}>{new Date(r.createdAt).toLocaleString('pt-BR')}</span>
                     {' — '}
                     <span>{r.createdBy}</span>
                   </div>

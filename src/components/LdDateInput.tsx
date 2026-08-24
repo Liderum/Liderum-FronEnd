@@ -65,7 +65,7 @@ const CSS = `
   display:flex;align-items:center;justify-content:space-between;gap:8px;
   width:100%;box-sizing:border-box;cursor:pointer;
   font-family:'DM Sans',sans-serif;
-  background:#fff;
+  background:var(--card-bg,#fff);
   border:1px solid rgba(26,24,20,0.15);
   border-radius:8px;
   padding:9px 12px;
@@ -81,12 +81,12 @@ const CSS = `
 }
 .ldd-trigger.sm{padding:6px 10px;font-size:12px;border-radius:7px;border:1px solid rgba(26,24,20,0.12);}
 .ldd-placeholder{color:var(--ink3,#7A7670);}
-.ldd-icon{flex-shrink:0;color:#B8922A;}
+.ldd-icon{flex-shrink:0;color:var(--gold,#B8922A);}
 
 /* Popover — renderizado via portal no body, posição calculada via JS */
 .ldd-pop{
   position:fixed;z-index:99999;
-  background:#fff;
+  background:var(--card-bg,#fff);
   border:1px solid rgba(26,24,20,0.12);
   border-radius:12px;
   box-shadow:0 12px 40px rgba(26,24,20,0.18);
@@ -99,8 +99,8 @@ const CSS = `
 /* Header do mês */
 .ldd-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
 .ldd-nav-btn{
-  width:28px;height:28px;border-radius:7px;border:1px solid rgba(26,24,20,0.10);
-  background:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;
+  width:28px;height:28px;border-radius:7px;border:1px solid var(--bdr,rgba(26,24,20,0.10));
+  background:var(--card-bg,#fff);cursor:pointer;display:flex;align-items:center;justify-content:center;
   color:var(--ink3,#7A7670);transition:all 0.13s;
 }
 .ldd-nav-btn:hover{border-color:var(--gold,#B8922A);color:var(--gold,#B8922A);background:rgba(184,146,42,0.05);}

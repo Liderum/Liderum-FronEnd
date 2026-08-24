@@ -22,7 +22,7 @@ const CSS = `
 .wk{font-family:'DM Sans',sans-serif;color:var(--ink,#1A1814);display:flex;flex-direction:column;gap:20px;}
 .wk-back{display:inline-flex;align-items:center;gap:5px;font-size:12px;color:var(--ink3,#7A7670);cursor:pointer;background:none;border:none;font-family:'DM Sans',sans-serif;padding:0;transition:color 0.14s;}
 .wk-back:hover{color:var(--gold,#B8922A);}
-.wk-hero{background:linear-gradient(135deg,var(--ink,#1A1814) 0%,#2C2820 100%);border-radius:14px;padding:28px 32px;position:relative;overflow:hidden;}
+.wk-hero{background:linear-gradient(135deg,var(--brand-dark) 0%,#2C2820 100%);border-radius:14px;padding:28px 32px;position:relative;overflow:hidden;}
 .wk-hero::after{content:'';position:absolute;top:-40px;right:-40px;width:200px;height:200px;border-radius:50%;background:radial-gradient(circle,rgba(184,146,42,0.15) 0%,transparent 70%);pointer-events:none;}
 .wk-hero-top{display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:12px;}
 .wk-hero-top>div:first-child{min-width:0;flex:1;}
@@ -35,7 +35,7 @@ const CSS = `
 .wk-hero-progress-bar{flex:1;max-width:300px;height:6px;border-radius:10px;background:rgba(255,255,255,0.12);overflow:hidden;}
 .wk-hero-progress-fill{height:100%;border-radius:10px;background:linear-gradient(90deg,var(--gold,#B8922A),var(--gold2,#D4A843));transition:width 0.5s ease;}
 .wk-hero-progress-label{font-size:13px;font-weight:600;color:var(--gold2,#D4A843);}
-.wk-tabs{display:flex;gap:2px;background:#fff;border-radius:10px;border:1px solid var(--bdr,rgba(26,24,20,0.10));padding:4px;box-shadow:0 2px 10px rgba(26,24,20,0.04);overflow-x:auto;}
+.wk-tabs{display:flex;gap:2px;background:var(--card-bg,#fff);border-radius:10px;border:1px solid var(--bdr,rgba(26,24,20,0.10));padding:4px;box-shadow:0 2px 10px rgba(26,24,20,0.04);overflow-x:auto;}
 .wk-tab{display:flex;align-items:center;gap:6px;padding:9px 16px;border-radius:7px;font-size:12.5px;font-weight:400;color:var(--ink3,#7A7670);text-decoration:none;transition:all 0.16s;white-space:nowrap;border:none;background:none;cursor:pointer;font-family:'DM Sans',sans-serif;}
 .wk-tab:hover{color:var(--ink,#1A1814);background:var(--cream,#F7F4EF);}
 .wk-tab.active{color:var(--gold,#B8922A);background:rgba(184,146,42,0.08);font-weight:500;}

@@ -24,7 +24,7 @@ const CSS = `
   display:flex;align-items:center;justify-content:space-between;gap:8px;
   width:100%;box-sizing:border-box;cursor:pointer;
   font-family:'DM Sans',sans-serif;
-  background:#fff;
+  background:var(--card-bg,#fff);
   border:1px solid rgba(26,24,20,0.15);
   border-radius:8px;
   padding:9px 12px;
@@ -41,12 +41,12 @@ const CSS = `
 }
 .lds-trigger.sm{padding:6px 10px;font-size:12px;border-radius:7px;border:1px solid rgba(26,24,20,0.12);}
 .lds-trigger-placeholder{color:var(--ink3,#7A7670);}
-.lds-chevron{flex-shrink:0;color:#B8922A;transition:transform 0.2s;}
+.lds-chevron{flex-shrink:0;color:var(--gold,#B8922A);transition:transform 0.2s;}
 .lds-chevron.open{transform:rotate(180deg);}
 
 .lds-dropdown{
   position:absolute;top:calc(100% + 5px);left:0;right:0;z-index:9999;
-  background:#fff;
+  background:var(--card-bg,#fff);
   border:1px solid rgba(26,24,20,0.12);
   border-radius:10px;
   box-shadow:0 8px 32px rgba(26,24,20,0.14);

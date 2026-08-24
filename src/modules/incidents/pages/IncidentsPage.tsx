@@ -24,26 +24,26 @@ const CSS = `
 .inc-title{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:700;color:var(--ink);}
 
 .inc-summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;}
-.inc-stat{background:#fff;border-radius:10px;border:1px solid rgba(26,24,20,0.08);padding:14px 16px;display:flex;align-items:center;gap:10px;}
+.inc-stat{background:var(--card-bg, #fff);border-radius:10px;border:1px solid rgba(26,24,20,0.08);padding:14px 16px;display:flex;align-items:center;gap:10px;}
 .inc-stat-icon{width:34px;height:34px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
 .inc-stat-val{font-family:var(--font-numeric,'IBM Plex Sans');font-size:20px;font-weight:600;font-variant-numeric:tabular-nums lining-nums;}
-.inc-stat-label{font-size:10.5px;color:#7A7670;text-transform:uppercase;letter-spacing:0.3px;font-weight:500;}
+.inc-stat-label{font-size:10.5px;color:var(--ink3, #7A7670);text-transform:uppercase;letter-spacing:0.3px;font-weight:500;}
 
-.inc-toolbar{background:#fff;border-radius:10px;border:1px solid rgba(26,24,20,0.08);padding:12px 16px;display:flex;gap:10px;flex-wrap:wrap;align-items:center;}
-.inc-search{padding:6px 10px 6px 32px;border-radius:6px;border:1px solid rgba(26,24,20,0.12);font-size:12px;font-family:'DM Sans',sans-serif;min-width:180px;background:#fff;color:var(--ink);}
+.inc-toolbar{background:var(--card-bg, #fff);border-radius:10px;border:1px solid rgba(26,24,20,0.08);padding:12px 16px;display:flex;gap:10px;flex-wrap:wrap;align-items:center;}
+.inc-search{padding:6px 10px 6px 32px;border-radius:6px;border:1px solid rgba(26,24,20,0.12);font-size:12px;font-family:'DM Sans',sans-serif;min-width:180px;background:var(--card-bg, #fff);color:var(--ink);}
 .inc-search-wrap{position:relative;}
 .inc-search-icon{position:absolute;left:10px;top:50%;transform:translateY(-50%);pointer-events:none;}
 
-.inc-btn{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:8px;font-size:12px;font-weight:500;cursor:pointer;border:1px solid rgba(26,24,20,0.12);background:#fff;color:var(--ink);font-family:'DM Sans',sans-serif;transition:all 0.16s;white-space:nowrap;}
+.inc-btn{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:8px;font-size:12px;font-weight:500;cursor:pointer;border:1px solid rgba(26,24,20,0.12);background:var(--card-bg, #fff);color:var(--ink);font-family:'DM Sans',sans-serif;transition:all 0.16s;white-space:nowrap;}
 .inc-btn:hover{background:var(--cream,#F7F4EF);}
-.inc-btn.primary{background:linear-gradient(135deg,var(--gold,#B8922A),var(--gold2,#D4A843));color:#fff;border:none;box-shadow:0 2px 10px rgba(184,146,42,0.22);}
+.inc-btn.primary{background:linear-gradient(135deg,var(--brand-gold,#B8922A),var(--brand-gold2,#D4A843));color:#fff;border:none;box-shadow:0 2px 10px rgba(184,146,42,0.22);}
 .inc-btn.primary:hover{transform:translateY(-1px);box-shadow:0 6px 18px rgba(184,146,42,0.35);}
 .inc-btn.resolve{background:#E8F5E9;color:#1E8449;border-color:rgba(30,132,73,0.2);}
 .inc-btn.resolve:hover{background:#d4edda;}
 .inc-btn.sm{padding:5px 10px;font-size:11px;}
 .inc-btn:disabled{opacity:0.5;cursor:not-allowed;}
 
-.inc-card{background:#fff;border-radius:12px;border:1px solid rgba(26,24,20,0.1);overflow:hidden;box-shadow:0 2px 8px rgba(26,24,20,0.04);transition:box-shadow 0.18s;}
+.inc-card{background:var(--card-bg, #fff);border-radius:12px;border:1px solid var(--bdr, rgba(26,24,20,0.1));overflow:hidden;box-shadow:0 2px 8px rgba(26,24,20,0.04);transition:box-shadow 0.18s;}
 .inc-card:hover{box-shadow:0 4px 20px rgba(26,24,20,0.08);}
 .inc-card.severity-critica{border-left:3px solid #C0392B;}
 .inc-card.severity-alta{border-left:3px solid #E67E22;}
@@ -55,13 +55,13 @@ const CSS = `
 .inc-card-title{font-family:'Cormorant Garamond',serif;font-size:17px;font-weight:700;line-height:1.2;flex:1;}
 .inc-card-badges{display:flex;gap:6px;flex-shrink:0;align-items:center;flex-wrap:wrap;}
 .inc-badge{padding:3px 10px;border-radius:14px;font-size:10.5px;font-weight:500;white-space:nowrap;}
-.inc-card-desc{font-size:12.5px;color:#7A7670;margin-top:8px;line-height:1.55;}
-.inc-card-meta{display:flex;gap:14px;flex-wrap:wrap;margin-top:10px;font-size:11.5px;color:#7A7670;align-items:center;}
+.inc-card-desc{font-size:12.5px;color:var(--ink3, #7A7670);margin-top:8px;line-height:1.55;}
+.inc-card-meta{display:flex;gap:14px;flex-wrap:wrap;margin-top:10px;font-size:11.5px;color:var(--ink3, #7A7670);align-items:center;}
 .inc-card-meta-item{display:flex;align-items:center;gap:4px;}
 
 .inc-card-expand{border-top:1px solid rgba(26,24,20,0.06);overflow:hidden;}
 .inc-card-history{padding:14px 20px;background:var(--cream,#F7F4EF);}
-.inc-history-title{font-size:10.5px;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:#7A7670;margin-bottom:10px;}
+.inc-history-title{font-size:10.5px;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:var(--ink3, #7A7670);margin-bottom:10px;}
 .inc-history-item{padding:8px 0;font-size:12px;display:flex;gap:10px;border-top:1px solid rgba(26,24,20,0.04);}
 .inc-history-item:first-child{border-top:none;}
 .inc-history-dot{width:6px;height:6px;border-radius:50%;background:var(--gold,#B8922A);margin-top:5px;flex-shrink:0;}
@@ -70,24 +70,24 @@ const CSS = `
 .inc-photo{width:68px;height:68px;border-radius:8px;overflow:hidden;border:1px solid rgba(26,24,20,0.1);cursor:pointer;transition:transform 0.15s;}
 .inc-photo:hover{transform:scale(1.05);}
 .inc-photo img{width:100%;height:100%;object-fit:cover;}
-.inc-upload-label{display:inline-flex;align-items:center;gap:5px;padding:6px 12px;border-radius:7px;font-size:11.5px;font-weight:500;cursor:pointer;border:1px dashed rgba(26,24,20,0.25);background:rgba(26,24,20,0.02);color:#7A7670;transition:all 0.15s;font-family:'DM Sans',sans-serif;}
+.inc-upload-label{display:inline-flex;align-items:center;gap:5px;padding:6px 12px;border-radius:7px;font-size:11.5px;font-weight:500;cursor:pointer;border:1px dashed rgba(26,24,20,0.25);background:rgba(26,24,20,0.02);color:var(--ink3, #7A7670);transition:all 0.15s;font-family:'DM Sans',sans-serif;}
 .inc-upload-label:hover{border-color:rgba(184,146,42,0.5);color:var(--gold);background:rgba(184,146,42,0.04);}
 
 .inc-card-actions{display:flex;gap:8px;padding:10px 20px;border-top:1px solid rgba(26,24,20,0.06);background:#fafaf8;flex-wrap:wrap;align-items:center;}
-.inc-actions-label{font-size:11px;color:#7A7670;font-weight:500;margin-right:4px;}
+.inc-actions-label{font-size:11px;color:var(--ink3, #7A7670);font-weight:500;margin-right:4px;}
 
-.inc-empty{padding:48px 20px;text-align:center;background:#fff;border-radius:12px;border:1px solid rgba(26,24,20,0.08);}
+.inc-empty{padding:48px 20px;text-align:center;background:var(--card-bg, #fff);border-radius:12px;border:1px solid rgba(26,24,20,0.08);}
 
 /* Modal */
 .inc-overlay{position:fixed;inset:0;background:rgba(26,24,20,0.5);display:flex;align-items:center;justify-content:center;z-index:1000;padding:16px;backdrop-filter:blur(3px);}
-.inc-modal{background:#fff;border-radius:16px;max-width:580px;width:100%;padding:28px;box-shadow:0 24px 64px rgba(0,0,0,0.22);max-height:93vh;overflow-y:auto;}
+.inc-modal{background:var(--card-bg, #fff);border-radius:16px;max-width:580px;width:100%;padding:28px;box-shadow:0 24px 64px rgba(0,0,0,0.22);max-height:93vh;overflow-y:auto;}
 .inc-modal-sm{max-width:440px;}
 .inc-modal-title{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:700;margin-bottom:4px;color:var(--ink);}
-.inc-modal-subtitle{font-size:12px;color:#7A7670;margin-bottom:20px;}
-.inc-label{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:#7A7670;margin-bottom:6px;display:block;}
-.inc-input{width:100%;padding:10px 12px;border-radius:8px;border:1px solid rgba(26,24,20,0.15);font-family:'DM Sans',sans-serif;font-size:13px;margin-bottom:14px;box-sizing:border-box;background:#fff;color:var(--ink);transition:border-color 0.15s;}
+.inc-modal-subtitle{font-size:12px;color:var(--ink3, #7A7670);margin-bottom:20px;}
+.inc-label{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:var(--ink3, #7A7670);margin-bottom:6px;display:block;}
+.inc-input{width:100%;padding:10px 12px;border-radius:8px;border:1px solid rgba(26,24,20,0.15);font-family:'DM Sans',sans-serif;font-size:13px;margin-bottom:14px;box-sizing:border-box;background:var(--card-bg, #fff);color:var(--ink);transition:border-color 0.15s;}
 .inc-input:focus{outline:none;border-color:rgba(184,146,42,0.5);}
-.inc-textarea{width:100%;padding:10px 12px;border-radius:8px;border:1px solid rgba(26,24,20,0.15);font-family:'DM Sans',sans-serif;font-size:13px;min-height:80px;box-sizing:border-box;resize:vertical;margin-bottom:14px;background:#fff;color:var(--ink);transition:border-color 0.15s;}
+.inc-textarea{width:100%;padding:10px 12px;border-radius:8px;border:1px solid rgba(26,24,20,0.15);font-family:'DM Sans',sans-serif;font-size:13px;min-height:80px;box-sizing:border-box;resize:vertical;margin-bottom:14px;background:var(--card-bg, #fff);color:var(--ink);transition:border-color 0.15s;}
 .inc-textarea:focus{outline:none;border-color:rgba(184,146,42,0.5);}
 `;
 
@@ -302,7 +302,7 @@ export default function IncidentsPage() {
 
   if (loading) {
     return (
-      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', padding: 60, color: '#7A7670' }}>
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', padding: 60, color: 'var(--ink3, #7A7670)' }}>
         <Loader2 size={22} className="animate-spin" style={{ marginRight: 10, color: 'var(--gold,#B8922A)' }} />
         <span style={{ fontFamily: 'DM Sans', fontSize: 13 }}>Carregando ocorrências…</span>
       </div>
@@ -366,9 +366,9 @@ export default function IncidentsPage() {
 
         {/* ── Toolbar ── */}
         <div className="inc-toolbar">
-          <Filter size={13} color="#7A7670" />
+          <Filter size={13} color="var(--ink3, #7A7670)" />
           <div className="inc-search-wrap">
-            <Search className="inc-search-icon" size={13} color="#7A7670" />
+            <Search className="inc-search-icon" size={13} color="var(--ink3, #7A7670)" />
             <input
               className="inc-search"
               placeholder="Buscar título ou descrição…"
@@ -419,7 +419,7 @@ export default function IncidentsPage() {
             <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--ink)', marginBottom: 6 }}>
               Nenhuma ocorrência encontrada
             </div>
-            <div style={{ fontSize: 12, color: '#7A7670' }}>
+            <div style={{ fontSize: 12, color: 'var(--ink3, #7A7670)' }}>
               {(filterCategory || filterSeverity || filterStatus || search)
                 ? 'Nenhuma ocorrência corresponde aos filtros.'
                 : 'Nenhuma ocorrência registrada para esta obra.'}
@@ -462,8 +462,8 @@ export default function IncidentsPage() {
                           {statCfg.label}
                         </span>
                         {isExpanded
-                          ? <ChevronUp size={14} color="#7A7670" />
-                          : <ChevronDown size={14} color="#7A7670" />}
+                          ? <ChevronUp size={14} color="var(--ink3, #7A7670)" />
+                          : <ChevronDown size={14} color="var(--ink3, #7A7670)" />}
                       </div>
                     </div>
                     <div className="inc-card-desc">{incident.description}</div>
@@ -538,7 +538,7 @@ export default function IncidentsPage() {
                           {transitions.includes('cancelado') && (
                             <button
                               className="inc-btn sm"
-                              style={{ color: '#7A7670' }}
+                              style={{ color: 'var(--ink3, #7A7670)' }}
                               disabled={isBusy}
                               onClick={() => doTransition(incident, 'cancelado')}
                             >
@@ -590,7 +590,7 @@ export default function IncidentsPage() {
                                   <img src={photo} alt={`Foto ${pi + 1}`} />
                                 ) : (
                                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%' }}>
-                                    <Camera size={20} color="#7A7670" />
+                                    <Camera size={20} color="var(--ink3, #7A7670)" />
                                   </div>
                                 )}
                               </div>
@@ -606,11 +606,11 @@ export default function IncidentsPage() {
                               <div className="inc-history-dot" />
                               <div style={{ flex: 1 }}>
                                 <div style={{ fontWeight: 500 }}>{h.action}</div>
-                                <div style={{ fontSize: 11, color: '#7A7670', marginTop: 2 }}>
+                                <div style={{ fontSize: 11, color: 'var(--ink3, #7A7670)', marginTop: 2 }}>
                                   {h.user} — {h.date ? new Date(h.date + 'T00:00:00').toLocaleDateString('pt-BR') : '—'}
                                 </div>
                                 {h.notes && (
-                                  <div style={{ fontSize: 11, color: '#7A7670', fontStyle: 'italic', marginTop: 3 }}>
+                                  <div style={{ fontSize: 11, color: 'var(--ink3, #7A7670)', fontStyle: 'italic', marginTop: 3 }}>
                                     "{h.notes}"
                                   </div>
                                 )}
@@ -791,7 +791,7 @@ export default function IncidentsPage() {
                   <div className="inc-modal-title" style={{ fontSize: 20, marginBottom: 0 }}>
                     Resolver ocorrência
                   </div>
-                  <div style={{ fontSize: 12, color: '#7A7670', marginTop: 2 }}>
+                  <div style={{ fontSize: 12, color: 'var(--ink3, #7A7670)', marginTop: 2 }}>
                     {resolveTarget.title}
                   </div>
                 </div>

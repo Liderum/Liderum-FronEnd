@@ -14,24 +14,24 @@ import { LdDateInput } from '@/components/LdDateInput';
 const CSS = `
 .sc{font-family:'DM Sans',sans-serif;color:var(--ink,#1A1814);display:flex;flex-direction:column;gap:18px;}
 .sc-summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;}
-.sc-summary-card{background:#fff;border-radius:10px;border:1px solid var(--bdr,rgba(26,24,20,0.10));padding:14px 16px;display:flex;align-items:center;gap:10px;box-shadow:0 2px 8px rgba(26,24,20,0.03);}
+.sc-summary-card{background:var(--card-bg,#fff);border-radius:10px;border:1px solid var(--bdr,rgba(26,24,20,0.10));padding:14px 16px;display:flex;align-items:center;gap:10px;box-shadow:0 2px 8px rgba(26,24,20,0.03);}
 .sc-summary-val{font-family:var(--font-numeric);font-size:22px;font-weight:600;font-variant-numeric:tabular-nums lining-nums;color:var(--ink,#1A1814);}
 .sc-summary-label{font-size:10.5px;color:var(--ink3,#7A7670);font-weight:500;text-transform:uppercase;letter-spacing:0.4px;}
 .sc-toolbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
 .sc-view-toggle{display:inline-flex;border-radius:8px;border:1px solid rgba(26,24,20,0.12);overflow:hidden;}
-.sc-view-btn{padding:8px 14px;font-size:12px;font-weight:500;border:none;background:#fff;color:#7A7670;cursor:pointer;display:flex;align-items:center;gap:6px;font-family:'DM Sans',sans-serif;}
-.sc-view-btn.active{background:var(--gold,#B8922A);color:#fff;}
-.sc-btn{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:8px;font-size:12px;font-weight:500;cursor:pointer;border:1px solid rgba(26,24,20,0.12);background:#fff;color:var(--ink,#1A1814);font-family:'DM Sans',sans-serif;transition:all 0.14s;}
+.sc-view-btn{padding:8px 14px;font-size:12px;font-weight:500;border:none;background:var(--card-bg,#fff);color:var(--ink3,#7A7670);cursor:pointer;display:flex;align-items:center;gap:6px;font-family:'DM Sans',sans-serif;}
+.sc-view-btn.active{background:var(--brand-gold);color:#fff;}
+.sc-btn{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:8px;font-size:12px;font-weight:500;cursor:pointer;border:1px solid rgba(26,24,20,0.12);background:var(--card-bg,#fff);color:var(--ink,#1A1814);font-family:'DM Sans',sans-serif;transition:all 0.14s;}
 .sc-btn:hover{background:var(--cream,#F7F4EF);}
-.sc-btn.primary{background:var(--gold,#B8922A);color:#fff;border-color:var(--gold,#B8922A);}
+.sc-btn.primary{background:var(--brand-gold);color:#fff;border-color:var(--brand-gold);}
 .sc-btn.primary:hover{background:#a07e1f;}
 .sc-btn:disabled{opacity:0.5;cursor:not-allowed;}
 .sc-timeline{position:relative;padding-left:28px;}
 .sc-timeline::before{content:'';position:absolute;left:11px;top:0;bottom:0;width:2px;background:rgba(26,24,20,0.08);border-radius:2px;}
 .sc-stage{margin-bottom:26px;}
 .sc-stage-label{font-size:10.5px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--gold,#B8922A);margin-bottom:10px;position:relative;}
-.sc-stage-label::before{content:'';position:absolute;left:-21px;top:50%;transform:translateY(-50%);width:10px;height:10px;border-radius:50%;background:var(--gold,#B8922A);border:2px solid #fff;box-shadow:0 0 0 2px rgba(184,146,42,0.2);}
-.sc-task{background:#fff;border-radius:10px;border:1px solid var(--bdr,rgba(26,24,20,0.10));padding:16px 20px;margin-bottom:8px;display:flex;align-items:center;gap:14px;box-shadow:0 1px 6px rgba(26,24,20,0.03);transition:all 0.18s;}
+.sc-stage-label::before{content:'';position:absolute;left:-21px;top:50%;transform:translateY(-50%);width:10px;height:10px;border-radius:50%;background:var(--gold,#B8922A);border:2px solid var(--card-bg,#fff);box-shadow:0 0 0 2px rgba(184,146,42,0.2);}
+.sc-task{background:var(--card-bg,#fff);border-radius:10px;border:1px solid var(--bdr,rgba(26,24,20,0.10));padding:16px 20px;margin-bottom:8px;display:flex;align-items:center;gap:14px;box-shadow:0 1px 6px rgba(26,24,20,0.03);transition:all 0.18s;}
 .sc-task:hover{box-shadow:0 4px 16px rgba(26,24,20,0.08);transform:translateX(2px);}
 .sc-task-icon{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
 .sc-task-info{flex:1;min-width:0;}
@@ -46,7 +46,7 @@ const CSS = `
 .sc-task-pct{font-size:11.5px;font-weight:600;color:var(--ink2,#3D3A34);text-align:right;margin-top:2px;}
 .sc-err{background:#FDEDEC;color:#C0392B;padding:10px 14px;border-radius:8px;font-size:12px;border:1px solid rgba(192,57,43,0.15);}
 .sc-modal{position:fixed;inset:0;background:rgba(26,24,20,0.45);display:flex;align-items:center;justify-content:center;z-index:1000;padding:20px;}
-.sc-modal-card{background:#fff;border-radius:14px;max-width:560px;width:100%;padding:24px;box-shadow:0 20px 60px rgba(0,0,0,0.25);max-height:90vh;overflow-y:auto;}
+.sc-modal-card{background:var(--card-bg,#fff);border-radius:14px;max-width:560px;width:100%;padding:24px;box-shadow:0 20px 60px rgba(0,0,0,0.25);max-height:90vh;overflow-y:auto;}
 .sc-modal-title{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:700;color:var(--ink,#1A1814);margin-bottom:16px;}
 .sc-modal-label{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:var(--ink3,#7A7670);margin-bottom:6px;display:block;}
 .sc-modal-input{width:100%;padding:10px 12px;border-radius:8px;border:1px solid rgba(26,24,20,0.15);font-family:'DM Sans',sans-serif;font-size:13px;margin-bottom:14px;box-sizing:border-box;}
@@ -190,7 +190,7 @@ export default function SchedulePage() {
 
   if (loading) {
     return (
-      <div style={{ padding: 40, textAlign: 'center', color: '#7A7670', fontFamily: 'DM Sans' }}>
+      <div style={{ padding: 40, textAlign: 'center', color: 'var(--ink3, #7A7670)', fontFamily: 'DM Sans' }}>
         Carregando cronograma…
       </div>
     );
@@ -307,7 +307,7 @@ export default function SchedulePage() {
             <input className="sc-modal-input" value={form.responsible} onChange={(e) => setForm({ ...form, responsible: e.target.value })} />
             <label className="sc-modal-label">Dependências (clique para marcar)</label>
             <div style={{ maxHeight: 140, overflowY: 'auto', padding: 6, border: '1px solid rgba(26,24,20,0.08)', borderRadius: 8, marginBottom: 14 }}>
-              {tasks.length === 0 && <div style={{ color: '#7A7670', fontSize: 12, padding: 6 }}>Sem tarefas prévias.</div>}
+              {tasks.length === 0 && <div style={{ color: 'var(--ink3, #7A7670)', fontSize: 12, padding: 6 }}>Sem tarefas prévias.</div>}
               {tasks.map((t) => {
                 const active = form.dependencies.includes(t.id);
                 return (
