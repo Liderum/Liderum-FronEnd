@@ -17,6 +17,8 @@ import {
 import { User, UserProfile, RegisterUserRequest } from '../types/auth';
 import { tokenStore } from '../services/api/tokenStore';
 
+const TENANT_ADMIN_ROLE = 'TenantAdmin';
+
 interface ErrorToastState {
   isVisible: boolean;
   message: string;
@@ -33,6 +35,11 @@ interface AuthContextData {
   permissions: string[];
   roles: string[];
   modules: string[];
+  isOnboardingComplete: boolean | null;
+  isTenantAdmin: boolean;
+  setOnboardingComplete: (complete: boolean) => void;
+  tourSeen: boolean | null;
+  setTourSeen: (seen: boolean) => void;
   signIn: (email: string, password: string) => Promise<void>;
   signOut: () => void;
   register: (data: RegisterUserRequest) => Promise<void>;
@@ -61,11 +68,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [roles, setRoles] = useState<string[]>([]);
   const [modules, setModules] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isOnboardingComplete, setIsOnboardingComplete] = useState<boolean | null>(null);
+  const [tourSeen, setTourSeenState] = useState<boolean | null>(null);
   const bootstrapRef = useRef(false);
 
   const isAuthenticated = !!user;
+  const isTenantAdmin = roles.includes(TENANT_ADMIN_ROLE);
 
   const { errorToast, showError, hideError } = useErrorToast();
+
+  const setOnboardingComplete = useCallback((complete: boolean) => {
+    setIsOnboardingComplete(complete);
+  }, []);
+
+  const setTourSeen = useCallback((seen: boolean) => {
+    setTourSeenState(seen);
+  }, []);
 
   const clearAuth = useCallback(() => {
     tokenStore.clear();
@@ -73,6 +91,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setPermissions([]);
     setRoles([]);
     setModules([]);
+    setIsOnboardingComplete(null);
+    setTourSeenState(null);
   }, []);
 
   // Registra callback para quando o interceptor detectar sessão expirada
@@ -82,6 +102,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setPermissions([]);
       setRoles([]);
       setModules([]);
+      setIsOnboardingComplete(null);
+      setTourSeenState(null);
     });
     return () => tokenStore.setOnAuthFailure(null);
   }, []);
@@ -106,6 +128,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           name: profile.name,
           email: profile.email,
         });
+        if (typeof profile.tourSeen === 'boolean') setTourSeenState(profile.tourSeen);
         return profile;
       }
       return null;
@@ -130,6 +153,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           name: profile.name,
           email: profile.email,
         });
+        if (typeof profile.tourSeen === 'boolean') setTourSeenState(profile.tourSeen);
       }
 
       const rbac = await SafeAuthCalls.getMyPermissionsDirect(data.accessToken);
@@ -138,6 +162,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setRoles(rbac.roles ?? []);
         setModules(rbac.modules ?? []);
       }
+
+      // Onboarding da PJ — falha é não-fatal, não deve travar o login.
+      const tenantProfile = await SafeAuthCalls.getTenantProfileDirect(data.accessToken);
+      setIsOnboardingComplete(tenantProfile ? tenantProfile.isOnboardingComplete : null);
 
       return !!profile;
     } catch {
@@ -168,9 +196,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // básica. Falha em qualquer um é não-fatal; o usuário ainda entra com os
       // dados retornados pelo /doLogin e a home fica acessível pelo fallback
       // do PrivateRoute.
-      const [profile, rbac] = await Promise.all([
+      const [profile, rbac, tenantProfile] = await Promise.all([
         SafeAuthCalls.getProfileDirect(data.accessToken),
         SafeAuthCalls.getMyPermissionsDirect(data.accessToken),
+        SafeAuthCalls.getTenantProfileDirect(data.accessToken),
       ]);
 
       if (rbac) {
@@ -184,6 +213,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setRoles([]);
         setModules([]);
       }
+
+      // Onboarding da PJ — falha é não-fatal, não deve travar o login.
+      setIsOnboardingComplete(tenantProfile ? tenantProfile.isOnboardingComplete : null);
+      if (profile && typeof profile.tourSeen === 'boolean') setTourSeenState(profile.tourSeen);
 
       // setUser é o ÚLTIMO passo: é ele que dispara isAuthenticated=true e a
       // transição de rotas. Chamar por último garante que permissions/roles já
@@ -222,6 +255,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         permissions,
         roles,
         modules,
+        isOnboardingComplete,
+        isTenantAdmin,
+        setOnboardingComplete,
+        tourSeen,
+        setTourSeen,
         signIn,
         signOut,
         register,

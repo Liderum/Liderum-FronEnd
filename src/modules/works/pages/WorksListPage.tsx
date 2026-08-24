@@ -33,7 +33,7 @@ const CSS = `
 .wl-card:hover::before{transform:scaleX(1);}
 .wl-card:hover{box-shadow:0 8px 30px rgba(26,24,20,0.10);transform:translateY(-2px);}
 .wl-card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;}
-.wl-card-name{font-family:'Cormorant Garamond',serif;font-size:17px;font-weight:700;color:var(--ink,#1A1814);line-height:1.2;}
+.wl-card-name{font-family:'Cormorant Garamond',serif;font-size:17px;font-weight:700;color:var(--ink,#1A1814);line-height:1.2;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;}
 .wl-card-client{font-size:12px;color:var(--ink3,#7A7670);margin-top:3px;}
 .wl-card-meta{display:flex;flex-direction:column;gap:8px;margin-top:4px;}
 .wl-card-meta-row{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--ink3,#7A7670);}

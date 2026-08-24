@@ -120,6 +120,7 @@ export const authApiInstance = authApi;
 export const usersApi = ApiFactory.getInstance('USERS');
 export const worksApi = ApiFactory.getInstance('WORKS');
 export const rbacApi = ApiFactory.getInstance('RBAC');
+export const tenantApi = ApiFactory.getInstance('TENANT');
 /** @deprecated Use worksApi instead */
 export const managementApi = worksApi;
 export default authApiInstance;

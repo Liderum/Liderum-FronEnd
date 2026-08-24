@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from "framer-motion";
 import { Sidebar } from '../components/Sidebar';
 import { Header } from '../components/Header';
+import { ProductTour } from '../components/onboarding/ProductTour';
 import { X, Menu } from "lucide-react";
 
 export function DashboardLayout() {
@@ -68,6 +69,8 @@ export function DashboardLayout() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      <ProductTour />
 
       {/* Mobile menu button */}
       <button

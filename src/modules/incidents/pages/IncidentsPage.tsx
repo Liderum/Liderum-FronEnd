@@ -8,7 +8,7 @@ import {
 } from 'lucide-react';
 import { LdSelect } from '@/components/LdSelect';
 import { LdDateInput } from '@/components/LdDateInput';
-import { IncidentsService, ScheduleService, ExtrasService } from '@/services/works';
+import { IncidentsService, ScheduleService, ExtrasService, WorksService } from '@/services/works';
 import { useAuth } from '@/contexts/AuthContext';
 import type {
   Incident, IncidentCategory, IncidentSeverity, IncidentStatus, ScheduleTask, ExtraRequest,
@@ -127,9 +127,18 @@ export default function IncidentsPage() {
   const canCreate = permissions.includes('incidents.create') || permissions.includes('daily-log.create');
   const canUpdate = permissions.includes('incidents.update') || permissions.includes('daily-log.update') || permissions.includes('daily-log.create');
 
+  // Works só conhece o Id do usuário (o cadastro de fato vive na Security API).
+  // Resolve pro nome quando é o próprio usuário logado; senão mostra uma
+  // referência curta em vez do GUID inteiro cru na tela.
+  const displayUser = (userId: string) => {
+    if (user && userId === user.identifier) return user.name || user.email || 'Você';
+    return `Usuário #${userId.slice(0, 8)}`;
+  };
+
   const [incidents, setIncidents] = useState<Incident[]>([]);
   const [tasks, setTasks] = useState<ScheduleTask[]>([]);
   const [extras, setExtras] = useState<ExtraRequest[]>([]);
+  const [workStartDate, setWorkStartDate] = useState<string>('');
   const [loading, setLoading] = useState(true);
   const [expanded, setExpanded] = useState<string[]>([]);
   const [busyId, setBusyId] = useState<string | null>(null);
@@ -165,12 +174,14 @@ export default function IncidentsPage() {
       IncidentsService.list(workId),
       ScheduleService.list(workId),
       ExtrasService.list(workId),
+      WorksService.getById(workId),
     ])
-      .then(([inc, t, ex]) => {
+      .then(([inc, t, ex, work]) => {
         if (!active) return;
         setIncidents(inc);
         setTasks(t);
         setExtras(ex);
+        setWorkStartDate(work?.startDate ?? '');
       })
       .finally(() => active && setLoading(false));
     return () => { active = false; };
@@ -206,6 +217,7 @@ export default function IncidentsPage() {
   /* ── Create ── */
   const handleCreate = async () => {
     if (!form.title.trim() || !form.description.trim()) return;
+    if (workStartDate && form.deadline && form.deadline < workStartDate) return;
     setCreating(true);
     try {
       const created = await IncidentsService.create(workId, {
@@ -462,7 +474,7 @@ export default function IncidentsPage() {
                         </span>
                       </span>
                       <span className="inc-card-meta-item">
-                        <User size={11} /> {incident.reportedBy}
+                        <User size={11} /> {displayUser(incident.reportedBy)}
                       </span>
                       <span className="inc-card-meta-item">
                         <Calendar size={11} /> {formatDate(incident.reportedAt)}
@@ -473,7 +485,7 @@ export default function IncidentsPage() {
                         </span>
                       )}
                       {incident.assignedTo && (
-                        <span className="inc-card-meta-item">Atribuído: {incident.assignedTo}</span>
+                        <span className="inc-card-meta-item">Atribuído: {displayUser(incident.assignedTo)}</span>
                       )}
                       {relatedTask && (
                         <span className="inc-card-meta-item">Tarefa: {relatedTask.name}</span>
@@ -696,7 +708,13 @@ export default function IncidentsPage() {
                   <LdDateInput
                     value={form.deadline}
                     onChange={(v) => setForm({ ...form, deadline: v })}
+                    min={workStartDate || undefined}
                   />
+                  {workStartDate && form.deadline && form.deadline < workStartDate && (
+                    <div style={{ fontSize: 11, color: '#C0392B', marginTop: -10, marginBottom: 12 }}>
+                      O prazo não pode ser anterior ao início da obra ({formatDate(workStartDate)}).
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -728,7 +746,12 @@ export default function IncidentsPage() {
                 <button
                   className="inc-btn primary"
                   onClick={handleCreate}
-                  disabled={creating || !form.title.trim() || !form.description.trim()}
+                  disabled={
+                    creating ||
+                    !form.title.trim() ||
+                    !form.description.trim() ||
+                    (!!workStartDate && !!form.deadline && form.deadline < workStartDate)
+                  }
                 >
                   {creating ? (
                     <><Loader2 size={13} className="animate-spin" /> Registrando…</>

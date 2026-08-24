@@ -4,6 +4,7 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '
 import { useSimpleToast } from '@/hooks/useSimpleToast';
 import { CompanyService } from '@/services/managementService';
 import { Company, CreateCompanyDto, UpdateCompanyDto } from '@/types/management';
+import { cleanCnpj, formatCnpj, isValidCnpj } from '@/utils/cnpj';
 import { Plus, Pencil, Trash2, Building2, RefreshCw } from 'lucide-react';
 
 const LDCSS = `
@@ -44,7 +45,7 @@ export function Companies() {
   const [companies, setCompanies] = useState<Company[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingCompany, setEditingCompany] = useState<Company | null>(null);
-  const [form, setForm] = useState<CreateCompanyDto>({ razaoSocial: '', nomeFantasia: '', documento: '' });
+  const [form, setForm] = useState<CreateCompanyDto>({ name: '', cnpj: '' });
 
   async function loadCompanies() {
     setLoading(true);
@@ -57,25 +58,26 @@ export function Companies() {
 
   function openCreate() {
     setEditingCompany(null);
-    setForm({ razaoSocial: '', nomeFantasia: '', documento: '' });
+    setForm({ name: '', cnpj: '' });
     setIsModalOpen(true);
   }
 
   function openEdit(c: Company) {
     setEditingCompany(c);
-    setForm({ razaoSocial: c.razaoSocial || '', nomeFantasia: c.nomeFantasia || '', documento: c.documento || '' });
+    setForm({ name: c.name || '', cnpj: c.cnpj ? formatCnpj(c.cnpj) : '' });
     setIsModalOpen(true);
   }
 
   async function handleSubmit() {
     try {
-      if (!form.razaoSocial || !form.documento) { showToast('Preencha Razão Social e Documento', 'error'); return; }
+      if (!form.name) { showToast('Preencha a Razão Social', 'error'); return; }
+      if (form.cnpj && !isValidCnpj(form.cnpj)) { showToast('CNPJ inválido', 'error'); return; }
+      const payload = { ...form, cnpj: form.cnpj ? cleanCnpj(form.cnpj) : form.cnpj };
       if (!editingCompany) {
-        await CompanyService.create(form);
+        await CompanyService.create(payload);
         showToast('Empresa criada com sucesso', 'success');
       } else {
-        const payload: UpdateCompanyDto = { ...form, rowVersion: editingCompany.rowVersion };
-        await CompanyService.update(editingCompany.id, payload);
+        await CompanyService.update(editingCompany.id, payload as UpdateCompanyDto);
         showToast('Empresa atualizada com sucesso', 'success');
       }
       setIsModalOpen(false);
@@ -84,7 +86,7 @@ export function Companies() {
   }
 
   async function handleDelete(c: Company) {
-    if (!window.confirm(`Excluir empresa ${c.razaoSocial}?`)) return;
+    if (!window.confirm(`Excluir empresa ${c.name}?`)) return;
     showToast('Funcionalidade de exclusão não disponível na API', 'info');
   }
 
@@ -115,13 +117,12 @@ export function Companies() {
               <div className="ld-empty">Nenhuma empresa encontrada</div>
             ) : (
               <table className="ld-table">
-                <thead><tr><th>Razão Social</th><th>Nome Fantasia</th><th>Documento</th><th style={{ textAlign: 'right' }}>Ações</th></tr></thead>
+                <thead><tr><th>Razão Social</th><th>CNPJ</th><th style={{ textAlign: 'right' }}>Ações</th></tr></thead>
                 <tbody>
                   {companies.map(c => (
                     <tr key={c.id}>
-                      <td>{c.razaoSocial}</td>
-                      <td>{c.nomeFantasia || '—'}</td>
-                      <td>{c.documento}</td>
+                      <td>{c.name}</td>
+                      <td>{c.cnpj ? formatCnpj(c.cnpj) : '—'}</td>
                       <td style={{ textAlign: 'right' }}>
                         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 4 }}>
                           <button className="ld-btn ld-btn-outline ld-btn-sm" onClick={() => openEdit(c)}><Pencil size={10} /></button>
@@ -144,9 +145,8 @@ export function Companies() {
               </DialogTitle>
             </DialogHeader>
             <div style={{ display: 'flex', flexDirection: 'column' }}>
-              <div className="ld-field"><label className="ld-lbl">Razão Social *</label><Input value={form.razaoSocial} onChange={(e) => setForm({ ...form, razaoSocial: e.target.value })} placeholder="Razão Social" /></div>
-              <div className="ld-field"><label className="ld-lbl">Nome Fantasia</label><Input value={form.nomeFantasia} onChange={(e) => setForm({ ...form, nomeFantasia: e.target.value })} placeholder="Nome Fantasia" /></div>
-              <div className="ld-field"><label className="ld-lbl">Documento (CNPJ) *</label><Input value={form.documento} onChange={(e) => setForm({ ...form, documento: e.target.value })} placeholder="00.000.000/0000-00" /></div>
+              <div className="ld-field"><label className="ld-lbl">Razão Social *</label><Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Razão Social" /></div>
+              <div className="ld-field"><label className="ld-lbl">CNPJ</label><Input value={form.cnpj} onChange={(e) => setForm({ ...form, cnpj: formatCnpj(e.target.value) })} placeholder="00.000.000/0000-00" maxLength={18} /></div>
             </div>
             <DialogFooter style={{ marginTop: 4 }}>
               <button className="ld-btn ld-btn-outline" onClick={() => setIsModalOpen(false)}>Cancelar</button>

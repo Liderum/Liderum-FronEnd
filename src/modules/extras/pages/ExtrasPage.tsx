@@ -112,6 +112,8 @@ export default function ExtrasPage() {
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState<FormState>(emptyForm);
   const [busyId, setBusyId] = useState<string | null>(null);
+  const [rejectTarget, setRejectTarget] = useState<ExtraRequest | null>(null);
+  const [rejectReason, setRejectReason] = useState('');
 
   useEffect(() => {
     let active = true;
@@ -166,6 +168,13 @@ export default function ExtrasPage() {
     } finally {
       setBusyId(null);
     }
+  };
+
+  const confirmReject = async () => {
+    if (!rejectTarget || !rejectReason.trim()) return;
+    await doTransition(rejectTarget, 'rejeitado', rejectReason.trim());
+    setRejectTarget(null);
+    setRejectReason('');
   };
 
   const requestClient = async (extra: ExtraRequest) => {
@@ -319,7 +328,7 @@ export default function ExtrasPage() {
                         <button className="ex-btn approve" disabled={isBusy} onClick={() => doTransition(extra, 'aprovado')}>
                           <CheckCircle2 size={12} /> Aprovar
                         </button>
-                        <button className="ex-btn reject" disabled={isBusy} onClick={() => doTransition(extra, 'rejeitado')}>
+                        <button className="ex-btn reject" disabled={isBusy} onClick={() => { setRejectTarget(extra); setRejectReason(''); }}>
                           <XCircle size={12} /> Rejeitar
                         </button>
                       </>
@@ -415,6 +424,34 @@ export default function ExtrasPage() {
                 disabled={!form.title.trim() || !form.description.trim()}
               >
                 Criar extra
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {rejectTarget && (
+        <div className="ex-modal">
+          <div className="ex-modal-card" onClick={(e) => e.stopPropagation()}>
+            <div className="ex-modal-title">Rejeitar extra</div>
+            <label className="ex-modal-label">Motivo da rejeição</label>
+            <textarea
+              className="ex-modal-textarea"
+              value={rejectReason}
+              onChange={(e) => setRejectReason(e.target.value)}
+              placeholder="Explique o motivo da rejeição deste extra"
+              autoFocus
+            />
+            <div className="ex-modal-actions">
+              <button className="ex-btn" onClick={() => setRejectTarget(null)}>
+                <X size={14} /> Cancelar
+              </button>
+              <button
+                className="ex-btn reject"
+                onClick={confirmReject}
+                disabled={!rejectReason.trim() || busyId === rejectTarget.id}
+              >
+                <XCircle size={12} /> Confirmar rejeição
               </button>
             </div>
           </div>

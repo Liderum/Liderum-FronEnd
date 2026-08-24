@@ -26,7 +26,7 @@ export class CompanyService {
     }
   }
 
-  static async getById(id: number): Promise<Company> {
+  static async getById(id: string): Promise<Company> {
     try {
       const response = await worksApi.get<Company>(`/companies/${id}`);
       return response.data;
@@ -46,7 +46,7 @@ export class CompanyService {
     }
   }
 
-  static async update(id: number, payload: UpdateCompanyDto): Promise<void> {
+  static async update(id: string, payload: UpdateCompanyDto): Promise<void> {
     try {
       await worksApi.put(`/companies/${id}`, payload);
     } catch (error) {
@@ -58,7 +58,7 @@ export class CompanyService {
 
 // Customers Service
 export class CustomerService {
-  static async list(companyId: number): Promise<Customer[]> {
+  static async list(companyId: string): Promise<Customer[]> {
     try {
       const response = await worksApi.get<Customer[]>(
         `/companies/${companyId}/customers`
@@ -70,7 +70,7 @@ export class CustomerService {
     }
   }
 
-  static async getById(companyId: number, id: number): Promise<Customer> {
+  static async getById(companyId: string, id: string): Promise<Customer> {
     try {
       const response = await worksApi.get<Customer>(
         `/companies/${companyId}/customers/${id}`
@@ -82,7 +82,7 @@ export class CustomerService {
     }
   }
 
-  static async create(companyId: number, payload: CreateCustomerDto): Promise<Customer> {
+  static async create(companyId: string, payload: CreateCustomerDto): Promise<Customer> {
     try {
       const response = await worksApi.post<Customer>(
         `/companies/${companyId}/customers`,
@@ -96,8 +96,8 @@ export class CustomerService {
   }
 
   static async update(
-    companyId: number,
-    id: number,
+    companyId: string,
+    id: string,
     payload: UpdateCustomerDto
   ): Promise<void> {
     try {
@@ -111,7 +111,7 @@ export class CustomerService {
     }
   }
 
-  static async delete(companyId: number, id: number): Promise<void> {
+  static async delete(companyId: string, id: string): Promise<void> {
     try {
       await worksApi.delete(`/companies/${companyId}/customers/${id}`);
     } catch (error) {
@@ -123,7 +123,7 @@ export class CustomerService {
 
 // Suppliers Service
 export class SupplierService {
-  static async list(companyId: number): Promise<Supplier[]> {
+  static async list(companyId: string): Promise<Supplier[]> {
     try {
       const response = await worksApi.get<Supplier[]>(
         `/companies/${companyId}/suppliers`
@@ -135,7 +135,7 @@ export class SupplierService {
     }
   }
 
-  static async getById(companyId: number, id: number): Promise<Supplier> {
+  static async getById(companyId: string, id: string): Promise<Supplier> {
     try {
       const response = await worksApi.get<Supplier>(
         `/companies/${companyId}/suppliers/${id}`
@@ -147,7 +147,7 @@ export class SupplierService {
     }
   }
 
-  static async create(companyId: number, payload: CreateSupplierDto): Promise<Supplier> {
+  static async create(companyId: string, payload: CreateSupplierDto): Promise<Supplier> {
     try {
       const response = await worksApi.post<Supplier>(
         `/companies/${companyId}/suppliers`,
@@ -161,8 +161,8 @@ export class SupplierService {
   }
 
   static async update(
-    companyId: number,
-    id: number,
+    companyId: string,
+    id: string,
     payload: UpdateSupplierDto
   ): Promise<void> {
     try {
@@ -176,7 +176,7 @@ export class SupplierService {
     }
   }
 
-  static async delete(companyId: number, id: number): Promise<void> {
+  static async delete(companyId: string, id: string): Promise<void> {
     try {
       await worksApi.delete(`/companies/${companyId}/suppliers/${id}`);
     } catch (error) {

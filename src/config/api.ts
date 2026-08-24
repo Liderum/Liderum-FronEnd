@@ -8,6 +8,7 @@ export interface ApiConfig {
   USERS: { BASE_URL: string };
   WORKS: { BASE_URL: string };
   RBAC: { BASE_URL: string };
+  TENANT: { BASE_URL: string };
 }
 
 export type ApiModule = keyof ApiConfig;
@@ -31,6 +32,7 @@ const dsvConfig: ApiConfig = {
   USERS: { BASE_URL: import.meta.env.VITE_USERS_API_URL || 'http://localhost:5065/liderum/api/user' },
   WORKS: { BASE_URL: import.meta.env.VITE_WORKS_API_URL || 'https://localhost:7141/api/v1' },
   RBAC:  { BASE_URL: import.meta.env.VITE_RBAC_API_URL  || 'http://localhost:5065/liderum/api/rbac' },
+  TENANT: { BASE_URL: import.meta.env.VITE_TENANT_API_URL || 'http://localhost:5065/liderum/api/tenant' },
 };
 
 // Sem fallback — prd exige que todas as VITE_* estejam definidas na Vercel.
@@ -40,6 +42,7 @@ const prdConfig: ApiConfig = {
   USERS: { BASE_URL: import.meta.env.VITE_USERS_API_URL || '' },
   WORKS: { BASE_URL: import.meta.env.VITE_WORKS_API_URL || '' },
   RBAC:  { BASE_URL: import.meta.env.VITE_RBAC_API_URL  || '' },
+  TENANT: { BASE_URL: import.meta.env.VITE_TENANT_API_URL || '' },
 };
 
 /**
@@ -47,7 +50,7 @@ const prdConfig: ApiConfig = {
  * Lança um erro em tempo de inicialização para evitar falhas silenciosas em produção.
  */
 function validateConfig(config: ApiConfig, env: AppEnv): void {
-  const required: (keyof ApiConfig)[] = ['AUTH', 'USERS', 'WORKS', 'RBAC'];
+  const required: (keyof ApiConfig)[] = ['AUTH', 'USERS', 'WORKS', 'RBAC', 'TENANT'];
   const missing = required.filter((key) => !config[key].BASE_URL);
   if (missing.length > 0) {
     throw new Error(

@@ -99,7 +99,7 @@ export default function SchedulePage() {
   const { id } = useParams();
   const workId = id ?? '1';
   const { permissions } = useAuth();
-  const canCreate = permissions.includes('schedule.create');
+  const canCreate = permissions.includes('schedule.write');
   const canDelete = permissions.includes('schedule.delete');
 
   const [tasks, setTasks] = useState<ScheduleTask[]>([]);

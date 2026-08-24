@@ -25,10 +25,12 @@ const CSS = `
 .wk-hero{background:linear-gradient(135deg,var(--ink,#1A1814) 0%,#2C2820 100%);border-radius:14px;padding:28px 32px;position:relative;overflow:hidden;}
 .wk-hero::after{content:'';position:absolute;top:-40px;right:-40px;width:200px;height:200px;border-radius:50%;background:radial-gradient(circle,rgba(184,146,42,0.15) 0%,transparent 70%);pointer-events:none;}
 .wk-hero-top{display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:12px;}
-.wk-hero-name{font-family:'Cormorant Garamond',serif;font-size:clamp(22px,2.5vw,30px);font-weight:700;color:#fff;line-height:1.1;letter-spacing:-0.3px;}
-.wk-hero-client{font-size:13px;color:rgba(255,255,255,0.50);margin-top:5px;}
-.wk-hero-meta{display:flex;gap:16px;margin-top:14px;flex-wrap:wrap;}
-.wk-hero-meta-item{display:flex;align-items:center;gap:5px;font-size:12px;color:rgba(255,255,255,0.55);}
+.wk-hero-top>div:first-child{min-width:0;flex:1;}
+.wk-hero-name{font-family:'Cormorant Garamond',serif;font-size:clamp(22px,2.5vw,30px);font-weight:700;color:#fff;line-height:1.1;letter-spacing:-0.3px;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;}
+.wk-hero-client{font-size:13px;color:rgba(255,255,255,0.50);margin-top:5px;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;}
+.wk-hero-meta{display:flex;gap:16px;margin-top:14px;flex-wrap:wrap;max-width:100%;}
+.wk-hero-meta-item{display:flex;align-items:center;gap:5px;font-size:12px;color:rgba(255,255,255,0.55);max-width:100%;min-width:0;}
+.wk-hero-meta-item span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;}
 .wk-hero-progress{display:flex;align-items:center;gap:12px;margin-top:18px;}
 .wk-hero-progress-bar{flex:1;max-width:300px;height:6px;border-radius:10px;background:rgba(255,255,255,0.12);overflow:hidden;}
 .wk-hero-progress-fill{height:100%;border-radius:10px;background:linear-gradient(90deg,var(--gold,#B8922A),var(--gold2,#D4A843));transition:width 0.5s ease;}
@@ -122,8 +124,7 @@ export function WorkLayout() {
             </div>
           </div>
           <div className="wk-hero-meta">
-            <div className="wk-hero-meta-item"><MapPin size={13} /> {formatAddress(work.address)}</div>
-            <div className="wk-hero-meta-item"><Building2 size={13} /> {work.description || '—'}</div>
+            <div className="wk-hero-meta-item"><MapPin size={13} /> <span>{formatAddress(work.address)}</span></div>
           </div>
           <div className="wk-hero-progress">
             <div className="wk-hero-progress-bar">

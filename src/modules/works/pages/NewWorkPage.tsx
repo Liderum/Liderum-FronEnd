@@ -129,12 +129,21 @@ export default function NewWorkPage() {
     e.preventDefault();
     setError('');
 
-    if (!name.trim()) { setError('Nome da obra é obrigatório.'); return; }
-    if (!street.trim() || !city.trim()) { setError('Informe ao menos rua e cidade no endereço.'); return; }
-    if (!startDate) { setError('Data de início é obrigatória.'); return; }
-
     const totalBudget = parseCurrencyToNumber(totalBudgetDisplay);
-    if (totalBudget <= 0) { setError('Orçamento total deve ser maior que zero.'); return; }
+
+    // Junta todos os erros de uma vez em vez de parar no primeiro campo
+    // vazio — evita que o usuário precise clicar em "Criar Obra" várias
+    // vezes seguidas só pra descobrir o próximo campo faltando.
+    const errors: string[] = [];
+    if (!name.trim()) errors.push('Nome da obra é obrigatório.');
+    if (!street.trim() || !city.trim()) errors.push('Informe ao menos rua e cidade no endereço.');
+    if (!startDate) errors.push('Data de início é obrigatória.');
+    if (totalBudget <= 0) errors.push('Orçamento total deve ser maior que zero.');
+
+    if (errors.length > 0) {
+      setError(errors.join(' '));
+      return;
+    }
 
     // Envia datas sem sufixo Z para evitar conversão de fuso horário pelo browser.
     // O backend trata "YYYY-MM-DDT00:00:00" como DateTime sem timezone especificado.

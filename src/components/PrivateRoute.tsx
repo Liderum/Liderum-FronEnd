@@ -8,9 +8,10 @@ interface PrivateRouteProps {
 }
 
 const HOME_PATH = '/home';
+const SETTINGS_PATH = '/settings';
 
 export function PrivateRoute({ children, requiredPermission, requiredRole }: PrivateRouteProps) {
-  const { isAuthenticated, isLoading, permissions, roles } = useAuth();
+  const { isAuthenticated, isLoading, permissions, roles, isOnboardingComplete } = useAuth();
   const location = useLocation();
 
   if (isLoading) {
@@ -26,6 +27,12 @@ export function PrivateRoute({ children, requiredPermission, requiredRole }: Pri
 
   if (!isAuthenticated) {
     return <Navigate to="/login" state={{ from: location }} replace />;
+  }
+
+  // Onboarding obrigatório da PJ — enquanto o cadastro da empresa do tenant
+  // não estiver completo, o usuário só pode navegar até /settings.
+  if (isOnboardingComplete === false && location.pathname !== SETTINGS_PATH) {
+    return <Navigate to={SETTINGS_PATH} replace />;
   }
 
   const missingPermission = !!requiredPermission && !permissions.includes(requiredPermission);

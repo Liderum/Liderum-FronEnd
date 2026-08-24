@@ -69,7 +69,7 @@ export default function BudgetPage() {
   const { id } = useParams();
   const workId = id ?? '1';
   const { permissions, user } = useAuth();
-  const canEdit = permissions.includes('budget.update');
+  const canEdit = permissions.includes('budget.write');
   const canExport = permissions.includes('budget.export');
 
   const [items, setItems] = useState<BudgetItem[]>([]);
@@ -171,10 +171,10 @@ export default function BudgetPage() {
     },
     {
       label: 'Margem',
-      value: work ? `${work.margin}%` : '—',
-      icon: work && work.margin > 0 ? TrendingUp : TrendingDown,
-      color: work && work.margin > 0 ? '#1E8449' : '#C0392B',
-      bg: work && work.margin > 0 ? '#E8F5E9' : '#FDEDEC',
+      value: work ? `${work.marginPercent.toFixed(1)}%` : '—',
+      icon: work && work.marginPercent > 0 ? TrendingUp : TrendingDown,
+      color: work && work.marginPercent > 0 ? '#1E8449' : '#C0392B',
+      bg: work && work.marginPercent > 0 ? '#E8F5E9' : '#FDEDEC',
     },
   ];
 

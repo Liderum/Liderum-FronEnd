@@ -140,6 +140,7 @@ const CSS = `
   box-shadow:0 2px 8px rgba(184,146,42,0.35);
 }
 .ldd-day.other-month:hover{background:rgba(26,24,20,0.04);}
+.ldd-day.disabled{color:rgba(26,24,20,0.2);cursor:not-allowed;pointer-events:none;}
 
 /* Ação rápida de hoje */
 .ldd-footer{margin-top:10px;padding-top:10px;border-top:1px solid rgba(26,24,20,0.06);display:flex;justify-content:space-between;align-items:center;}
@@ -183,6 +184,8 @@ interface LdDateInputProps {
   style?: React.CSSProperties;
   className?: string;
   clearable?: boolean;
+  /** Data mínima selecionável (YYYY-MM-DD, inclusive) */
+  min?: string;
 }
 
 export function LdDateInput({
@@ -193,6 +196,7 @@ export function LdDateInput({
   style,
   className = '',
   clearable = true,
+  min,
 }: LdDateInputProps) {
   injectCss();
 
@@ -256,12 +260,14 @@ export function LdDateInput({
   }, [value]);
 
   function selectDay(date: Date) {
+    if (min && toYMD(date) < min) return;
     onChange(toYMD(date));
     setOpen(false);
     setPickingYear(false);
   }
 
   function goToday() {
+    if (min && todayStr < min) return;
     onChange(todayStr);
     setOpen(false);
     setPickingYear(false);
@@ -350,15 +356,18 @@ export function LdDateInput({
                   const cellStr = toYMD(cell.date);
                   const isSelected = cellStr === value;
                   const isToday = cellStr === todayStr;
+                  const isDisabled = !!min && cellStr < min;
                   return (
                     <button
                       key={i}
                       type="button"
+                      disabled={isDisabled}
                       className={[
                         'ldd-day',
                         !cell.current ? 'other-month' : '',
                         isSelected ? 'selected' : '',
                         isToday && !isSelected ? 'today' : '',
+                        isDisabled ? 'disabled' : '',
                       ].filter(Boolean).join(' ')}
                       onClick={() => selectDay(cell.date)}
                     >

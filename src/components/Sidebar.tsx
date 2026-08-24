@@ -51,6 +51,7 @@ interface NavItem {
   icon: React.ElementType;
   badge?: string;
   permission?: string;
+  tourId?: string;
 }
 
 interface NavSection {
@@ -64,14 +65,14 @@ const navSections: NavSection[] = [
   {
     label: 'Operação',
     items: [
-      { name: 'Dashboard', href: '/home', icon: Home, permission: 'dashboard.read' },
-      { name: 'Obras', href: '/works', icon: Building2, permission: 'works.read' },
+      { name: 'Dashboard', href: '/home', icon: Home, permission: 'dashboard.read', tourId: 'nav-dashboard' },
+      { name: 'Obras', href: '/works', icon: Building2, permission: 'works.read', tourId: 'nav-obras' },
     ],
   },
   {
     label: 'Gestão de Obras',
     items: [
-      { name: 'Cronograma', href: '/works', icon: CalendarClock, permission: 'schedule.read' },
+      { name: 'Cronograma', href: '/works', icon: CalendarClock, permission: 'schedule.read', tourId: 'nav-gestao' },
       { name: 'Orçamento', href: '/works', icon: DollarSign, permission: 'budget.read' },
       { name: 'Extras', href: '/works', icon: FilePlus2, permission: 'extras.read' },
       { name: 'Diário de Obra', href: '/works', icon: BookOpen, permission: 'dailylogs.read' },
@@ -80,7 +81,7 @@ const navSections: NavSection[] = [
   {
     label: 'Cadastros',
     items: [
-      { name: 'Empresas', href: '/management/companies', icon: Building, permission: 'companies.read' },
+      { name: 'Empresas', href: '/management/companies', icon: Building, permission: 'companies.read', tourId: 'nav-cadastros' },
       { name: 'Clientes', href: '/management/customers', icon: Users, permission: 'customers.read' },
       { name: 'Fornecedores', href: '/management/suppliers', icon: Truck, permission: 'suppliers.read' },
     ],
@@ -88,7 +89,7 @@ const navSections: NavSection[] = [
   {
     label: 'Administração',
     items: [
-      { name: 'Usuários', href: '/management/users', icon: Users, permission: 'users.view' },
+      { name: 'Usuários', href: '/management/users', icon: Users, permission: 'users.view', tourId: 'nav-admin' },
       { name: 'Controle de Acesso', href: '/management/rbac', icon: Shield, permission: 'users.rbac.manage' },
       { name: 'Configurações', href: '/settings', icon: Settings, permission: 'settings.view' },
     ],
@@ -148,6 +149,7 @@ export function Sidebar() {
                   <NavLink
                     key={item.name}
                     to={item.href}
+                    data-tour-id={item.tourId}
                     className={({ isActive: a }) =>
                       `sb-item${a || isActive(item.href) ? ' active' : ''}`
                     }
