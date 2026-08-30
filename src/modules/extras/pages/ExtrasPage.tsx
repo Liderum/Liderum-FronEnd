@@ -56,6 +56,9 @@ const CSS = `
 .ex-modal-title{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:700;color:var(--ink,#1A1814);margin-bottom:16px;}
 .ex-modal-label{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:var(--ink3,#7A7670);margin-bottom:6px;display:block;}
 .ex-modal-input{width:100%;padding:10px 12px;border-radius:8px;border:1px solid rgba(26,24,20,0.15);font-family:'DM Sans',sans-serif;font-size:13px;margin-bottom:14px;box-sizing:border-box;}
+.ex-currency-wrap{position:relative;}
+.ex-currency-wrap .ex-prefix{position:absolute;left:12px;top:10px;font-size:13px;font-weight:500;color:var(--ink3,#7A7670);pointer-events:none;}
+.ex-currency-wrap .ex-modal-input{padding-left:36px;}
 .ex-modal-textarea{width:100%;padding:10px 12px;border-radius:8px;border:1px solid rgba(26,24,20,0.15);font-family:'DM Sans',sans-serif;font-size:13px;min-height:80px;box-sizing:border-box;resize:vertical;margin-bottom:14px;}
 .ex-modal-actions{display:flex;gap:10px;justify-content:flex-end;}
 .ex-client-badge{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:12px;font-size:10.5px;font-weight:500;background:#EBF5FB;color:#1A5276;}
@@ -63,6 +66,20 @@ const CSS = `
 
 function formatCurrency(value: number) {
   return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 }).format(value);
+}
+
+// Mesma máscara de moeda usada em NewWorkPage (dígitos → centavos → "1.234,56").
+function formatCurrencyInput(value: string): string {
+  const digits = value.replace(/\D/g, '');
+  if (!digits) return '';
+  const num = parseInt(digits, 10) / 100;
+  return num.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+function parseCurrencyToNumber(formatted: string): number {
+  if (!formatted) return 0;
+  const clean = formatted.replace(/\./g, '').replace(',', '.');
+  return parseFloat(clean) || 0;
 }
 
 function formatDate(dateStr: string | undefined): string {
@@ -139,8 +156,9 @@ export default function ExtrasPage() {
 
   const submitForm = async () => {
     if (!form.title.trim() || !form.description.trim()) return;
-    const financialImpact = Number(form.financialImpact);
-    if (!Number.isFinite(financialImpact) || financialImpact < 0) return;
+    const financialImpact = parseCurrencyToNumber(form.financialImpact);
+    // Backend exige Amount > 0 (CreateExtraRequestCommandValidator).
+    if (!Number.isFinite(financialImpact) || financialImpact <= 0) return;
     const created = await ExtrasService.create(workId, {
       title: form.title.trim(),
       description: form.description.trim(),
@@ -389,13 +407,16 @@ export default function ExtrasPage() {
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
               <div>
                 <label className="ex-modal-label">Impacto financeiro (R$)</label>
-                <input
-                  className="ex-modal-input"
-                  type="number"
-                  min={0}
-                  value={form.financialImpact}
-                  onChange={(e) => setForm({ ...form, financialImpact: e.target.value })}
-                />
+                <div className="ex-currency-wrap">
+                  <span className="ex-prefix">R$</span>
+                  <input
+                    className="ex-modal-input"
+                    inputMode="decimal"
+                    placeholder="0,00"
+                    value={form.financialImpact}
+                    onChange={(e) => setForm({ ...form, financialImpact: formatCurrencyInput(e.target.value) })}
+                  />
+                </div>
               </div>
               <div>
                 <label className="ex-modal-label">Impacto no prazo</label>
@@ -421,7 +442,7 @@ export default function ExtrasPage() {
               <button
                 className="ex-btn primary"
                 onClick={submitForm}
-                disabled={!form.title.trim() || !form.description.trim()}
+                disabled={!form.title.trim() || !form.description.trim() || parseCurrencyToNumber(form.financialImpact) <= 0}
               >
                 Criar extra
               </button>

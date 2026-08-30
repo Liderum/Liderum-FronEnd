@@ -76,6 +76,15 @@ export interface BudgetItem {
   note?: string;
 }
 
+export interface BudgetRevisionItem {
+  id: string;
+  category: string;
+  description: string;
+  plannedValue: number;
+  actualValue: number;
+  variance: number;
+}
+
 export interface BudgetRevision {
   id: string;
   workId: string;
@@ -85,6 +94,7 @@ export interface BudgetRevision {
   totalActual: number;
   createdAt: string;
   createdBy: string;
+  items: BudgetRevisionItem[];
 }
 
 export interface ExtraRequest {

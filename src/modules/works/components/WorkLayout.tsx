@@ -34,7 +34,8 @@ const CSS = `
 .wk-hero-progress{display:flex;align-items:center;gap:12px;margin-top:18px;}
 .wk-hero-progress-bar{flex:1;max-width:300px;height:6px;border-radius:10px;background:rgba(255,255,255,0.12);overflow:hidden;}
 .wk-hero-progress-fill{height:100%;border-radius:10px;background:linear-gradient(90deg,var(--gold,#B8922A),var(--gold2,#D4A843));transition:width 0.5s ease;}
-.wk-hero-progress-label{font-size:13px;font-weight:600;color:var(--gold2,#D4A843);}
+.wk-hero-progress-label{font-size:13px;font-weight:600;color:rgba(255,255,255,0.92);}
+.wk-hero-progress-label strong{color:var(--gold2,#D4A843);font-weight:700;}
 .wk-tabs{display:flex;gap:2px;background:var(--card-bg,#fff);border-radius:10px;border:1px solid var(--bdr,rgba(26,24,20,0.10));padding:4px;box-shadow:0 2px 10px rgba(26,24,20,0.04);overflow-x:auto;}
 .wk-tab{display:flex;align-items:center;gap:6px;padding:9px 16px;border-radius:7px;font-size:12.5px;font-weight:400;color:var(--ink3,#7A7670);text-decoration:none;transition:all 0.16s;white-space:nowrap;border:none;background:none;cursor:pointer;font-family:'DM Sans',sans-serif;}
 .wk-tab:hover{color:var(--ink,#1A1814);background:var(--cream,#F7F4EF);}
@@ -130,7 +131,7 @@ export function WorkLayout() {
             <div className="wk-hero-progress-bar">
               <div className="wk-hero-progress-fill" style={{ width: `${executionPct}%` }} />
             </div>
-            <span className="wk-hero-progress-label">{executionPct}% executado</span>
+            <span className="wk-hero-progress-label"><strong>{executionPct}%</strong> executado</span>
           </div>
         </motion.div>
 
@@ -162,7 +163,7 @@ export function WorkLayout() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
         >
-          <Outlet />
+          <Outlet context={{ work }} />
         </motion.div>
       </div>
     </>

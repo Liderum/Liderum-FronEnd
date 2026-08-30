@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useOutletContext } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
   CheckCircle2, Clock, AlertTriangle, Lock, Minus, Plus, X, List, BarChart3, Trash2,
@@ -7,7 +7,7 @@ import {
 import { ScheduleService } from '@/services/works';
 import { useAuth } from '@/contexts/AuthContext';
 import { TASK_STATUS_CONFIG } from '@/modules/shared/types';
-import type { ScheduleTask, TaskStatus } from '@/modules/shared/types';
+import type { ScheduleTask, TaskStatus, Work } from '@/modules/shared/types';
 import GanttView from '../components/GanttView';
 import { LdDateInput } from '@/components/LdDateInput';
 
@@ -43,7 +43,7 @@ const CSS = `
 .sc-task-progress{width:80px;}
 .sc-task-progress-bar{height:5px;border-radius:10px;background:rgba(26,24,20,0.06);overflow:hidden;}
 .sc-task-progress-fill{height:100%;border-radius:10px;transition:width 0.5s ease;}
-.sc-task-pct{font-size:11.5px;font-weight:600;color:var(--ink2,#3D3A34);text-align:right;margin-top:2px;}
+.sc-task-pct{font-size:11.5px;font-weight:700;font-family:var(--font-numeric);text-align:right;margin-top:2px;}
 .sc-err{background:#FDEDEC;color:#C0392B;padding:10px 14px;border-radius:8px;font-size:12px;border:1px solid rgba(192,57,43,0.15);}
 .sc-modal{position:fixed;inset:0;background:rgba(26,24,20,0.45);display:flex;align-items:center;justify-content:center;z-index:1000;padding:20px;}
 .sc-modal-card{background:var(--card-bg,#fff);border-radius:14px;max-width:560px;width:100%;padding:24px;box-shadow:0 20px 60px rgba(0,0,0,0.25);max-height:90vh;overflow-y:auto;}
@@ -98,9 +98,11 @@ function formatDate(dateStr: string | undefined): string {
 export default function SchedulePage() {
   const { id } = useParams();
   const workId = id ?? '1';
+  const { work } = useOutletContext<{ work: Work }>();
   const { permissions } = useAuth();
   const canCreate = permissions.includes('schedule.write');
   const canDelete = permissions.includes('schedule.delete');
+  const workStartDate = work?.startDate?.substring(0, 10);
 
   const [tasks, setTasks] = useState<ScheduleTask[]>([]);
   const [view, setView] = useState<'list' | 'gantt'>('list');
@@ -141,6 +143,10 @@ export default function SchedulePage() {
     setFormError(null);
     if (!form.name.trim() || !form.stage.trim() || !form.startDate || !form.endDate) {
       setFormError('Preencha nome, etapa, data de início e fim.');
+      return;
+    }
+    if (workStartDate && form.startDate < workStartDate) {
+      setFormError(`A tarefa não pode começar antes do início da obra (${formatDate(workStartDate)}).`);
       return;
     }
     if (form.startDate >= form.endDate) {
@@ -267,7 +273,7 @@ export default function SchedulePage() {
                           <div className="sc-task-progress-bar">
                             <div className="sc-task-progress-fill" style={{ width: `${task.progress}%`, background: getProgressColor(task.progress, task.status) }} />
                           </div>
-                          <div className="sc-task-pct">{task.progress}%</div>
+                          <div className="sc-task-pct" style={{ color: getProgressColor(task.progress, task.status) }}>{task.progress}%</div>
                         </div>
                         {canDelete && (
                           <button className="sc-btn" style={{ padding: '4px 8px' }} onClick={() => remove(task)} aria-label="Excluir">
@@ -295,12 +301,19 @@ export default function SchedulePage() {
             <input className="sc-modal-input" value={form.stage} onChange={(e) => setForm({ ...form, stage: e.target.value })} placeholder="Ex.: Estrutura" />
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
               <div>
-                <label className="sc-modal-label">Início</label>
-                <LdDateInput value={form.startDate} onChange={(v) => setForm({ ...form, startDate: v })} clearable={false} />
+                <label className="sc-modal-label">
+                  Início
+                  {workStartDate && (
+                    <span style={{ textTransform: 'none', fontWeight: 400, color: 'var(--ink3, #7A7670)', letterSpacing: 0 }}>
+                      {' '}(a partir de {formatDate(workStartDate)})
+                    </span>
+                  )}
+                </label>
+                <LdDateInput value={form.startDate} onChange={(v) => setForm({ ...form, startDate: v })} clearable={false} min={workStartDate} />
               </div>
               <div>
                 <label className="sc-modal-label">Fim</label>
-                <LdDateInput value={form.endDate} onChange={(v) => setForm({ ...form, endDate: v })} clearable={false} />
+                <LdDateInput value={form.endDate} onChange={(v) => setForm({ ...form, endDate: v })} clearable={false} min={form.startDate || workStartDate} />
               </div>
             </div>
             <label className="sc-modal-label">Responsável</label>

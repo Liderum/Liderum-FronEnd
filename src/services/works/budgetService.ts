@@ -1,9 +1,43 @@
 import { worksApi } from '@/services/api/apiFactory';
 import { extractErrorMessage } from '@/utils/errorHandler';
-import type { BudgetItem, BudgetRevision } from '@/modules/shared/types';
+import type { BudgetItem, BudgetRevision, BudgetRevisionItem } from '@/modules/shared/types';
 import { mockStore, USE_MOCK, delay, genId, nowIso, getList, setList } from './mockStore';
 
 const base = (workId: string) => `/works/${workId}/budget`;
+
+export interface CreateRevisionItemInput {
+  category: string;
+  description: string;
+  plannedValue: number;
+  actualValue: number;
+}
+
+function mapRevisionItem(raw: any): BudgetRevisionItem {
+  const plannedValue = Number(raw.plannedValue ?? 0);
+  const actualValue = Number(raw.actualValue ?? 0);
+  return {
+    id: String(raw.id ?? ''),
+    category: raw.category ?? '',
+    description: raw.description ?? '',
+    plannedValue,
+    actualValue,
+    variance: raw.variance != null ? Number(raw.variance) : actualValue - plannedValue,
+  };
+}
+
+function mapRevision(raw: any): BudgetRevision {
+  return {
+    id: String(raw.id ?? ''),
+    workId: String(raw.workId ?? ''),
+    revisionNumber: Number(raw.revisionNumber ?? 0),
+    reason: raw.reason ?? '',
+    totalPlanned: Number(raw.totalPlanned ?? 0),
+    totalActual: Number(raw.totalActual ?? 0),
+    createdAt: String(raw.createdAt ?? ''),
+    createdBy: String(raw.createdBy ?? ''),
+    items: Array.isArray(raw.items) ? raw.items.map(mapRevisionItem) : [],
+  };
+}
 
 function mapBudgetItem(raw: any): BudgetItem {
   return {
@@ -104,8 +138,9 @@ export class BudgetService {
       return delay([...(mockStore.budgetRevisions[workId] ?? [])]);
     }
     try {
-      const { data } = await worksApi.get<BudgetRevision[]>(`${base(workId)}/revisions`);
-      return data;
+      const { data } = await worksApi.get<any>(`${base(workId)}/revisions`);
+      const items: any[] = Array.isArray(data) ? data : (data?.items ?? []);
+      return items.map(mapRevision);
     } catch (error) {
       throw new Error(extractErrorMessage(error));
     }
@@ -115,10 +150,10 @@ export class BudgetService {
     workId: string,
     reason: string,
     createdBy: string,
+    items: CreateRevisionItemInput[],
   ): Promise<BudgetRevision> {
-    const items = await this.list(workId);
-    const totalPlanned = items.reduce((s, i) => s + i.plannedCost, 0);
-    const totalActual = items.reduce((s, i) => s + i.actualCost, 0);
+    const totalPlanned = items.reduce((s, i) => s + i.plannedValue, 0);
+    const totalActual = items.reduce((s, i) => s + i.actualValue, 0);
     if (USE_MOCK) {
       const existing = mockStore.budgetRevisions[workId] ?? [];
       const revision: BudgetRevision = {
@@ -130,17 +165,29 @@ export class BudgetService {
         totalActual,
         createdAt: nowIso(),
         createdBy,
+        items: items.map((i) => ({
+          id: genId('revitem'),
+          category: i.category,
+          description: i.description,
+          plannedValue: i.plannedValue,
+          actualValue: i.actualValue,
+          variance: i.actualValue - i.plannedValue,
+        })),
       };
       mockStore.budgetRevisions[workId] = [revision, ...existing];
       return delay(revision);
     }
     try {
-      const { data } = await worksApi.post<BudgetRevision>(`${base(workId)}/revisions`, {
+      const { data } = await worksApi.post<any>(`${base(workId)}/revisions`, {
         reason,
-        totalPlanned,
-        totalActual,
+        items: items.map((i) => ({
+          category: i.category,
+          description: i.description,
+          plannedValue: i.plannedValue,
+          actualValue: i.actualValue,
+        })),
       });
-      return data;
+      return mapRevision(data);
     } catch (error) {
       throw new Error(extractErrorMessage(error));
     }
