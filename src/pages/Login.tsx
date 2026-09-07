@@ -3,6 +3,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Mail, Lock, Eye, EyeOff, AlertCircle, Loader2, ArrowRight } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
+import { useForceLightTheme } from '@/contexts/ThemeContext';
 import { validateEmail } from '@/lib/emailValidation';
 import { Redirecting } from '@/components/Redirecting';
 
@@ -67,6 +68,7 @@ const LOCKOUT_THRESHOLD = 3;
 const LOCKOUT_DURATION_S = 30;
 
 const Login = () => {
+  useForceLightTheme();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
