@@ -34,36 +34,83 @@
     --ring: 221 83% 53%;
 
     --radius: 0.5rem;
+
+    /* ─── Liderum brand tokens (tema claro) ───────────────────────────────
+       Estes são os hex já usados como fallback em var(--ink, #1A1814) etc.
+       espalhados pelo app — declará-los aqui faz TODO componente que já usa
+       esse padrão herdar o tema automaticamente, sem editar cada arquivo. */
+    --paper: #f7f4ef;
+    --paper2: #ece7da;
+    --sidebar-bg: #ffffff;
+    --card-bg: #ffffff;
+    --cream: #f7f4ef;
+    --cream-rgb: 247 244 239;
+    --ink: #1a1814;
+    --ink2: #3d3a34;
+
+    /* ─── Tokens de marca CONSTANTES (não trocam entre claro/escuro) ──────
+       Uso: qualquer elemento decorativo/CTA cujo PRÓPRIO fundo é a cor de
+       marca (selo do logo, botão "Nova X" com preenchimento dourado, botão
+       sólido escuro) e cujo texto é fixo (branco/claro). Se esses elementos
+       usassem --ink/--gold (que trocam de valor no tema escuro), o contraste
+       quebraria — ex.: --ink vira claro no escuro, texto branco some.
+       Só declarar aqui em :root, NUNCA dentro de .dark. */
+    --brand-dark: #1a1814;
+    --brand-gold: #b8922a;
+    --brand-gold2: #d4a843;
+    --ink3: #7a7670;
+    --bdr: rgba(26, 24, 20, 0.10);
+    --bdr-strong: rgba(26, 24, 20, 0.22);
+    --gold: #b8922a;
+    --gold2: #d4a843;
+    --shadow: 0 1px 2px rgba(26, 24, 20, 0.04), 0 8px 24px -12px rgba(26, 24, 20, 0.14);
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
+    --background: 45 21% 7%;
+    --foreground: 42 38% 91%;
 
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
+    --card: 47 18% 10%;
+    --card-foreground: 42 38% 91%;
 
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 47 18% 10%;
+    --popover-foreground: 42 38% 91%;
 
-    --primary: 217.2 91.2% 59.8%;
-    --primary-foreground: 222.2 47.4% 11.2%;
+    --primary: 43 61% 55%;
+    --primary-foreground: 45 21% 7%;
 
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
+    --secondary: 45 15% 18%;
+    --secondary-foreground: 42 38% 91%;
 
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
+    --muted: 45 15% 18%;
+    --muted-foreground: 40 12% 58%;
 
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
+    --accent: 45 15% 18%;
+    --accent-foreground: 42 38% 91%;
 
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 4 60% 42%;
+    --destructive-foreground: 42 38% 91%;
 
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 224.3 76.3% 48%;
+    --border: 45 15% 20%;
+    --input: 45 15% 20%;
+    --ring: 43 61% 55%;
+
+    /* ─── Liderum brand tokens (tema escuro) ───────────────────────────────
+       Mesma paleta usada no protótipo do tour de onboarding. */
+    --paper: #17150f;
+    --paper2: #1e1c15;
+    --sidebar-bg: #1b1912;
+    --card-bg: #1e1c15;
+    --cream: #1e1c15;
+    --cream-rgb: 241 236 224;
+    --ink: #f1ece0;
+    --ink2: #d6cfbe;
+    --ink3: #948e7c;
+    --bdr: rgba(241, 236, 224, 0.10);
+    --bdr-strong: rgba(241, 236, 224, 0.22);
+    --gold: #d3ab48;
+    --gold2: #e4c169;
+    --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 8px 24px -12px rgba(0, 0, 0, 0.55);
   }
 }
 
@@ -89,6 +136,56 @@
     font-variant-numeric: tabular-nums lining-nums;
     font-feature-settings: "tnum" 1, "lnum" 1;
   }
+}
+
+/* ─── Select padrão Liderum ─────────────────────────────────────────────────
+   Usar .ld-select em todos os <select> do projeto.
+   A seta nativa é removida e substituída por um chevron SVG em ouro.
+   ─────────────────────────────────────────────────────────────────────────── */
+.ld-select {
+  appearance: none;
+  -webkit-appearance: none;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  color: #1A1814;
+  background-color: #fff;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23B8922A' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  padding: 9px 34px 9px 12px;
+  border-radius: 8px;
+  border: 1px solid rgba(26, 24, 20, 0.15);
+  width: 100%;
+  box-sizing: border-box;
+  cursor: pointer;
+  transition: border-color 0.15s, box-shadow 0.15s;
+  line-height: 1.4;
+}
+
+.ld-select:focus {
+  outline: none;
+  border-color: rgba(184, 146, 42, 0.55);
+  box-shadow: 0 0 0 3px rgba(184, 146, 42, 0.10);
+}
+
+.ld-select:hover:not(:focus) {
+  border-color: rgba(26, 24, 20, 0.28);
+}
+
+.ld-select option {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  color: #1A1814;
+  background: #fff;
+}
+
+/* Variante compacta — filtros em toolbar (width auto para não quebrar flex) */
+.ld-select-sm {
+  width: auto;
+  font-size: 12px;
+  padding: 6px 30px 6px 10px;
+  border-radius: 7px;
+  border: 1px solid rgba(26, 24, 20, 0.12);
 }
 
 /* Eixos e tooltips Recharts: números consistentes */

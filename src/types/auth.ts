@@ -75,6 +75,43 @@ export interface UserProfile {
   email: string;
   phone?: string;
   cnpj?: string;
+  tourSeen?: boolean;
+}
+
+export interface UpdateUserProfileRequest {
+  name: string;
+  email: string;
+  phone?: string;
+  cnpj?: string;
+}
+
+export interface TenantProfile {
+  name: string;
+  cnpj: string | null;
+  email: string | null;
+  phone: string | null;
+  addressZipCode: string | null;
+  addressStreet: string | null;
+  addressNumber: string | null;
+  addressNeighborhood: string | null;
+  addressCity: string | null;
+  addressState: string | null;
+  addressComplement: string | null;
+  isOnboardingComplete: boolean;
+}
+
+export interface UpdateTenantProfileRequest {
+  name: string;
+  cnpj?: string;
+  email?: string;
+  phone?: string;
+  addressZipCode?: string;
+  addressStreet?: string;
+  addressNumber?: string;
+  addressNeighborhood?: string;
+  addressCity?: string;
+  addressState?: string;
+  addressComplement?: string;
 }
 
 export interface RefreshResponse {

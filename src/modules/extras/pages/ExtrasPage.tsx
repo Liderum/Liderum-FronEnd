@@ -13,7 +13,7 @@ import type { ExtraRequest, ExtraStatus } from '@/modules/shared/types';
 const CSS = `
 .ex{font-family:'DM Sans',sans-serif;color:var(--ink,#1A1814);display:flex;flex-direction:column;gap:18px;}
 .ex-summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;}
-.ex-summary-card{background:#fff;border-radius:10px;border:1px solid var(--bdr,rgba(26,24,20,0.10));padding:16px 18px;display:flex;align-items:center;gap:12px;box-shadow:0 2px 8px rgba(26,24,20,0.03);}
+.ex-summary-card{background:var(--card-bg,#fff);border-radius:10px;border:1px solid var(--bdr,rgba(26,24,20,0.10));padding:16px 18px;display:flex;align-items:center;gap:12px;box-shadow:0 2px 8px rgba(26,24,20,0.03);}
 .ex-summary-icon{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
 .ex-summary-val{font-family:var(--font-numeric);font-size:20px;font-weight:600;font-variant-numeric:tabular-nums lining-nums;color:var(--ink,#1A1814);}
 .ex-summary-label{font-size:10.5px;color:var(--ink3,#7A7670);font-weight:500;text-transform:uppercase;letter-spacing:0.3px;}
@@ -22,16 +22,16 @@ const CSS = `
 .ex-filter{padding:6px 12px;border-radius:7px;font-size:11.5px;font-weight:500;cursor:pointer;border:1px solid transparent;background:transparent;color:var(--ink3,#7A7670);font-family:'DM Sans',sans-serif;transition:all 0.14s;}
 .ex-filter:hover{background:var(--cream,#F7F4EF);}
 .ex-filter.active{background:rgba(184,146,42,0.08);color:var(--gold,#B8922A);border-color:rgba(184,146,42,0.15);}
-.ex-btn{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:8px;font-size:12px;font-weight:500;cursor:pointer;border:1px solid rgba(26,24,20,0.12);background:#fff;color:var(--ink,#1A1814);font-family:'DM Sans',sans-serif;transition:all 0.14s;}
+.ex-btn{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:8px;font-size:12px;font-weight:500;cursor:pointer;border:1px solid rgba(26,24,20,0.12);background:var(--card-bg,#fff);color:var(--ink,#1A1814);font-family:'DM Sans',sans-serif;transition:all 0.14s;}
 .ex-btn:hover{background:var(--cream,#F7F4EF);}
-.ex-btn.primary{background:var(--gold,#B8922A);color:#fff;border-color:var(--gold,#B8922A);}
+.ex-btn.primary{background:var(--brand-gold);color:#fff;border-color:var(--brand-gold);}
 .ex-btn.primary:hover{background:#a07e1f;}
 .ex-btn.approve{background:#1E8449;color:#fff;border-color:#1E8449;}
 .ex-btn.approve:hover{background:#196e3d;}
 .ex-btn.reject{background:#C0392B;color:#fff;border-color:#C0392B;}
 .ex-btn.reject:hover{background:#a03024;}
 .ex-btn:disabled{opacity:0.5;cursor:not-allowed;}
-.ex-card{background:#fff;border-radius:12px;border:1px solid var(--bdr,rgba(26,24,20,0.10));padding:0;overflow:hidden;box-shadow:0 2px 10px rgba(26,24,20,0.04);transition:all 0.18s;}
+.ex-card{background:var(--card-bg,#fff);border-radius:12px;border:1px solid var(--bdr,rgba(26,24,20,0.10));padding:0;overflow:hidden;box-shadow:0 2px 10px rgba(26,24,20,0.04);transition:all 0.18s;}
 .ex-card:hover{box-shadow:0 6px 24px rgba(26,24,20,0.08);}
 .ex-card-main{padding:20px 24px;cursor:pointer;display:flex;flex-direction:column;gap:12px;}
 .ex-card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;}
@@ -52,10 +52,13 @@ const CSS = `
 .ex-history-notes{font-size:11.5px;color:var(--ink3,#7A7670);font-style:italic;margin-top:3px;}
 .ex-history-date{font-size:10.5px;color:rgba(26,24,20,0.4);flex-shrink:0;margin-top:3px;}
 .ex-modal{position:fixed;inset:0;background:rgba(26,24,20,0.45);display:flex;align-items:center;justify-content:center;z-index:1000;padding:20px;}
-.ex-modal-card{background:#fff;border-radius:14px;max-width:560px;width:100%;padding:24px;box-shadow:0 20px 60px rgba(0,0,0,0.25);max-height:90vh;overflow-y:auto;}
+.ex-modal-card{background:var(--card-bg,#fff);border-radius:14px;max-width:560px;width:100%;padding:24px;box-shadow:0 20px 60px rgba(0,0,0,0.25);max-height:90vh;overflow-y:auto;}
 .ex-modal-title{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:700;color:var(--ink,#1A1814);margin-bottom:16px;}
 .ex-modal-label{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:var(--ink3,#7A7670);margin-bottom:6px;display:block;}
 .ex-modal-input{width:100%;padding:10px 12px;border-radius:8px;border:1px solid rgba(26,24,20,0.15);font-family:'DM Sans',sans-serif;font-size:13px;margin-bottom:14px;box-sizing:border-box;}
+.ex-currency-wrap{position:relative;}
+.ex-currency-wrap .ex-prefix{position:absolute;left:12px;top:10px;font-size:13px;font-weight:500;color:var(--ink3,#7A7670);pointer-events:none;}
+.ex-currency-wrap .ex-modal-input{padding-left:36px;}
 .ex-modal-textarea{width:100%;padding:10px 12px;border-radius:8px;border:1px solid rgba(26,24,20,0.15);font-family:'DM Sans',sans-serif;font-size:13px;min-height:80px;box-sizing:border-box;resize:vertical;margin-bottom:14px;}
 .ex-modal-actions{display:flex;gap:10px;justify-content:flex-end;}
 .ex-client-badge{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:12px;font-size:10.5px;font-weight:500;background:#EBF5FB;color:#1A5276;}
@@ -63,6 +66,20 @@ const CSS = `
 
 function formatCurrency(value: number) {
   return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 }).format(value);
+}
+
+// Mesma máscara de moeda usada em NewWorkPage (dígitos → centavos → "1.234,56").
+function formatCurrencyInput(value: string): string {
+  const digits = value.replace(/\D/g, '');
+  if (!digits) return '';
+  const num = parseInt(digits, 10) / 100;
+  return num.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+function parseCurrencyToNumber(formatted: string): number {
+  if (!formatted) return 0;
+  const clean = formatted.replace(/\./g, '').replace(',', '.');
+  return parseFloat(clean) || 0;
 }
 
 function formatDate(dateStr: string | undefined): string {
@@ -112,6 +129,8 @@ export default function ExtrasPage() {
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState<FormState>(emptyForm);
   const [busyId, setBusyId] = useState<string | null>(null);
+  const [rejectTarget, setRejectTarget] = useState<ExtraRequest | null>(null);
+  const [rejectReason, setRejectReason] = useState('');
 
   useEffect(() => {
     let active = true;
@@ -137,8 +156,9 @@ export default function ExtrasPage() {
 
   const submitForm = async () => {
     if (!form.title.trim() || !form.description.trim()) return;
-    const financialImpact = Number(form.financialImpact);
-    if (!Number.isFinite(financialImpact) || financialImpact < 0) return;
+    const financialImpact = parseCurrencyToNumber(form.financialImpact);
+    // Backend exige Amount > 0 (CreateExtraRequestCommandValidator).
+    if (!Number.isFinite(financialImpact) || financialImpact <= 0) return;
     const created = await ExtrasService.create(workId, {
       title: form.title.trim(),
       description: form.description.trim(),
@@ -168,6 +188,13 @@ export default function ExtrasPage() {
     }
   };
 
+  const confirmReject = async () => {
+    if (!rejectTarget || !rejectReason.trim()) return;
+    await doTransition(rejectTarget, 'rejeitado', rejectReason.trim());
+    setRejectTarget(null);
+    setRejectReason('');
+  };
+
   const requestClient = async (extra: ExtraRequest) => {
     setBusyId(extra.id);
     try {
@@ -184,7 +211,7 @@ export default function ExtrasPage() {
 
   if (loading) {
     return (
-      <div style={{ padding: 40, textAlign: 'center', color: '#7A7670', fontFamily: 'DM Sans' }}>
+      <div style={{ padding: 40, textAlign: 'center', color: 'var(--ink3, #7A7670)', fontFamily: 'DM Sans' }}>
         Carregando extras…
       </div>
     );
@@ -250,7 +277,7 @@ export default function ExtrasPage() {
         </div>
 
         {filtered.length === 0 && (
-          <div style={{ padding: 40, textAlign: 'center', color: '#7A7670', background: '#fff', borderRadius: 12, border: '1px solid rgba(26,24,20,0.08)' }}>
+          <div style={{ padding: 40, textAlign: 'center', color: 'var(--ink3, #7A7670)', background: 'var(--card-bg, #fff)', borderRadius: 12, border: '1px solid rgba(26,24,20,0.08)' }}>
             Nenhum extra nesta visão.
           </div>
         )}
@@ -319,7 +346,7 @@ export default function ExtrasPage() {
                         <button className="ex-btn approve" disabled={isBusy} onClick={() => doTransition(extra, 'aprovado')}>
                           <CheckCircle2 size={12} /> Aprovar
                         </button>
-                        <button className="ex-btn reject" disabled={isBusy} onClick={() => doTransition(extra, 'rejeitado')}>
+                        <button className="ex-btn reject" disabled={isBusy} onClick={() => { setRejectTarget(extra); setRejectReason(''); }}>
                           <XCircle size={12} /> Rejeitar
                         </button>
                       </>
@@ -380,13 +407,16 @@ export default function ExtrasPage() {
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
               <div>
                 <label className="ex-modal-label">Impacto financeiro (R$)</label>
-                <input
-                  className="ex-modal-input"
-                  type="number"
-                  min={0}
-                  value={form.financialImpact}
-                  onChange={(e) => setForm({ ...form, financialImpact: e.target.value })}
-                />
+                <div className="ex-currency-wrap">
+                  <span className="ex-prefix">R$</span>
+                  <input
+                    className="ex-modal-input"
+                    inputMode="decimal"
+                    placeholder="0,00"
+                    value={form.financialImpact}
+                    onChange={(e) => setForm({ ...form, financialImpact: formatCurrencyInput(e.target.value) })}
+                  />
+                </div>
               </div>
               <div>
                 <label className="ex-modal-label">Impacto no prazo</label>
@@ -412,9 +442,37 @@ export default function ExtrasPage() {
               <button
                 className="ex-btn primary"
                 onClick={submitForm}
-                disabled={!form.title.trim() || !form.description.trim()}
+                disabled={!form.title.trim() || !form.description.trim() || parseCurrencyToNumber(form.financialImpact) <= 0}
               >
                 Criar extra
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {rejectTarget && (
+        <div className="ex-modal">
+          <div className="ex-modal-card" onClick={(e) => e.stopPropagation()}>
+            <div className="ex-modal-title">Rejeitar extra</div>
+            <label className="ex-modal-label">Motivo da rejeição</label>
+            <textarea
+              className="ex-modal-textarea"
+              value={rejectReason}
+              onChange={(e) => setRejectReason(e.target.value)}
+              placeholder="Explique o motivo da rejeição deste extra"
+              autoFocus
+            />
+            <div className="ex-modal-actions">
+              <button className="ex-btn" onClick={() => setRejectTarget(null)}>
+                <X size={14} /> Cancelar
+              </button>
+              <button
+                className="ex-btn reject"
+                onClick={confirmReject}
+                disabled={!rejectReason.trim() || busyId === rejectTarget.id}
+              >
+                <XCircle size={12} /> Confirmar rejeição
               </button>
             </div>
           </div>

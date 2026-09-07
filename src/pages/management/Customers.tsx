@@ -5,33 +5,34 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '
 import { useSimpleToast } from '@/hooks/useSimpleToast';
 import { CustomerService, CompanyService } from '@/services/managementService';
 import { Customer, CreateCustomerDto, UpdateCustomerDto, Company } from '@/types/management';
+import { cleanCnpj, formatCnpj, isValidCnpj } from '@/utils/cnpj';
 import { Plus, Pencil, Trash2, Users, RefreshCw, Building2 } from 'lucide-react';
 
 const LDCSS = `
 @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;700&family=DM+Sans:wght@300;400;500&display=swap');
-:root{--cream:#F7F4EF;--cream2:#EDE9E1;--ink:#1A1814;--ink2:#3D3A34;--ink3:#7A7670;--gold:#B8922A;--gold2:#D4A843;--gold-light:#F0E4C4;--bdr:rgba(26,24,20,0.10);}
+:root{--cream2:#EDE9E1;--gold-light:#F0E4C4;}
 .ld{font-family:'DM Sans',sans-serif;color:var(--ink);}
 .ld-tag{font-size:9.5px;font-weight:500;letter-spacing:1.6px;text-transform:uppercase;color:var(--gold);display:block;margin-bottom:4px;}
 .ld-h1{font-family:'Cormorant Garamond',serif;font-size:clamp(18px,2.5vw,24px);font-weight:700;line-height:1.15;letter-spacing:-0.3px;color:var(--ink);}
 .ld-sub{font-size:12px;color:var(--ink3);font-weight:300;}
-.ld-card{background:#fff;border-radius:10px;border:1px solid var(--bdr);box-shadow:0 2px 12px rgba(26,24,20,0.04);position:relative;overflow:hidden;}
+.ld-card{background:var(--card-bg, #fff);border-radius:10px;border:1px solid var(--bdr);box-shadow:0 2px 12px rgba(26,24,20,0.04);position:relative;overflow:hidden;}
 .ld-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--gold),var(--gold2));}
 .ld-card-body{padding:14px 16px;}
 .ld-h2{font-family:'Cormorant Garamond',serif;font-size:13.5px;font-weight:700;color:var(--ink);display:flex;align-items:center;gap:6px;margin-bottom:10px;}
 .ld-table{width:100%;border-collapse:collapse;font-size:12.5px;}
-.ld-table thead th{text-align:left;font-size:10px;font-weight:600;letter-spacing:0.5px;text-transform:uppercase;color:var(--ink3);padding:8px 10px;border-bottom:1px solid var(--bdr);background:rgba(247,244,239,0.4);}
+.ld-table thead th{text-align:left;font-size:10px;font-weight:600;letter-spacing:0.5px;text-transform:uppercase;color:var(--ink3);padding:8px 10px;border-bottom:1px solid var(--bdr);background:rgb(var(--cream-rgb, 247 244 239) / 0.4);}
 .ld-table tbody td{padding:9px 10px;border-bottom:1px solid rgba(26,24,20,0.05);color:var(--ink2);}
-.ld-table tbody tr:hover{background:rgba(247,244,239,0.3);}
+.ld-table tbody tr:hover{background:rgb(var(--cream-rgb, 247 244 239) / 0.3);}
 .ld-table tbody td:first-child{font-weight:500;color:var(--ink);}
 .ld-field{display:flex;flex-direction:column;gap:4px;margin-bottom:10px;}
 .ld-lbl{font-size:11px;font-weight:500;color:var(--ink2);}
 .ld-btn{display:inline-flex;align-items:center;gap:5px;padding:7px 14px;border-radius:7px;font-size:12px;font-weight:500;font-family:'DM Sans',sans-serif;border:none;cursor:pointer;transition:all 0.18s;}
-.ld-btn-dark{background:var(--ink);color:#fff;}
-.ld-btn-dark:hover:not(:disabled){background:var(--gold);}
-.ld-btn-outline{background:#fff;color:var(--ink);border:1px solid var(--bdr);}
+.ld-btn-dark{background:var(--brand-dark);color:#fff;}
+.ld-btn-dark:hover:not(:disabled){background:var(--brand-gold);}
+.ld-btn-outline{background:var(--card-bg, #fff);color:var(--ink);border:1px solid var(--bdr);}
 .ld-btn-outline:hover:not(:disabled){border-color:var(--gold);color:var(--gold);}
 .ld-btn-sm{padding:4px 8px;font-size:11px;}
-.ld-btn-danger{background:#fff;color:#C0392B;border:1px solid rgba(192,57,43,0.15);}
+.ld-btn-danger{background:var(--card-bg, #fff);color:#C0392B;border:1px solid rgba(192,57,43,0.15);}
 .ld-btn-danger:hover{background:#FDEDEC;}
 .ld-btn:disabled{opacity:0.4;cursor:not-allowed;}
 .ld-empty{text-align:center;padding:28px 0;color:var(--ink3);font-size:12.5px;}
@@ -45,10 +46,10 @@ export function Customers() {
   const [loading, setLoading] = useState(false);
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [companies, setCompanies] = useState<Company[]>([]);
-  const [selectedCompanyId, setSelectedCompanyId] = useState<number | null>(null);
+  const [selectedCompanyId, setSelectedCompanyId] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingCustomer, setEditingCustomer] = useState<Customer | null>(null);
-  const [form, setForm] = useState<CreateCustomerDto>({ nome: '', documento: '', email: '' });
+  const [form, setForm] = useState<CreateCustomerDto>({ name: '', cnpj: '', email: '' });
 
   async function loadCompanies() {
     try {
@@ -72,26 +73,27 @@ export function Customers() {
   function openCreate() {
     if (!selectedCompanyId) { showToast('Selecione uma empresa primeiro', 'error'); return; }
     setEditingCustomer(null);
-    setForm({ nome: '', documento: '', email: '' });
+    setForm({ name: '', cnpj: '', email: '' });
     setIsModalOpen(true);
   }
 
   function openEdit(c: Customer) {
     setEditingCustomer(c);
-    setForm({ nome: c.nome || '', documento: c.documento || '', email: c.email || '' });
+    setForm({ name: c.name || '', cnpj: c.cnpj ? formatCnpj(c.cnpj) : '', email: c.email || '' });
     setIsModalOpen(true);
   }
 
   async function handleSubmit() {
     if (!selectedCompanyId) { showToast('Selecione uma empresa primeiro', 'error'); return; }
     try {
-      if (!form.nome || !form.documento) { showToast('Preencha Nome e Documento', 'error'); return; }
+      if (!form.name) { showToast('Preencha o Nome', 'error'); return; }
+      if (form.cnpj && !isValidCnpj(form.cnpj)) { showToast('CNPJ inválido', 'error'); return; }
+      const payload = { ...form, cnpj: form.cnpj ? cleanCnpj(form.cnpj) : form.cnpj };
       if (!editingCustomer) {
-        await CustomerService.create(selectedCompanyId, form);
+        await CustomerService.create(selectedCompanyId, payload);
         showToast('Cliente criado com sucesso', 'success');
       } else {
-        const payload: UpdateCustomerDto = { ...form, rowVersion: editingCustomer.rowVersion };
-        await CustomerService.update(selectedCompanyId, editingCustomer.id, payload);
+        await CustomerService.update(selectedCompanyId, editingCustomer.id, payload as UpdateCustomerDto);
         showToast('Cliente atualizado com sucesso', 'success');
       }
       setIsModalOpen(false);
@@ -101,7 +103,7 @@ export function Customers() {
 
   async function handleDelete(c: Customer) {
     if (!selectedCompanyId) return;
-    if (!window.confirm(`Excluir cliente ${c.nome}?`)) return;
+    if (!window.confirm(`Excluir cliente ${c.name}?`)) return;
     try {
       await CustomerService.delete(selectedCompanyId, c.id);
       showToast('Cliente excluído com sucesso', 'success');
@@ -133,9 +135,9 @@ export function Customers() {
           <div className="ld-card-body">
             <h2 className="ld-h2"><Building2 size={12} color="var(--gold)" /> Empresa</h2>
             <div className="ld-field" style={{ marginBottom: 0 }}>
-              <Select value={selectedCompanyId?.toString() || ''} onValueChange={(v) => setSelectedCompanyId(Number(v))}>
+              <Select value={selectedCompanyId || ''} onValueChange={(v) => setSelectedCompanyId(v)}>
                 <SelectTrigger><SelectValue placeholder="Selecione uma empresa" /></SelectTrigger>
-                <SelectContent>{companies.map(c => <SelectItem key={c.id} value={c.id.toString()}>{c.razaoSocial}</SelectItem>)}</SelectContent>
+                <SelectContent>{companies.map(c => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}</SelectContent>
               </Select>
             </div>
           </div>
@@ -152,12 +154,12 @@ export function Customers() {
               <div className="ld-empty">Nenhum cliente encontrado</div>
             ) : (
               <table className="ld-table">
-                <thead><tr><th>Nome</th><th>Documento</th><th>E-mail</th><th style={{ textAlign: 'right' }}>Ações</th></tr></thead>
+                <thead><tr><th>Nome</th><th>CNPJ</th><th>E-mail</th><th style={{ textAlign: 'right' }}>Ações</th></tr></thead>
                 <tbody>
                   {customers.map(c => (
                     <tr key={c.id}>
-                      <td>{c.nome}</td>
-                      <td>{c.documento}</td>
+                      <td>{c.name}</td>
+                      <td>{c.cnpj ? formatCnpj(c.cnpj) : '—'}</td>
                       <td>{c.email || '—'}</td>
                       <td style={{ textAlign: 'right' }}>
                         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 4 }}>
@@ -181,8 +183,8 @@ export function Customers() {
               </DialogTitle>
             </DialogHeader>
             <div style={{ display: 'flex', flexDirection: 'column' }}>
-              <div className="ld-field"><label className="ld-lbl">Nome *</label><Input value={form.nome} onChange={(e) => setForm({ ...form, nome: e.target.value })} placeholder="Nome completo" /></div>
-              <div className="ld-field"><label className="ld-lbl">Documento (CPF/CNPJ) *</label><Input value={form.documento} onChange={(e) => setForm({ ...form, documento: e.target.value })} placeholder="000.000.000-00" /></div>
+              <div className="ld-field"><label className="ld-lbl">Nome *</label><Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Nome completo" /></div>
+              <div className="ld-field"><label className="ld-lbl">CNPJ</label><Input value={form.cnpj} onChange={(e) => setForm({ ...form, cnpj: formatCnpj(e.target.value) })} placeholder="00.000.000/0000-00" maxLength={18} /></div>
               <div className="ld-field"><label className="ld-lbl">E-mail</label><Input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} placeholder="email@exemplo.com" /></div>
             </div>
             <DialogFooter style={{ marginTop: 4 }}>

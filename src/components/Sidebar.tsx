@@ -10,10 +10,10 @@ import { useToast } from "@/hooks/use-toast";
 
 const CSS = `
 @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;700&family=DM+Sans:wght@300;400;500&display=swap');
-:root{--cream:#F7F4EF;--cream2:#EDE9E1;--ink:#1A1814;--ink2:#3D3A34;--ink3:#7A7670;--gold:#B8922A;--gold2:#D4A843;--gold-light:#F0E4C4;--bdr:rgba(26,24,20,0.10);}
-.sb{font-family:'DM Sans',sans-serif;width:210px;min-width:210px;background:#fff;border-right:1px solid var(--bdr);display:flex;flex-direction:column;height:100vh;overflow:hidden;}
-.sb-logo{padding:16px 16px 12px;border-bottom:1px solid var(--bdr);display:flex;align-items:center;gap:10px;flex-shrink:0;}
-.sb-logo-mark{width:30px;height:30px;background:var(--ink);border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0;position:relative;overflow:hidden;}
+:root{--cream2:#EDE9E1;--gold-light:#F0E4C4;}
+.sb{font-family:'DM Sans',sans-serif;width:210px;min-width:210px;background:var(--sidebar-bg,#fff);border-right:1px solid var(--bdr,rgba(26,24,20,0.10));display:flex;flex-direction:column;height:100vh;overflow:hidden;}
+.sb-logo{padding:16px 16px 12px;border-bottom:1px solid var(--bdr,rgba(26,24,20,0.10));display:flex;align-items:center;gap:10px;flex-shrink:0;}
+.sb-logo-mark{width:30px;height:30px;background:var(--brand-dark,#1A1814);border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0;position:relative;overflow:hidden;}
 .sb-logo-mark::after{content:'';position:absolute;bottom:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--gold),var(--gold2));}
 .sb-logo-mark span{font-family:'Cormorant Garamond',serif;color:#fff;font-size:15px;font-weight:700;line-height:1;}
 .sb-logo-text{flex:1;min-width:0;}
@@ -40,7 +40,7 @@ const CSS = `
 .sb-user-name{font-size:12px;font-weight:500;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .sb-user-role{font-size:10.5px;color:var(--ink3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .sb-action-row{display:flex;gap:4px;margin-top:6px;}
-.sb-action-btn{flex:1;display:flex;align-items:center;justify-content:center;gap:5px;padding:5px 6px;border-radius:6px;font-size:11px;color:var(--ink3);border:1px solid var(--bdr);background:#fff;cursor:pointer;transition:all 0.15s;font-family:'DM Sans',sans-serif;}
+.sb-action-btn{flex:1;display:flex;align-items:center;justify-content:center;gap:5px;padding:5px 6px;border-radius:6px;font-size:11px;color:var(--ink3);border:1px solid var(--bdr);background:var(--card-bg,#fff);cursor:pointer;transition:all 0.15s;font-family:'DM Sans',sans-serif;}
 .sb-action-btn:hover{background:var(--cream);color:var(--ink);}
 .sb-action-btn.danger:hover{background:#FDEDEC;color:#C0392B;border-color:rgba(192,57,43,0.2);}
 `;
@@ -51,6 +51,7 @@ interface NavItem {
   icon: React.ElementType;
   badge?: string;
   permission?: string;
+  tourId?: string;
 }
 
 interface NavSection {
@@ -64,14 +65,14 @@ const navSections: NavSection[] = [
   {
     label: 'Operação',
     items: [
-      { name: 'Dashboard', href: '/home', icon: Home, permission: 'dashboard.read' },
-      { name: 'Obras', href: '/works', icon: Building2, permission: 'works.read' },
+      { name: 'Dashboard', href: '/home', icon: Home, permission: 'dashboard.read', tourId: 'nav-dashboard' },
+      { name: 'Obras', href: '/works', icon: Building2, permission: 'works.read', tourId: 'nav-obras' },
     ],
   },
   {
     label: 'Gestão de Obras',
     items: [
-      { name: 'Cronograma', href: '/works', icon: CalendarClock, permission: 'schedule.read' },
+      { name: 'Cronograma', href: '/works', icon: CalendarClock, permission: 'schedule.read', tourId: 'nav-gestao' },
       { name: 'Orçamento', href: '/works', icon: DollarSign, permission: 'budget.read' },
       { name: 'Extras', href: '/works', icon: FilePlus2, permission: 'extras.read' },
       { name: 'Diário de Obra', href: '/works', icon: BookOpen, permission: 'dailylogs.read' },
@@ -80,7 +81,7 @@ const navSections: NavSection[] = [
   {
     label: 'Cadastros',
     items: [
-      { name: 'Empresas', href: '/management/companies', icon: Building, permission: 'companies.read' },
+      { name: 'Empresas', href: '/management/companies', icon: Building, permission: 'companies.read', tourId: 'nav-cadastros' },
       { name: 'Clientes', href: '/management/customers', icon: Users, permission: 'customers.read' },
       { name: 'Fornecedores', href: '/management/suppliers', icon: Truck, permission: 'suppliers.read' },
     ],
@@ -88,7 +89,7 @@ const navSections: NavSection[] = [
   {
     label: 'Administração',
     items: [
-      { name: 'Usuários', href: '/management/users', icon: Users, permission: 'users.view' },
+      { name: 'Usuários', href: '/management/users', icon: Users, permission: 'users.view', tourId: 'nav-admin' },
       { name: 'Controle de Acesso', href: '/management/rbac', icon: Shield, permission: 'users.rbac.manage' },
       { name: 'Configurações', href: '/settings', icon: Settings, permission: 'settings.view' },
     ],
@@ -148,6 +149,7 @@ export function Sidebar() {
                   <NavLink
                     key={item.name}
                     to={item.href}
+                    data-tour-id={item.tourId}
                     className={({ isActive: a }) =>
                       `sb-item${a || isActive(item.href) ? ' active' : ''}`
                     }

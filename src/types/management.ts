@@ -1,66 +1,95 @@
 // Types for Management Module
 
 export interface Company {
-  id: number;
-  razaoSocial: string;
-  nomeFantasia: string;
-  documento: string;
-  rowVersion?: string;
+  id: string;
+  name: string;
+  cnpj?: string;
+  email?: string;
+  phone?: string;
+  address?: string;
+  description?: string;
 }
 
 export interface CreateCompanyDto {
-  razaoSocial?: string;
-  nomeFantasia?: string;
-  documento?: string;
+  name: string;
+  cnpj?: string;
+  email?: string;
+  phone?: string;
+  address?: string;
+  description?: string;
 }
 
 export interface UpdateCompanyDto {
-  razaoSocial?: string;
-  nomeFantasia?: string;
-  documento?: string;
-  rowVersion?: string;
+  name: string;
+  cnpj?: string;
+  email?: string;
+  phone?: string;
+  address?: string;
+  description?: string;
 }
 
 export interface Customer {
-  id: number;
-  nome: string;
-  documento: string;
-  email: string;
-  rowVersion?: string;
+  id: string;
+  companyId: string;
+  name: string;
+  cpf?: string;
+  cnpj?: string;
+  email?: string;
+  phone?: string;
+  address?: string;
+  notes?: string;
 }
 
 export interface CreateCustomerDto {
-  nome?: string;
-  documento?: string;
+  name: string;
+  cpf?: string;
+  cnpj?: string;
   email?: string;
+  phone?: string;
+  address?: string;
+  notes?: string;
 }
 
 export interface UpdateCustomerDto {
-  nome?: string;
-  documento?: string;
+  name: string;
+  cpf?: string;
+  cnpj?: string;
   email?: string;
-  rowVersion?: string;
+  phone?: string;
+  address?: string;
+  notes?: string;
 }
 
 export interface Supplier {
-  id: number;
-  nome: string;
-  documento: string;
-  email: string;
-  rowVersion?: string;
+  id: string;
+  companyId: string;
+  name: string;
+  cnpj?: string;
+  email?: string;
+  phone?: string;
+  address?: string;
+  category?: string;
+  notes?: string;
 }
 
 export interface CreateSupplierDto {
-  nome?: string;
-  documento?: string;
+  name: string;
+  cnpj?: string;
   email?: string;
+  phone?: string;
+  address?: string;
+  category?: string;
+  notes?: string;
 }
 
 export interface UpdateSupplierDto {
-  nome?: string;
-  documento?: string;
+  name: string;
+  cnpj?: string;
   email?: string;
-  rowVersion?: string;
+  phone?: string;
+  address?: string;
+  category?: string;
+  notes?: string;
 }
 
 export interface Profile {

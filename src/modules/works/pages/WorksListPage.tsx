@@ -5,7 +5,7 @@ import {
   Plus, Search, Building2, ArrowRight, MapPin,
   Calendar, LayoutGrid, List, Loader2,
 } from 'lucide-react';
-import type { Work, WorkStatus } from '@/modules/shared/types';
+import type { Work, WorkStatus, AddressDto } from '@/modules/shared/types';
 import { STATUS_CONFIG } from '@/modules/shared/types';
 import { WorksService } from '@/services/works/worksService';
 
@@ -15,25 +15,25 @@ const CSS = `
 .wl-title-wrap{}
 .wl-tag{font-size:10px;font-weight:600;letter-spacing:1.6px;text-transform:uppercase;color:var(--gold,#B8922A);margin-bottom:4px;}
 .wl-title{font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:700;color:var(--ink,#1A1814);letter-spacing:-0.5px;}
-.wl-btn-new{display:inline-flex;align-items:center;gap:6px;padding:10px 20px;border-radius:9px;font-size:13px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;border:none;background:linear-gradient(135deg,var(--gold,#B8922A),var(--gold2,#D4A843));color:#fff;transition:all 0.2s;box-shadow:0 2px 10px rgba(184,146,42,0.25);}
+.wl-btn-new{display:inline-flex;align-items:center;gap:6px;padding:10px 20px;border-radius:9px;font-size:13px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;border:none;background:linear-gradient(135deg,var(--brand-gold),var(--brand-gold2));color:#fff;transition:all 0.2s;box-shadow:0 2px 10px rgba(184,146,42,0.25);}
 .wl-btn-new:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(184,146,42,0.35);}
 .wl-filters{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
-.wl-search{display:flex;align-items:center;gap:8px;padding:8px 14px;border-radius:8px;border:1px solid var(--bdr,rgba(26,24,20,0.10));background:#fff;flex:1;min-width:200px;max-width:360px;}
+.wl-search{display:flex;align-items:center;gap:8px;padding:8px 14px;border-radius:8px;border:1px solid var(--bdr,rgba(26,24,20,0.10));background:var(--card-bg,#fff);flex:1;min-width:200px;max-width:360px;}
 .wl-search input{border:none;outline:none;font-size:13px;font-family:'DM Sans',sans-serif;color:var(--ink,#1A1814);background:transparent;flex:1;min-width:0;}
 .wl-search input::placeholder{color:var(--ink3,#7A7670);}
-.wl-filter-btn{display:inline-flex;align-items:center;gap:5px;padding:7px 13px;border-radius:7px;font-size:12px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;border:1px solid var(--bdr,rgba(26,24,20,0.10));background:#fff;color:var(--ink3,#7A7670);transition:all 0.16s;}
+.wl-filter-btn{display:inline-flex;align-items:center;gap:5px;padding:7px 13px;border-radius:7px;font-size:12px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;border:1px solid var(--bdr,rgba(26,24,20,0.10));background:var(--card-bg,#fff);color:var(--ink3,#7A7670);transition:all 0.16s;}
 .wl-filter-btn:hover,.wl-filter-btn.active{border-color:var(--gold,#B8922A);color:var(--gold,#B8922A);background:rgba(184,146,42,0.05);}
 .wl-view-toggle{display:flex;border:1px solid var(--bdr,rgba(26,24,20,0.10));border-radius:7px;overflow:hidden;}
-.wl-view-btn{padding:7px 10px;background:#fff;border:none;cursor:pointer;color:var(--ink3,#7A7670);display:flex;align-items:center;transition:all 0.14s;}
+.wl-view-btn{padding:7px 10px;background:var(--card-bg,#fff);border:none;cursor:pointer;color:var(--ink3,#7A7670);display:flex;align-items:center;transition:all 0.14s;}
 .wl-view-btn.active{background:var(--cream,#F7F4EF);color:var(--gold,#B8922A);}
 .wl-view-btn+.wl-view-btn{border-left:1px solid var(--bdr,rgba(26,24,20,0.10));}
 .wl-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:16px;}
-.wl-card{background:#fff;border-radius:12px;border:1px solid var(--bdr,rgba(26,24,20,0.10));padding:22px 24px;cursor:pointer;transition:all 0.22s;position:relative;overflow:hidden;display:flex;flex-direction:column;gap:14px;box-shadow:0 2px 10px rgba(26,24,20,0.04);}
+.wl-card{background:var(--card-bg,#fff);border-radius:12px;border:1px solid var(--bdr,rgba(26,24,20,0.10));padding:22px 24px;cursor:pointer;transition:all 0.22s;position:relative;overflow:hidden;display:flex;flex-direction:column;gap:14px;box-shadow:0 2px 10px rgba(26,24,20,0.04);}
 .wl-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--gold,#B8922A),var(--gold2,#D4A843));transform:scaleX(0);transform-origin:left;transition:transform 0.22s;}
 .wl-card:hover::before{transform:scaleX(1);}
 .wl-card:hover{box-shadow:0 8px 30px rgba(26,24,20,0.10);transform:translateY(-2px);}
 .wl-card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;}
-.wl-card-name{font-family:'Cormorant Garamond',serif;font-size:17px;font-weight:700;color:var(--ink,#1A1814);line-height:1.2;}
+.wl-card-name{font-family:'Cormorant Garamond',serif;font-size:17px;font-weight:700;color:var(--ink,#1A1814);line-height:1.2;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;}
 .wl-card-client{font-size:12px;color:var(--ink3,#7A7670);margin-top:3px;}
 .wl-card-meta{display:flex;flex-direction:column;gap:8px;margin-top:4px;}
 .wl-card-meta-row{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--ink3,#7A7670);}
@@ -56,6 +56,16 @@ const FILTERS: { key: FilterKey; label: string }[] = [
   { key: 'atrasada', label: 'Atrasadas' },
   { key: 'concluida', label: 'Concluídas' },
 ];
+
+function formatAddress(address: AddressDto | string): string {
+  if (!address) return '—';
+  if (typeof address === 'string') return address || '—';
+  const { street, number, neighborhood, city, state } = address;
+  const parts = [street, number ? `nº ${number}` : null, neighborhood, city, state]
+    .filter(Boolean)
+    .join(', ');
+  return parts || '—';
+}
 
 function formatCurrency(value: number) {
   return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 }).format(value);
@@ -108,8 +118,9 @@ export default function WorksListPage() {
   }
 
   const filtered = works.filter(w => {
+    const addressStr = formatAddress(w.address).toLowerCase();
     const matchSearch = w.name.toLowerCase().includes(search.toLowerCase()) ||
-      (w.address ?? '').toLowerCase().includes(search.toLowerCase());
+      addressStr.includes(search.toLowerCase());
     const matchFilter = filter === 'todas' || w.status === filter;
     return matchSearch && matchFilter;
   });
@@ -194,7 +205,7 @@ function WorkCard({ work, index, onClick }: { work: Work; index: number; onClick
       <div className="wl-card-top">
         <div>
           <div className="wl-card-name">{work.name}</div>
-          <div className="wl-card-client">{work.address}</div>
+          <div className="wl-card-client">{work.customerId ? `Cliente: ${work.customerId}` : ''}</div>
         </div>
         <span style={{
           display: 'inline-flex',
@@ -215,7 +226,7 @@ function WorkCard({ work, index, onClick }: { work: Work; index: number; onClick
 
       <div className="wl-card-meta">
         <div className="wl-card-meta-row">
-          <MapPin size={12} /> {work.address}
+          <MapPin size={12} /> {formatAddress(work.address)}
         </div>
         <div className="wl-card-meta-row">
           <Calendar size={12} /> Início: {formatDate(work.startDate)}

@@ -1,6 +1,6 @@
 import { worksApi } from '@/services/api/apiFactory';
 import { extractErrorMessage } from '@/utils/errorHandler';
-import type { Work, WorkStatus, CreateWorkDto } from '@/modules/shared/types';
+import type { Work, WorkStatus, CreateWorkDto, AddressDto } from '@/modules/shared/types';
 
 const BASE = '/works';
 
@@ -21,13 +21,31 @@ function normalizeDate(raw: unknown): string | undefined {
   return str.length >= 10 ? str.substring(0, 10) : str;
 }
 
+function mapAddress(raw: unknown): AddressDto | string {
+  if (raw == null) return '';
+  if (typeof raw === 'string') return raw;
+  if (typeof raw === 'object') {
+    const a = raw as Record<string, unknown>;
+    return {
+      zipCode: String(a.zipCode ?? ''),
+      street: String(a.street ?? ''),
+      number: String(a.number ?? ''),
+      neighborhood: String(a.neighborhood ?? ''),
+      city: String(a.city ?? ''),
+      state: String(a.state ?? ''),
+      complement: a.complement != null ? String(a.complement) : undefined,
+    } satisfies AddressDto;
+  }
+  return '';
+}
+
 function mapWork(raw: Record<string, unknown>): Work {
   const statusLabel = (raw.statusLabel as string) ?? '';
   return {
     id: String(raw.id),
     name: String(raw.name ?? ''),
     description: raw.description as string | undefined,
-    address: String(raw.address ?? ''),
+    address: mapAddress(raw.address),
     status: STATUS_MAP[statusLabel] ?? 'planejada',
     statusLabel,
     startDate: normalizeDate(raw.startDate) ?? '',
@@ -90,4 +108,24 @@ export class WorksService {
       throw new Error(extractErrorMessage(error));
     }
   }
+
+  static async lookupCep(cep: string): Promise<CepResult> {
+    try {
+      const { data } = await worksApi.get(`${BASE}/cep/${cep}`);
+      if (!data.isSuccess) {
+        throw new Error(data.error ?? 'CEP não encontrado.');
+      }
+      return data.value as CepResult;
+    } catch (error) {
+      throw new Error(extractErrorMessage(error));
+    }
+  }
+}
+
+export interface CepResult {
+  zipCode: string;
+  street: string;
+  neighborhood: string;
+  city: string;
+  state: string;
 }

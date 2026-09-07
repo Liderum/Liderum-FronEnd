@@ -22,7 +22,7 @@ function processPendingQueue(token: string | null, error: unknown) {
 
 const authApi = axios.create({
   baseURL: API_CONFIG.AUTH.BASE_URL,
-  timeout: 10000,
+  timeout: 15000,
   withCredentials: true,
   headers: { 'Content-Type': 'application/json' },
 });
@@ -42,7 +42,7 @@ class ApiFactory {
     if (!this.instances.has(module)) {
       const instance = axios.create({
         baseURL: API_CONFIG[module].BASE_URL,
-        timeout: 10000,
+        timeout: 30000,
         withCredentials: true,
         headers: { 'Content-Type': 'application/json' },
       });
@@ -120,6 +120,7 @@ export const authApiInstance = authApi;
 export const usersApi = ApiFactory.getInstance('USERS');
 export const worksApi = ApiFactory.getInstance('WORKS');
 export const rbacApi = ApiFactory.getInstance('RBAC');
+export const tenantApi = ApiFactory.getInstance('TENANT');
 /** @deprecated Use worksApi instead */
 export const managementApi = worksApi;
 export default authApiInstance;

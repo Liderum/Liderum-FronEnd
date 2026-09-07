@@ -10,7 +10,7 @@ export interface Work {
   id: string;
   name: string;
   description?: string;
-  address: string;
+  address: AddressDto | string;
   status: WorkStatus;
   statusLabel?: string;
   startDate: string;
@@ -26,14 +26,25 @@ export interface Work {
   updatedAt?: string;
 }
 
+export interface AddressDto {
+  zipCode: string;
+  street: string;
+  number: string;
+  neighborhood: string;
+  city: string;
+  state: string;
+  complement?: string | null;
+}
+
 export interface CreateWorkDto {
   name: string;
-  description?: string;
-  address: string;
+  description?: string | null;
+  address: AddressDto;
   startDate: string;
-  expectedEndDate?: string;
+  expectedEndDate?: string | null;
   totalBudget: number;
-  responsibleUserId?: string;
+  customerId?: string | null;
+  responsibleUserId?: string | null;
 }
 
 export interface ScheduleTask {
@@ -65,6 +76,15 @@ export interface BudgetItem {
   note?: string;
 }
 
+export interface BudgetRevisionItem {
+  id: string;
+  category: string;
+  description: string;
+  plannedValue: number;
+  actualValue: number;
+  variance: number;
+}
+
 export interface BudgetRevision {
   id: string;
   workId: string;
@@ -74,6 +94,7 @@ export interface BudgetRevision {
   totalActual: number;
   createdAt: string;
   createdBy: string;
+  items: BudgetRevisionItem[];
 }
 
 export interface ExtraRequest {
@@ -103,6 +124,13 @@ export interface ExtraHistoryEntry {
   notes?: string;
 }
 
+export interface DailyLogOccurrence {
+  id: string;
+  description: string;
+  responsible: string;
+  deadline: string;
+}
+
 export interface DailyLogEntry {
   id: string;
   date: string;
@@ -113,6 +141,7 @@ export interface DailyLogEntry {
   photos: string[];
   weather?: string;
   workersCount?: number;
+  occurrences?: DailyLogOccurrence[];
 }
 
 export interface Incident {
@@ -126,6 +155,7 @@ export interface Incident {
   reportedBy: string;
   reportedAt: string;
   assignedTo?: string;
+  deadline?: string;
   resolvedAt?: string;
   resolution?: string;
   photos: string[];

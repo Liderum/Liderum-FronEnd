@@ -4,32 +4,33 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '
 import { useSimpleToast } from '@/hooks/useSimpleToast';
 import { CompanyService } from '@/services/managementService';
 import { Company, CreateCompanyDto, UpdateCompanyDto } from '@/types/management';
+import { cleanCnpj, formatCnpj, isValidCnpj } from '@/utils/cnpj';
 import { Plus, Pencil, Trash2, Building2, RefreshCw } from 'lucide-react';
 
 const LDCSS = `
 @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;700&family=DM+Sans:wght@300;400;500&display=swap');
-:root{--cream:#F7F4EF;--cream2:#EDE9E1;--ink:#1A1814;--ink2:#3D3A34;--ink3:#7A7670;--gold:#B8922A;--gold2:#D4A843;--gold-light:#F0E4C4;--bdr:rgba(26,24,20,0.10);}
+:root{--cream2:#EDE9E1;--gold-light:#F0E4C4;}
 .ld{font-family:'DM Sans',sans-serif;color:var(--ink);}
 .ld-tag{font-size:9.5px;font-weight:500;letter-spacing:1.6px;text-transform:uppercase;color:var(--gold);display:block;margin-bottom:4px;}
 .ld-h1{font-family:'Cormorant Garamond',serif;font-size:clamp(18px,2.5vw,24px);font-weight:700;line-height:1.15;letter-spacing:-0.3px;color:var(--ink);}
 .ld-sub{font-size:12px;color:var(--ink3);font-weight:300;}
-.ld-card{background:#fff;border-radius:10px;border:1px solid var(--bdr);box-shadow:0 2px 12px rgba(26,24,20,0.04);position:relative;overflow:hidden;}
+.ld-card{background:var(--card-bg, #fff);border-radius:10px;border:1px solid var(--bdr);box-shadow:0 2px 12px rgba(26,24,20,0.04);position:relative;overflow:hidden;}
 .ld-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--gold),var(--gold2));}
 .ld-card-body{padding:14px 16px;}
 .ld-table{width:100%;border-collapse:collapse;font-size:12.5px;}
-.ld-table thead th{text-align:left;font-size:10px;font-weight:600;letter-spacing:0.5px;text-transform:uppercase;color:var(--ink3);padding:8px 10px;border-bottom:1px solid var(--bdr);background:rgba(247,244,239,0.4);}
+.ld-table thead th{text-align:left;font-size:10px;font-weight:600;letter-spacing:0.5px;text-transform:uppercase;color:var(--ink3);padding:8px 10px;border-bottom:1px solid var(--bdr);background:rgb(var(--cream-rgb, 247 244 239) / 0.4);}
 .ld-table tbody td{padding:9px 10px;border-bottom:1px solid rgba(26,24,20,0.05);color:var(--ink2);}
-.ld-table tbody tr:hover{background:rgba(247,244,239,0.3);}
+.ld-table tbody tr:hover{background:rgb(var(--cream-rgb, 247 244 239) / 0.3);}
 .ld-table tbody td:first-child{font-weight:500;color:var(--ink);}
 .ld-field{display:flex;flex-direction:column;gap:4px;margin-bottom:10px;}
 .ld-lbl{font-size:11px;font-weight:500;color:var(--ink2);}
 .ld-btn{display:inline-flex;align-items:center;gap:5px;padding:7px 14px;border-radius:7px;font-size:12px;font-weight:500;font-family:'DM Sans',sans-serif;border:none;cursor:pointer;transition:all 0.18s;}
-.ld-btn-dark{background:var(--ink);color:#fff;}
-.ld-btn-dark:hover:not(:disabled){background:var(--gold);}
-.ld-btn-outline{background:#fff;color:var(--ink);border:1px solid var(--bdr);}
+.ld-btn-dark{background:var(--brand-dark);color:#fff;}
+.ld-btn-dark:hover:not(:disabled){background:var(--brand-gold);}
+.ld-btn-outline{background:var(--card-bg, #fff);color:var(--ink);border:1px solid var(--bdr);}
 .ld-btn-outline:hover:not(:disabled){border-color:var(--gold);color:var(--gold);}
 .ld-btn-sm{padding:4px 8px;font-size:11px;}
-.ld-btn-danger{background:#fff;color:#C0392B;border:1px solid rgba(192,57,43,0.15);}
+.ld-btn-danger{background:var(--card-bg, #fff);color:#C0392B;border:1px solid rgba(192,57,43,0.15);}
 .ld-btn-danger:hover{background:#FDEDEC;}
 .ld-btn:disabled{opacity:0.4;cursor:not-allowed;}
 .ld-empty{text-align:center;padding:28px 0;color:var(--ink3);font-size:12.5px;}
@@ -44,7 +45,7 @@ export function Companies() {
   const [companies, setCompanies] = useState<Company[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingCompany, setEditingCompany] = useState<Company | null>(null);
-  const [form, setForm] = useState<CreateCompanyDto>({ razaoSocial: '', nomeFantasia: '', documento: '' });
+  const [form, setForm] = useState<CreateCompanyDto>({ name: '', cnpj: '' });
 
   async function loadCompanies() {
     setLoading(true);
@@ -57,25 +58,26 @@ export function Companies() {
 
   function openCreate() {
     setEditingCompany(null);
-    setForm({ razaoSocial: '', nomeFantasia: '', documento: '' });
+    setForm({ name: '', cnpj: '' });
     setIsModalOpen(true);
   }
 
   function openEdit(c: Company) {
     setEditingCompany(c);
-    setForm({ razaoSocial: c.razaoSocial || '', nomeFantasia: c.nomeFantasia || '', documento: c.documento || '' });
+    setForm({ name: c.name || '', cnpj: c.cnpj ? formatCnpj(c.cnpj) : '' });
     setIsModalOpen(true);
   }
 
   async function handleSubmit() {
     try {
-      if (!form.razaoSocial || !form.documento) { showToast('Preencha Razão Social e Documento', 'error'); return; }
+      if (!form.name) { showToast('Preencha a Razão Social', 'error'); return; }
+      if (form.cnpj && !isValidCnpj(form.cnpj)) { showToast('CNPJ inválido', 'error'); return; }
+      const payload = { ...form, cnpj: form.cnpj ? cleanCnpj(form.cnpj) : form.cnpj };
       if (!editingCompany) {
-        await CompanyService.create(form);
+        await CompanyService.create(payload);
         showToast('Empresa criada com sucesso', 'success');
       } else {
-        const payload: UpdateCompanyDto = { ...form, rowVersion: editingCompany.rowVersion };
-        await CompanyService.update(editingCompany.id, payload);
+        await CompanyService.update(editingCompany.id, payload as UpdateCompanyDto);
         showToast('Empresa atualizada com sucesso', 'success');
       }
       setIsModalOpen(false);
@@ -84,7 +86,7 @@ export function Companies() {
   }
 
   async function handleDelete(c: Company) {
-    if (!window.confirm(`Excluir empresa ${c.razaoSocial}?`)) return;
+    if (!window.confirm(`Excluir empresa ${c.name}?`)) return;
     showToast('Funcionalidade de exclusão não disponível na API', 'info');
   }
 
@@ -115,13 +117,12 @@ export function Companies() {
               <div className="ld-empty">Nenhuma empresa encontrada</div>
             ) : (
               <table className="ld-table">
-                <thead><tr><th>Razão Social</th><th>Nome Fantasia</th><th>Documento</th><th style={{ textAlign: 'right' }}>Ações</th></tr></thead>
+                <thead><tr><th>Razão Social</th><th>CNPJ</th><th style={{ textAlign: 'right' }}>Ações</th></tr></thead>
                 <tbody>
                   {companies.map(c => (
                     <tr key={c.id}>
-                      <td>{c.razaoSocial}</td>
-                      <td>{c.nomeFantasia || '—'}</td>
-                      <td>{c.documento}</td>
+                      <td>{c.name}</td>
+                      <td>{c.cnpj ? formatCnpj(c.cnpj) : '—'}</td>
                       <td style={{ textAlign: 'right' }}>
                         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 4 }}>
                           <button className="ld-btn ld-btn-outline ld-btn-sm" onClick={() => openEdit(c)}><Pencil size={10} /></button>
@@ -144,9 +145,8 @@ export function Companies() {
               </DialogTitle>
             </DialogHeader>
             <div style={{ display: 'flex', flexDirection: 'column' }}>
-              <div className="ld-field"><label className="ld-lbl">Razão Social *</label><Input value={form.razaoSocial} onChange={(e) => setForm({ ...form, razaoSocial: e.target.value })} placeholder="Razão Social" /></div>
-              <div className="ld-field"><label className="ld-lbl">Nome Fantasia</label><Input value={form.nomeFantasia} onChange={(e) => setForm({ ...form, nomeFantasia: e.target.value })} placeholder="Nome Fantasia" /></div>
-              <div className="ld-field"><label className="ld-lbl">Documento (CNPJ) *</label><Input value={form.documento} onChange={(e) => setForm({ ...form, documento: e.target.value })} placeholder="00.000.000/0000-00" /></div>
+              <div className="ld-field"><label className="ld-lbl">Razão Social *</label><Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Razão Social" /></div>
+              <div className="ld-field"><label className="ld-lbl">CNPJ</label><Input value={form.cnpj} onChange={(e) => setForm({ ...form, cnpj: formatCnpj(e.target.value) })} placeholder="00.000.000/0000-00" maxLength={18} /></div>
             </div>
             <DialogFooter style={{ marginTop: 4 }}>
               <button className="ld-btn ld-btn-outline" onClick={() => setIsModalOpen(false)}>Cancelar</button>

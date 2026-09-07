@@ -3,13 +3,24 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from "framer-motion";
 import { Sidebar } from '../components/Sidebar';
 import { Header } from '../components/Header';
+import { ProductTour } from '../components/onboarding/ProductTour';
 import { X, Menu } from "lucide-react";
+
+// Um `style={{display:...}}` inline sempre vence a classe utilitária `md:hidden`
+// do Tailwind (que só troca `display` dentro de uma media query) — por isso o
+// botão do menu mobile precisa da própria classe com a media query, sem
+// `display` inline, senão ele fica visível em qualquer largura de tela.
+const CSS = `
+.ld-mobile-fab{position:fixed;bottom:16px;right:16px;z-index:40;width:42px;height:42px;border-radius:50%;background:var(--brand-dark,#1A1814);border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 4px 20px rgba(26,24,20,0.25);}
+@media(min-width:768px){.ld-mobile-fab{display:none;}}
+`;
 
 export function DashboardLayout() {
   const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', background: '#F7F4EF', fontFamily: "'DM Sans', sans-serif" }}>
+    <div style={{ display: 'flex', minHeight: '100vh', background: 'var(--paper, #F7F4EF)', fontFamily: "'DM Sans', sans-serif" }}>
+      <style>{CSS}</style>
 
       {/* Sidebar Desktop */}
       <div style={{ display: 'none', position: 'fixed', top: 0, left: 0, bottom: 0, zIndex: 30 }}
@@ -69,11 +80,12 @@ export function DashboardLayout() {
         )}
       </AnimatePresence>
 
-      {/* Mobile menu button */}
+      <ProductTour />
+
+      {/* Mobile menu button — só visível abaixo de 768px, ver .ld-mobile-fab no CSS acima */}
       <button
         onClick={() => setMobileOpen(true)}
-        className="md:hidden"
-        style={{ position: 'fixed', bottom: 16, right: 16, zIndex: 40, width: 42, height: 42, borderRadius: '50%', background: 'var(--ink, #1A1814)', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', boxShadow: '0 4px 20px rgba(26,24,20,0.25)' }}
+        className="ld-mobile-fab"
       >
         <Menu size={17} color="#fff" />
       </button>

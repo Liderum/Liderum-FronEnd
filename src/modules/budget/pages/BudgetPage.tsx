@@ -3,26 +3,27 @@ import { useParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
   DollarSign, TrendingUp, TrendingDown, Percent, ArrowUpRight, ArrowDownRight,
-  Download, History, FileEdit, Plus, X,
+  Download, History, FileEdit, Plus, X, Trash2,
 } from 'lucide-react';
 import { BudgetService, WorksService } from '@/services/works';
+import type { CreateRevisionItemInput } from '@/services/works/budgetService';
 import { useAuth } from '@/contexts/AuthContext';
 import type { BudgetItem, BudgetRevision, Work } from '@/modules/shared/types';
 
 const CSS = `
 .bg{font-family:'DM Sans',sans-serif;color:var(--ink,#1A1814);display:flex;flex-direction:column;gap:18px;}
 .bg-summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;}
-.bg-stat{background:#fff;border-radius:12px;border:1px solid var(--bdr,rgba(26,24,20,0.10));padding:20px;display:flex;align-items:center;gap:14px;box-shadow:0 2px 10px rgba(26,24,20,0.04);position:relative;overflow:hidden;}
+.bg-stat{background:var(--card-bg,#fff);border-radius:12px;border:1px solid var(--bdr,rgba(26,24,20,0.10));padding:20px;display:flex;align-items:center;gap:14px;box-shadow:0 2px 10px rgba(26,24,20,0.04);position:relative;overflow:hidden;}
 .bg-stat-icon{width:42px;height:42px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
 .bg-stat-val{font-family:var(--font-numeric);font-size:24px;font-weight:600;font-variant-numeric:tabular-nums lining-nums;color:var(--ink,#1A1814);line-height:1.1;}
 .bg-stat-label{font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:0.4px;color:var(--ink3,#7A7670);margin-top:2px;}
 .bg-actions{display:flex;gap:8px;flex-wrap:wrap;}
-.bg-btn{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:8px;font-size:12px;font-weight:500;font-family:'DM Sans',sans-serif;cursor:pointer;border:1px solid rgba(26,24,20,0.12);background:#fff;color:var(--ink,#1A1814);transition:all 0.14s;}
+.bg-btn{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:8px;font-size:12px;font-weight:500;font-family:'DM Sans',sans-serif;cursor:pointer;border:1px solid rgba(26,24,20,0.12);background:var(--card-bg,#fff);color:var(--ink,#1A1814);transition:all 0.14s;}
 .bg-btn:hover{background:var(--cream,#F7F4EF);}
-.bg-btn.primary{background:var(--gold,#B8922A);color:#fff;border-color:var(--gold,#B8922A);}
+.bg-btn.primary{background:var(--brand-gold);color:#fff;border-color:var(--brand-gold);}
 .bg-btn.primary:hover{background:#a07e1f;}
 .bg-btn:disabled{opacity:0.5;cursor:not-allowed;}
-.bg-table-wrap{background:#fff;border-radius:12px;border:1px solid var(--bdr,rgba(26,24,20,0.10));box-shadow:0 2px 10px rgba(26,24,20,0.04);overflow:hidden;}
+.bg-table-wrap{background:var(--card-bg,#fff);border-radius:12px;border:1px solid var(--bdr,rgba(26,24,20,0.10));box-shadow:0 2px 10px rgba(26,24,20,0.04);overflow:hidden;}
 .bg-table-header{padding:16px 20px;border-bottom:1px solid rgba(26,24,20,0.06);display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;}
 .bg-table-title{font-family:'Cormorant Garamond',serif;font-size:17px;font-weight:700;color:var(--ink,#1A1814);}
 .bg-cat-tabs{display:flex;gap:4px;flex-wrap:wrap;}
@@ -41,7 +42,8 @@ const CSS = `
 .bg-total-label{font-size:10.5px;color:var(--ink3,#7A7670);text-transform:uppercase;letter-spacing:0.4px;font-weight:500;}
 .bg-edit-input{font-family:var(--font-numeric);font-variant-numeric:tabular-nums;padding:4px 8px;border-radius:6px;border:1px solid rgba(26,24,20,0.15);width:120px;text-align:right;font-size:12px;}
 .bg-modal{position:fixed;inset:0;background:rgba(26,24,20,0.45);display:flex;align-items:center;justify-content:center;z-index:1000;padding:20px;}
-.bg-modal-card{background:#fff;border-radius:14px;max-width:520px;width:100%;padding:24px;box-shadow:0 20px 60px rgba(0,0,0,0.25);}
+.bg-modal-card{background:var(--card-bg,#fff);border-radius:14px;max-width:520px;width:100%;padding:24px;box-shadow:0 20px 60px rgba(0,0,0,0.25);}
+.bg-modal-card.wide{max-width:820px;max-height:88vh;overflow-y:auto;}
 .bg-modal-title{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:700;color:var(--ink,#1A1814);margin-bottom:8px;}
 .bg-modal-sub{font-size:12.5px;color:var(--ink3,#7A7670);margin-bottom:16px;}
 .bg-modal-label{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:var(--ink3,#7A7670);margin-bottom:6px;display:block;}
@@ -52,10 +54,37 @@ const CSS = `
 .bg-rev-item{padding:10px 12px;border-radius:8px;background:var(--cream,#F7F4EF);border:1px solid rgba(26,24,20,0.06);font-size:12px;}
 .bg-rev-num{font-weight:700;color:var(--gold,#B8922A);}
 .bg-rev-reason{color:var(--ink3,#7A7670);margin-top:4px;font-style:italic;}
+.bg-rev-detail{margin-top:8px;border-top:1px dashed rgba(26,24,20,0.1);padding-top:6px;display:flex;flex-direction:column;gap:3px;}
+.bg-rev-detail-row{display:grid;grid-template-columns:auto 1fr auto auto auto;gap:10px;align-items:center;font-size:11.5px;}
+.bg-rev-detail-cat{font-size:9.5px;font-weight:600;padding:1px 6px;border-radius:5px;white-space:nowrap;}
+.bg-rev-form-row{display:grid;grid-template-columns:1fr 1.6fr 0.9fr 0.9fr 0.8fr auto;gap:8px;align-items:start;margin-bottom:8px;}
+.bg-rev-form-row input{width:100%;padding:8px 10px;border-radius:7px;border:1px solid rgba(26,24,20,0.15);font-family:'DM Sans',sans-serif;font-size:12.5px;box-sizing:border-box;}
+.bg-rev-form-diff{font-family:var(--font-numeric);font-variant-numeric:tabular-nums;font-size:12px;font-weight:600;padding:8px 0;text-align:right;white-space:nowrap;}
+.bg-rev-form-remove{display:flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:7px;border:1px solid rgba(26,24,20,0.12);background:var(--card-bg,#fff);color:var(--ink3,#7A7670);cursor:pointer;flex-shrink:0;}
+.bg-rev-form-remove:hover{border-color:#C0392B;color:#C0392B;}
+.bg-rev-form-head{display:grid;grid-template-columns:1fr 1.6fr 0.9fr 0.9fr 0.8fr auto;gap:8px;font-size:10px;font-weight:600;letter-spacing:0.5px;text-transform:uppercase;color:var(--ink3,#7A7670);margin-bottom:6px;}
+.bg-rev-add{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:500;color:var(--gold,#B8922A);background:none;border:none;cursor:pointer;padding:6px 0;font-family:'DM Sans',sans-serif;}
+.bg-rev-add:hover{text-decoration:underline;}
+.bg-rev-form-totals{display:flex;justify-content:flex-end;gap:24px;padding:10px 0;border-top:1px solid rgba(26,24,20,0.08);margin:6px 0 14px;}
+@media(max-width:720px){.bg-rev-form-row,.bg-rev-form-head{grid-template-columns:1fr;}.bg-rev-form-head{display:none;}}
 `;
 
 function formatCurrency(value: number) {
   return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 }).format(value);
+}
+
+// Mesma máscara de moeda usada em NewWorkPage/ExtrasPage (dígitos → centavos → "1.234,56").
+function formatCurrencyInput(value: string): string {
+  const digits = value.replace(/\D/g, '');
+  if (!digits) return '';
+  const num = parseInt(digits, 10) / 100;
+  return num.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+function parseCurrencyToNumber(formatted: string): number {
+  if (!formatted) return 0;
+  const clean = formatted.replace(/\./g, '').replace(',', '.');
+  return parseFloat(clean) || 0;
 }
 
 const catColors: Record<string, { bg: string; color: string }> = {
@@ -65,11 +94,29 @@ const catColors: Record<string, { bg: string; color: string }> = {
   'Administrativo': { bg: '#F3E5F5', color: '#8E44AD' },
 };
 
+let revisionRowSeq = 0;
+function nextRowId() {
+  revisionRowSeq += 1;
+  return `rev-row-${revisionRowSeq}`;
+}
+
+interface RevisionItemForm {
+  localId: string;
+  category: string;
+  description: string;
+  plannedValue: string;
+  actualValue: string;
+}
+
+function emptyRevisionItem(): RevisionItemForm {
+  return { localId: nextRowId(), category: '', description: '', plannedValue: '', actualValue: '' };
+}
+
 export default function BudgetPage() {
   const { id } = useParams();
   const workId = id ?? '1';
   const { permissions, user } = useAuth();
-  const canEdit = permissions.includes('budget.update');
+  const canEdit = permissions.includes('budget.write');
   const canExport = permissions.includes('budget.export');
 
   const [items, setItems] = useState<BudgetItem[]>([]);
@@ -80,6 +127,7 @@ export default function BudgetPage() {
   const [editValue, setEditValue] = useState<string>('');
   const [showRevisionModal, setShowRevisionModal] = useState(false);
   const [revisionReason, setRevisionReason] = useState('');
+  const [revisionItems, setRevisionItems] = useState<RevisionItemForm[]>([]);
   const [showHistory, setShowHistory] = useState(false);
   const [loading, setLoading] = useState(true);
 
@@ -130,15 +178,60 @@ export default function BudgetPage() {
     setEditingId(null);
   };
 
+  // Abre o fluxo de revisão pré-preenchido com os itens atuais do orçamento (categoria,
+  // descrição, previsto, realizado), editáveis antes de confirmar — não é mais um snapshot cego.
+  const openRevisionModal = () => {
+    setRevisionItems(
+      items.length > 0
+        ? items.map((i) => ({
+            localId: i.id,
+            category: i.category,
+            description: i.description,
+            plannedValue: i.plannedCost.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
+            actualValue: i.actualCost.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
+          }))
+        : [emptyRevisionItem()],
+    );
+    setRevisionReason('');
+    setShowRevisionModal(true);
+  };
+
+  const addRevisionRow = () => setRevisionItems((prev) => [...prev, emptyRevisionItem()]);
+
+  const removeRevisionRow = (localId: string) =>
+    setRevisionItems((prev) => (prev.length > 1 ? prev.filter((r) => r.localId !== localId) : prev));
+
+  const updateRevisionRow = (localId: string, patch: Partial<RevisionItemForm>) =>
+    setRevisionItems((prev) => prev.map((r) => (r.localId === localId ? { ...r, ...patch } : r)));
+
+  const revisionFormTotals = revisionItems.reduce(
+    (acc, r) => ({
+      planned: acc.planned + parseCurrencyToNumber(r.plannedValue),
+      actual: acc.actual + parseCurrencyToNumber(r.actualValue),
+    }),
+    { planned: 0, actual: 0 },
+  );
+
+  const validRevisionItems: CreateRevisionItemInput[] = revisionItems
+    .filter((r) => r.category.trim() && r.description.trim())
+    .map((r) => ({
+      category: r.category.trim(),
+      description: r.description.trim(),
+      plannedValue: parseCurrencyToNumber(r.plannedValue),
+      actualValue: parseCurrencyToNumber(r.actualValue),
+    }));
+
   const createRevision = async () => {
-    if (!revisionReason.trim()) return;
+    if (!revisionReason.trim() || validRevisionItems.length === 0) return;
     const rev = await BudgetService.createRevision(
       workId,
       revisionReason.trim(),
       user?.name ?? user?.email ?? 'usuário',
+      validRevisionItems,
     );
     setRevisions((prev) => [rev, ...prev]);
     setRevisionReason('');
+    setRevisionItems([]);
     setShowRevisionModal(false);
   };
 
@@ -171,16 +264,16 @@ export default function BudgetPage() {
     },
     {
       label: 'Margem',
-      value: work ? `${work.margin}%` : '—',
-      icon: work && work.margin > 0 ? TrendingUp : TrendingDown,
-      color: work && work.margin > 0 ? '#1E8449' : '#C0392B',
-      bg: work && work.margin > 0 ? '#E8F5E9' : '#FDEDEC',
+      value: work ? `${work.marginPercent.toFixed(1)}%` : '—',
+      icon: work && work.marginPercent > 0 ? TrendingUp : TrendingDown,
+      color: work && work.marginPercent > 0 ? '#1E8449' : '#C0392B',
+      bg: work && work.marginPercent > 0 ? '#E8F5E9' : '#FDEDEC',
     },
   ];
 
   if (loading) {
     return (
-      <div style={{ padding: 40, textAlign: 'center', color: '#7A7670', fontFamily: 'DM Sans' }}>
+      <div style={{ padding: 40, textAlign: 'center', color: 'var(--ink3, #7A7670)', fontFamily: 'DM Sans' }}>
         Carregando orçamento…
       </div>
     );
@@ -210,7 +303,7 @@ export default function BudgetPage() {
 
         <div className="bg-actions">
           {canEdit && (
-            <button className="bg-btn primary" onClick={() => setShowRevisionModal(true)}>
+            <button className="bg-btn primary" onClick={openRevisionModal}>
               <Plus size={14} /> Criar revisão
             </button>
           )}
@@ -237,11 +330,30 @@ export default function BudgetPage() {
                       {formatCurrency(r.totalPlanned)} previsto / {formatCurrency(r.totalActual)} realizado
                     </span>
                     {' — '}
-                    <span style={{ color: '#7A7670' }}>{new Date(r.createdAt).toLocaleString('pt-BR')}</span>
+                    <span style={{ color: 'var(--ink3, #7A7670)' }}>{new Date(r.createdAt).toLocaleString('pt-BR')}</span>
                     {' — '}
                     <span>{r.createdBy}</span>
                   </div>
                   <div className="bg-rev-reason">"{r.reason}"</div>
+                  {r.items.length > 0 && (
+                    <div className="bg-rev-detail">
+                      {r.items.map((it) => {
+                        const cc = catColors[it.category] || { bg: '#F5F5F5', color: '#7A7670' };
+                        const isOver = it.variance > 0;
+                        return (
+                          <div key={it.id} className="bg-rev-detail-row">
+                            <span className="bg-rev-detail-cat" style={{ background: cc.bg, color: cc.color }}>{it.category}</span>
+                            <span style={{ color: 'var(--ink)' }}>{it.description}</span>
+                            <span style={{ fontFamily: 'var(--font-numeric)', textAlign: 'right' }}>{formatCurrency(it.plannedValue)}</span>
+                            <span style={{ fontFamily: 'var(--font-numeric)', textAlign: 'right' }}>{formatCurrency(it.actualValue)}</span>
+                            <span style={{ fontFamily: 'var(--font-numeric)', textAlign: 'right', fontWeight: 600, color: it.variance === 0 ? 'var(--ink3, #7A7670)' : isOver ? '#C0392B' : '#1E8449' }}>
+                              {isOver ? '+' : ''}{formatCurrency(it.variance)}
+                            </span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
@@ -354,12 +466,86 @@ export default function BudgetPage() {
 
       {showRevisionModal && (
         <div className="bg-modal" onClick={() => setShowRevisionModal(false)}>
-          <div className="bg-modal-card" onClick={(e) => e.stopPropagation()}>
+          <div className="bg-modal-card wide" onClick={(e) => e.stopPropagation()}>
             <div className="bg-modal-title">Nova revisão de orçamento</div>
             <div className="bg-modal-sub">
-              Snapshota o orçamento atual ({formatCurrency(totalPlanned)} previsto / {formatCurrency(totalActual)} realizado).
-              Descreva o motivo para rastreabilidade.
+              Revise e ajuste as linhas abaixo (pré-preenchidas com o orçamento atual) antes de confirmar.
+              Cada linha registra categoria, descrição, previsto e realizado — a diferença é calculada automaticamente.
             </div>
+
+            <div className="bg-rev-form-head">
+              <span>Categoria</span>
+              <span>Descrição</span>
+              <span style={{ textAlign: 'right' }}>Previsto</span>
+              <span style={{ textAlign: 'right' }}>Realizado</span>
+              <span style={{ textAlign: 'right' }}>Diferença</span>
+              <span />
+            </div>
+            {revisionItems.map((row) => {
+              const variance = parseCurrencyToNumber(row.actualValue) - parseCurrencyToNumber(row.plannedValue);
+              return (
+                <div key={row.localId} className="bg-rev-form-row">
+                  <input
+                    list="bg-rev-categories"
+                    value={row.category}
+                    onChange={(e) => updateRevisionRow(row.localId, { category: e.target.value })}
+                    placeholder="Categoria"
+                  />
+                  <input
+                    value={row.description}
+                    onChange={(e) => updateRevisionRow(row.localId, { description: e.target.value })}
+                    placeholder="Descrição"
+                  />
+                  <input
+                    style={{ textAlign: 'right', fontFamily: 'var(--font-numeric)' }}
+                    inputMode="decimal"
+                    value={row.plannedValue}
+                    onChange={(e) => updateRevisionRow(row.localId, { plannedValue: formatCurrencyInput(e.target.value) })}
+                    placeholder="0,00"
+                  />
+                  <input
+                    style={{ textAlign: 'right', fontFamily: 'var(--font-numeric)' }}
+                    inputMode="decimal"
+                    value={row.actualValue}
+                    onChange={(e) => updateRevisionRow(row.localId, { actualValue: formatCurrencyInput(e.target.value) })}
+                    placeholder="0,00"
+                  />
+                  <span className="bg-rev-form-diff" style={{ color: variance === 0 ? 'var(--ink3, #7A7670)' : variance > 0 ? '#C0392B' : '#1E8449' }}>
+                    {variance > 0 ? '+' : ''}{formatCurrency(variance)}
+                  </span>
+                  <button
+                    type="button"
+                    className="bg-rev-form-remove"
+                    onClick={() => removeRevisionRow(row.localId)}
+                    disabled={revisionItems.length === 1}
+                    aria-label="Remover item"
+                  >
+                    <Trash2 size={13} />
+                  </button>
+                </div>
+              );
+            })}
+            <datalist id="bg-rev-categories">
+              {categories.filter((c) => c !== 'Todas').map((c) => <option key={c} value={c} />)}
+            </datalist>
+
+            <button type="button" className="bg-rev-add" onClick={addRevisionRow}>
+              <Plus size={14} /> Adicionar item
+            </button>
+
+            <div className="bg-rev-form-totals">
+              <div className="bg-total-item">
+                <div className="bg-total-val">{formatCurrency(revisionFormTotals.planned)}</div>
+                <div className="bg-total-label">Total Previsto</div>
+              </div>
+              <div className="bg-total-item">
+                <div className="bg-total-val" style={{ color: revisionFormTotals.actual > revisionFormTotals.planned ? '#C0392B' : '#1E8449' }}>
+                  {formatCurrency(revisionFormTotals.actual)}
+                </div>
+                <div className="bg-total-label">Total Realizado</div>
+              </div>
+            </div>
+
             <label className="bg-modal-label">Motivo da revisão</label>
             <textarea
               className="bg-modal-textarea"
@@ -371,7 +557,11 @@ export default function BudgetPage() {
               <button className="bg-btn" onClick={() => setShowRevisionModal(false)}>
                 <X size={14} /> Cancelar
               </button>
-              <button className="bg-btn primary" onClick={createRevision} disabled={!revisionReason.trim()}>
+              <button
+                className="bg-btn primary"
+                onClick={createRevision}
+                disabled={!revisionReason.trim() || validRevisionItems.length === 0}
+              >
                 Criar revisão
               </button>
             </div>

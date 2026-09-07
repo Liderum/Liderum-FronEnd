@@ -19,13 +19,13 @@ import type {
 const CSS = `
 .wo{font-family:'DM Sans',sans-serif;color:var(--ink,#1A1814);display:flex;flex-direction:column;gap:18px;}
 .wo-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;}
-.wo-stat{background:#fff;border-radius:12px;border:1px solid var(--bdr,rgba(26,24,20,0.10));padding:18px 20px;display:flex;align-items:center;gap:14px;box-shadow:0 2px 10px rgba(26,24,20,0.04);position:relative;overflow:hidden;}
+.wo-stat{background:var(--card-bg,#fff);border-radius:12px;border:1px solid var(--bdr,rgba(26,24,20,0.10));padding:18px 20px;display:flex;align-items:center;gap:14px;box-shadow:0 2px 10px rgba(26,24,20,0.04);position:relative;overflow:hidden;}
 .wo-stat::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;}
 .wo-stat-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
 .wo-stat-val{font-family:var(--font-numeric);font-size:22px;font-weight:600;font-variant-numeric:tabular-nums lining-nums;color:var(--ink,#1A1814);line-height:1.1;}
 .wo-stat-label{font-size:11px;font-weight:500;letter-spacing:0.4px;text-transform:uppercase;color:var(--ink3,#7A7670);margin-top:2px;}
 .wo-section-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;}
-.wo-card{background:#fff;border-radius:12px;border:1px solid var(--bdr,rgba(26,24,20,0.10));box-shadow:0 2px 10px rgba(26,24,20,0.04);overflow:hidden;}
+.wo-card{background:var(--card-bg,#fff);border-radius:12px;border:1px solid var(--bdr,rgba(26,24,20,0.10));box-shadow:0 2px 10px rgba(26,24,20,0.04);overflow:hidden;}
 .wo-card-header{padding:16px 20px;border-bottom:1px solid rgba(26,24,20,0.06);display:flex;align-items:center;justify-content:space-between;}
 .wo-card-title{font-family:'Cormorant Garamond',serif;font-size:16px;font-weight:700;color:var(--ink,#1A1814);}
 .wo-card-link{font-size:12px;color:var(--gold,#B8922A);cursor:pointer;background:none;border:none;font-family:'DM Sans',sans-serif;font-weight:500;display:flex;align-items:center;gap:4px;}
@@ -82,7 +82,7 @@ export default function WorkOverviewPage() {
   }, [workId]);
 
   if (!work) {
-    return <div style={{ padding: 40, textAlign: 'center', color: '#7A7670' }}>Carregando…</div>;
+    return <div style={{ padding: 40, textAlign: 'center', color: 'var(--ink3, #7A7670)' }}>Carregando…</div>;
   }
 
   const variation = work.totalBudget === 0 ? 0 : ((work.currentCost - work.totalBudget) / work.totalBudget) * 100;
@@ -133,7 +133,7 @@ export default function WorkOverviewPage() {
               </button>
             </div>
             <div className="wo-card-body">
-              {nextMilestones.length === 0 && <div style={{ color: '#7A7670', fontSize: 12 }}>Nenhuma tarefa pendente.</div>}
+              {nextMilestones.length === 0 && <div style={{ color: 'var(--ink3, #7A7670)', fontSize: 12 }}>Nenhuma tarefa pendente.</div>}
               {nextMilestones.map((task) => {
                 const statusCfg = TASK_STATUS_CONFIG[task.status];
                 return (
@@ -180,7 +180,7 @@ export default function WorkOverviewPage() {
                       </div>
                       <div style={{ flex: 1 }}>
                         <div style={{ fontSize: 12.5, fontWeight: 500 }}>{inc.title}</div>
-                        <div style={{ fontSize: 11, color: '#7A7670', marginTop: 2 }}>
+                        <div style={{ fontSize: 11, color: 'var(--ink3, #7A7670)', marginTop: 2 }}>
                           {sevCfg.label} • {inc.reportedBy} • {formatDate(inc.reportedAt)}
                         </div>
                       </div>
@@ -202,13 +202,13 @@ export default function WorkOverviewPage() {
             </div>
             <div className="wo-card-body">
               {pendingExtras.length === 0 ? (
-                <div style={{ color: '#7A7670', fontSize: 12 }}>Nenhum extra pendente.</div>
+                <div style={{ color: 'var(--ink3, #7A7670)', fontSize: 12 }}>Nenhum extra pendente.</div>
               ) : (
                 pendingExtras.slice(0, 3).map((e) => (
                   <div key={e.id} className="wo-item">
                     <div style={{ flex: 1 }}>
                       <div style={{ fontSize: 12.5, fontWeight: 500 }}>{e.title}</div>
-                      <div style={{ fontSize: 11, color: '#7A7670', marginTop: 2 }}>
+                      <div style={{ fontSize: 11, color: 'var(--ink3, #7A7670)', marginTop: 2 }}>
                         {formatCurrency(e.financialImpact)} • {e.scheduleImpact}
                       </div>
                     </div>
@@ -227,10 +227,10 @@ export default function WorkOverviewPage() {
             </div>
             <div className="wo-card-body">
               {!lastLog ? (
-                <div style={{ color: '#7A7670', fontSize: 12 }}>Nenhum registro.</div>
+                <div style={{ color: 'var(--ink3, #7A7670)', fontSize: 12 }}>Nenhum registro.</div>
               ) : (
                 <div>
-                  <div style={{ fontSize: 11, color: '#7A7670', fontWeight: 500, textTransform: 'uppercase', letterSpacing: 0.4 }}>
+                  <div style={{ fontSize: 11, color: 'var(--ink3, #7A7670)', fontWeight: 500, textTransform: 'uppercase', letterSpacing: 0.4 }}>
                     <BookOpen size={11} style={{ display: 'inline', verticalAlign: 'middle' }} /> {formatDate(lastLog.date)} — {lastLog.responsible}
                   </div>
                   <div style={{ fontSize: 13, marginTop: 8, lineHeight: 1.5 }}>{lastLog.description}</div>

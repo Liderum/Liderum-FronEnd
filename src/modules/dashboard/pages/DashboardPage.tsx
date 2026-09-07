@@ -16,9 +16,9 @@ import type { Work, ExtraRequest, Incident, RiskAlert } from '@/modules/shared/t
 
 const CSS = `
 @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,700;1,400;1,700&family=DM+Sans:wght@300;400;500&display=swap');
-:root{--cream:#F7F4EF;--cream2:#EDE9E1;--ink:#1A1814;--ink2:#3D3A34;--ink3:#7A7670;--gold:#B8922A;--gold2:#D4A843;--gold-light:#F0E4C4;--bdr:rgba(26,24,20,0.10);}
+:root{--cream2:#EDE9E1;--gold-light:#F0E4C4;}
 .db{font-family:'DM Sans',sans-serif;color:var(--ink);display:flex;flex-direction:column;gap:22px;}
-.db-hero{background:linear-gradient(135deg,var(--ink) 0%,#2C2820 100%);border-radius:14px;padding:32px 36px;position:relative;overflow:hidden;}
+.db-hero{background:linear-gradient(135deg,var(--brand-dark) 0%,#2C2820 100%);border-radius:14px;padding:32px 36px;position:relative;overflow:hidden;}
 .db-hero::after{content:'';position:absolute;top:-60px;right:-60px;width:260px;height:260px;border-radius:50%;background:radial-gradient(circle,rgba(184,146,42,0.15) 0%,transparent 70%);pointer-events:none;}
 .db-hero::before{content:'';position:absolute;bottom:-40px;left:30%;width:180px;height:180px;border-radius:50%;background:radial-gradient(circle,rgba(184,146,42,0.08) 0%,transparent 70%);pointer-events:none;}
 .db-hero-tag{font-size:10px;font-weight:500;letter-spacing:2px;text-transform:uppercase;color:var(--gold);display:inline-flex;align-items:center;gap:6px;margin-bottom:14px;}
@@ -28,7 +28,7 @@ const CSS = `
 .db-hero-sub{font-size:13.5px;color:rgba(255,255,255,0.50);font-weight:300;line-height:1.7;}
 .db-hero-actions{display:flex;gap:10px;margin-top:20px;flex-wrap:wrap;}
 .db-hero-btn{display:inline-flex;align-items:center;gap:6px;padding:9px 18px;border-radius:8px;font-size:12.5px;font-weight:500;cursor:pointer;transition:all 0.2s;font-family:'DM Sans',sans-serif;border:none;}
-.db-hero-btn-primary{background:linear-gradient(135deg,var(--gold),var(--gold2));color:#fff;}
+.db-hero-btn-primary{background:linear-gradient(135deg,var(--brand-gold),var(--brand-gold2));color:#fff;}
 .db-hero-btn-primary:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(184,146,42,0.35);}
 .db-hero-btn-ghost{background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.75);border:1px solid rgba(255,255,255,0.12);}
 .db-hero-btn-ghost:hover{background:rgba(255,255,255,0.14);color:#fff;}
@@ -71,7 +71,7 @@ export default function DashboardPage() {
   const completedThisMonth = works.filter((w) => w.status === 'concluida').length;
   const totalPlanned = works.reduce((sum, w) => sum + w.totalBudget, 0);
   const totalActual = works.reduce((sum, w) => sum + w.currentCost, 0);
-  const avgMargin = works.length === 0 ? 0 : works.reduce((sum, w) => sum + w.margin, 0) / works.length;
+  const avgMargin = works.length === 0 ? 0 : works.reduce((sum, w) => sum + w.marginPercent, 0) / works.length;
   const pendingExtras = extras.filter((e) => e.status === 'pendente' || e.status === 'em_analise').length;
   const openCriticalIncidents = incidents.filter(
     (i) => i.status !== 'resolvido' && i.status !== 'cancelado' && (i.severity === 'alta' || i.severity === 'critica'),
@@ -102,13 +102,13 @@ export default function DashboardPage() {
           date: new Date().toISOString().slice(0, 10),
         });
       }
-      if (w.margin < 0) {
+      if (w.marginPercent < 0) {
         alerts.push({
           id: `alert-margin-${w.id}`,
           workId: w.id,
           workName: w.name,
           type: 'orcamento',
-          message: `Margem negativa detectada (${w.margin}%).`,
+          message: `Margem negativa detectada (${w.marginPercent.toFixed(1)}%).`,
           severity: 'critico',
           date: new Date().toISOString().slice(0, 10),
         });
@@ -147,7 +147,7 @@ export default function DashboardPage() {
       <style>{CSS}</style>
       <div className="db">
         {/* Hero */}
-        <motion.div className="db-hero" custom={0} initial="hidden" animate="visible" variants={fadeUp}>
+        <motion.div className="db-hero" data-tour-id="dashboard-hero" custom={0} initial="hidden" animate="visible" variants={fadeUp}>
           <div className="db-hero-tag"><span />Gestão de Obras</div>
           <h1 className="db-hero-h">
             Bem-vindo, <em>{user?.name?.split(' ')[0] || 'gestor'}</em>
@@ -166,7 +166,7 @@ export default function DashboardPage() {
         </motion.div>
 
         {/* KPIs */}
-        <motion.div custom={1} initial="hidden" animate="visible" variants={fadeUp}>
+        <motion.div data-tour-id="dashboard-kpis" custom={1} initial="hidden" animate="visible" variants={fadeUp}>
           <KpiCards kpis={kpis} />
         </motion.div>
 
@@ -206,7 +206,7 @@ export default function DashboardPage() {
                 <div className="db-section-title">Alertas de Risco</div>
               </div>
               {riskAlerts.length === 0 ? (
-                <div style={{ padding: 30, textAlign: 'center', background: '#fff', borderRadius: 12, border: '1px solid rgba(26,24,20,0.08)', color: '#7A7670' }}>
+                <div style={{ padding: 30, textAlign: 'center', background: 'var(--card-bg, #fff)', borderRadius: 12, border: '1px solid rgba(26,24,20,0.08)', color: 'var(--ink3, #7A7670)' }}>
                   <CheckCircle2 size={28} color="#1E8449" style={{ marginBottom: 8 }} />
                   <div style={{ fontSize: 13 }}>Nenhum alerta ativo.</div>
                 </div>

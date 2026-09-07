@@ -12,7 +12,7 @@ function formatCurrency(value: number) {
 export function FinancialChart() {
   return (
     <div style={{
-      background: '#fff',
+      background: 'var(--card-bg, #fff)',
       borderRadius: 12,
       border: '1px solid var(--bdr, rgba(26,24,20,0.10))',
       padding: '22px 24px',
@@ -49,8 +49,8 @@ export function FinancialChart() {
             </linearGradient>
           </defs>
           <CartesianGrid strokeDasharray="3 3" stroke="rgba(26,24,20,0.06)" />
-          <XAxis dataKey="month" tick={{ fontSize: 11, fill: '#7A7670' }} axisLine={false} tickLine={false} />
-          <YAxis tick={{ fontSize: 11, fill: '#7A7670' }} axisLine={false} tickLine={false} tickFormatter={formatCurrency} />
+          <XAxis dataKey="month" tick={{ fontSize: 11, fill: 'var(--ink3, #7A7670)' }} axisLine={false} tickLine={false} />
+          <YAxis tick={{ fontSize: 11, fill: 'var(--ink3, #7A7670)' }} axisLine={false} tickLine={false} tickFormatter={formatCurrency} />
           <Tooltip
             formatter={(value: number, name: string) => [formatCurrency(value), name === 'previsto' ? 'Previsto' : 'Realizado']}
             contentStyle={{ borderRadius: 8, border: '1px solid rgba(26,24,20,0.09)', fontSize: 12, fontFamily: "'DM Sans', sans-serif" }}

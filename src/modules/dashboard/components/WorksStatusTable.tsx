@@ -1,10 +1,19 @@
 import { useNavigate } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
-import type { Work } from '@/modules/shared/types';
+import type { Work, AddressDto } from '@/modules/shared/types';
 import { STATUS_CONFIG } from '@/modules/shared/types';
 
 interface WorksStatusTableProps {
   works: Work[];
+}
+
+function formatAddress(address: AddressDto | string): string {
+  if (!address) return '—';
+  if (typeof address === 'string') return address || '—';
+  const { street, number, neighborhood, city, state } = address;
+  return [street, number ? `nº ${number}` : null, neighborhood, city, state]
+    .filter(Boolean)
+    .join(', ') || '—';
 }
 
 function formatCurrency(value: number) {
@@ -16,7 +25,7 @@ export function WorksStatusTable({ works }: WorksStatusTableProps) {
 
   return (
     <div style={{
-      background: '#fff',
+      background: 'var(--card-bg, #fff)',
       borderRadius: 12,
       border: '1px solid var(--bdr, rgba(26,24,20,0.10))',
       boxShadow: '0 2px 10px rgba(26,24,20,0.04)',
@@ -58,10 +67,10 @@ export function WorksStatusTable({ works }: WorksStatusTableProps) {
                 >
                   <td style={{ padding: '14px 16px' }}>
                     <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--ink, #1A1814)' }}>{work.name}</div>
-                    <div style={{ fontSize: 11.5, color: 'var(--ink3, #7A7670)', marginTop: 2 }}>{work.address}</div>
+                    <div style={{ fontSize: 11.5, color: 'var(--ink3, #7A7670)', marginTop: 2 }}>{formatAddress(work.address)}</div>
                   </td>
                   <td style={{ padding: '14px 16px', fontSize: 12.5, color: 'var(--ink2, #3D3A34)' }}>
-                    {work.address}
+                    {formatAddress(work.address)}
                   </td>
                   <td style={{ padding: '14px 16px', minWidth: 120 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
