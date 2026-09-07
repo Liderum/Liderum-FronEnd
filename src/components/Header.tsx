@@ -73,7 +73,7 @@ const notifications = [
 ];
 
 export function Header() {
-  const { user, signOut } = useAuth();
+  const { user, signOut, isOnboardingComplete } = useAuth();
   const { resolvedTheme, setPreference } = useTheme();
   const navigate = useNavigate();
   const location = useLocation();
@@ -136,13 +136,15 @@ export function Header() {
             </DropdownMenuContent>
           </DropdownMenu>
 
-          <button
-            className="hd-icon-btn"
-            aria-label={resolvedTheme === 'dark' ? 'Ativar tema claro' : 'Ativar tema escuro'}
-            onClick={toggleTheme}
-          >
-            {resolvedTheme === 'dark' ? <Sun size={14} /> : <Moon size={14} />}
-          </button>
+          {isOnboardingComplete && (
+            <button
+              className="hd-icon-btn"
+              aria-label={resolvedTheme === 'dark' ? 'Ativar tema claro' : 'Ativar tema escuro'}
+              onClick={toggleTheme}
+            >
+              {resolvedTheme === 'dark' ? <Sun size={14} /> : <Moon size={14} />}
+            </button>
+          )}
 
           <div className="hd-sep" />
 

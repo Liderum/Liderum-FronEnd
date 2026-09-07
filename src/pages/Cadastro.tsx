@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Mail, User, Phone, Building, Lock, Shield, AlertCircle, Loader2, Eye, EyeOff, Check } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { useForceLightTheme } from '@/contexts/ThemeContext';
 import { validateEmail } from '@/lib/emailValidation';
 import { UserService } from '@/services/authService';
 
@@ -63,6 +64,7 @@ const CSS = `
 `;
 
 const Cadastro = () => {
+  useForceLightTheme();
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
