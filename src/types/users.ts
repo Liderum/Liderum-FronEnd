@@ -1,14 +1,14 @@
 export type UserStatus = 'active' | 'inactive';
 
 export interface UserDto {
-  id: string;
-  fullName: string;
+  identifier: string;
+  name: string;
   email: string;
-  role: string;
+  role: string | null;
   status: UserStatus;
-  createdAt?: string;
-  updatedAt?: string;
-  permissions?: string[];
+  createdAt: string;
+  updatedAt: string | null;
+  permissions: string[];
 }
 
 export interface CreateUserRequest {
@@ -45,13 +45,3 @@ export interface PagedResponse<T> {
   page: number;
   pageSize: number;
 }
-
-export interface ApiResponse<T> {
-  statusCode: number;
-  message: string;
-  data: T[];
-  error: null | string;
-  isSuccess: boolean;
-}
-
-

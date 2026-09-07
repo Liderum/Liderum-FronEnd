@@ -1,139 +1,79 @@
-// Configuração unificada de API que detecta automaticamente o ambiente
+// Configuração unificada de API — URLs resolvidas em build time via VITE_* env vars.
+//
+// Dois ambientes:
+//   dsv — desenvolvimento local + Vercel Preview (sem URL fixa)
+//   prd — produção em https://liderum.com.br/ (Vercel Production)
 export interface ApiConfig {
-  AUTH: {
-    BASE_URL: string;
-  };
-  FINANCIAL: {
-    BASE_URL: string;
-  };
-  BILLING: {
-    BASE_URL: string;
-  };
-  INVENTORY: {
-    BASE_URL: string;
-  };
-  USERS: {
-    BASE_URL: string;
-  };
-  MANAGEMENT: {
-    BASE_URL: string;
-  };
+  AUTH: { BASE_URL: string };
+  USERS: { BASE_URL: string };
+  WORKS: { BASE_URL: string };
+  RBAC: { BASE_URL: string };
+  TENANT: { BASE_URL: string };
 }
 
-// Função para detectar o ambiente atual
-const getEnvironment = (): 'development' | 'staging' | 'production' => {
-  // Verifica se está em produção baseado no modo do Vite
-  if (import.meta.env.MODE === 'production') {
-    return 'production';
-  }
-  
-  // Verifica se está em staging
-  if (import.meta.env.MODE === 'staging') {
-    return 'staging';
-  }
-  
-  // Verifica se está em desenvolvimento
-  if (import.meta.env.MODE === 'development') {
-    return 'development';
-  }
-  
-  // Fallback: verifica se está rodando localmente
-  if (import.meta.env.DEV) {
-    return 'development';
-  }
-  
-  return 'production';
-};
-
-// Configurações de desenvolvimento
-const developmentConfig: ApiConfig = {
-  AUTH: {
-    BASE_URL: import.meta.env.VITE_AUTH_API_URL || 'https://localhost:7247/liderum/api/login',
-  },
-  FINANCIAL: {
-    BASE_URL: import.meta.env.VITE_FINANCIAL_API_URL || 'https://localhost:3002',
-  },
-  BILLING: {
-    BASE_URL: import.meta.env.VITE_BILLING_API_URL || 'https://localhost:3003',
-  },
-  INVENTORY: {
-    BASE_URL: import.meta.env.VITE_INVENTORY_API_URL || 'https://localhost:7143/Liderum', 
-  },
-  USERS: {
-    BASE_URL: import.meta.env.VITE_USERS_API_URL || 'https://localhost:7247/liderum/api/user',
-  },
-  MANAGEMENT: {
-    BASE_URL: import.meta.env.VITE_MANAGEMENT_API_URL || 'https://localhost:7036',
-  },
-};
-
-// Configurações de staging (pode usar as mesmas de desenvolvimento ou URLs específicas)
-const stagingConfig: ApiConfig = {
-  AUTH: {
-    BASE_URL: import.meta.env.VITE_AUTH_API_URL || 'https://localhost:7247/liderum/api/login',
-  },
-  FINANCIAL: {
-    BASE_URL: import.meta.env.VITE_FINANCIAL_API_URL || 'https://localhost:3002',
-  },
-  BILLING: {
-    BASE_URL: import.meta.env.VITE_BILLING_API_URL || 'https://localhost:3003',
-  },
-  INVENTORY: {
-    BASE_URL: import.meta.env.VITE_INVENTORY_API_URL || 'https://localhost:7143/Liderum',
-  },
-  USERS: {
-    BASE_URL: import.meta.env.VITE_USERS_API_URL || 'https://localhost:7247/liderum/api/user',
-  },
-  MANAGEMENT: {
-    BASE_URL: import.meta.env.VITE_MANAGEMENT_API_URL || 'https://localhost:7036',
-  },
-};
-
-// Configurações de produção
-const productionConfig: ApiConfig = {
-  AUTH: {
-    BASE_URL: import.meta.env.VITE_AUTH_API_URL || '',
-  },
-  FINANCIAL: {
-    BASE_URL: import.meta.env.VITE_FINANCIAL_API_URL || '',
-  },
-  BILLING: {
-    BASE_URL: import.meta.env.VITE_BILLING_API_URL || '',
-  },
-  INVENTORY: {
-    BASE_URL: import.meta.env.VITE_INVENTORY_API_URL || '',
-  },
-  USERS: {
-    BASE_URL: import.meta.env.VITE_USERS_API_URL || '',
-  },
-  MANAGEMENT: {
-    BASE_URL: import.meta.env.VITE_MANAGEMENT_API_URL || '',
-  },
-};
-
-// Função para obter a configuração baseada no ambiente
-export const getApiConfig = (): ApiConfig => {
-  const environment = getEnvironment();
-  
-  switch (environment) {
-    case 'production':
-      return productionConfig;
-    case 'staging':
-      return stagingConfig;
-    case 'development':
-    default:
-      return developmentConfig;
-  }
-};
-
-// Exporta a configuração atual
-export const API_CONFIG = getApiConfig();
-
-// Exporta o tipo para compatibilidade
 export type ApiModule = keyof ApiConfig;
 
-// Log para debug (apenas em desenvolvimento)
+type AppEnv = 'dsv' | 'prd';
+
+const getEnvironment = (): AppEnv => {
+  // VITE_APP_ENV é injetado pela Vercel por ambiente (prd em Production, dsv em Preview).
+  // Em desenvolvimento local, cai no MODE do Vite (dsv via `npm run dev`).
+  const appEnv = import.meta.env.VITE_APP_ENV as string | undefined;
+  if (appEnv === 'prd') return 'prd';
+  if (appEnv === 'dsv') return 'dsv';
+  if (import.meta.env.MODE === 'prd' || import.meta.env.MODE === 'production') return 'prd';
+  return 'dsv';
+};
+
+// Liderum.Security.API roda em http://localhost:5065 (ver launchSettings.json).
+// Fallbacks para localhost são válidos apenas em dsv.
+const dsvConfig: ApiConfig = {
+  AUTH:  { BASE_URL: import.meta.env.VITE_AUTH_API_URL  || 'http://localhost:5065/liderum/api/login' },
+  USERS: { BASE_URL: import.meta.env.VITE_USERS_API_URL || 'http://localhost:5065/liderum/api/user' },
+  WORKS: { BASE_URL: import.meta.env.VITE_WORKS_API_URL || 'https://localhost:7141/api/v1' },
+  RBAC:  { BASE_URL: import.meta.env.VITE_RBAC_API_URL  || 'http://localhost:5065/liderum/api/rbac' },
+  TENANT: { BASE_URL: import.meta.env.VITE_TENANT_API_URL || 'http://localhost:5065/liderum/api/tenant' },
+};
+
+// Sem fallback — prd exige que todas as VITE_* estejam definidas na Vercel.
+// Se faltar alguma, a validação abaixo aborta o startup com erro claro.
+const prdConfig: ApiConfig = {
+  AUTH:  { BASE_URL: import.meta.env.VITE_AUTH_API_URL  || '' },
+  USERS: { BASE_URL: import.meta.env.VITE_USERS_API_URL || '' },
+  WORKS: { BASE_URL: import.meta.env.VITE_WORKS_API_URL || '' },
+  RBAC:  { BASE_URL: import.meta.env.VITE_RBAC_API_URL  || '' },
+  TENANT: { BASE_URL: import.meta.env.VITE_TENANT_API_URL || '' },
+};
+
+/**
+ * Valida que todas as URLs obrigatórias estão preenchidas em prd.
+ * Lança um erro em tempo de inicialização para evitar falhas silenciosas em produção.
+ */
+function validateConfig(config: ApiConfig, env: AppEnv): void {
+  const required: (keyof ApiConfig)[] = ['AUTH', 'USERS', 'WORKS', 'RBAC', 'TENANT'];
+  const missing = required.filter((key) => !config[key].BASE_URL);
+  if (missing.length > 0) {
+    throw new Error(
+      `[Liderum] Variáveis de ambiente obrigatórias não definidas para o ambiente "${env}": ` +
+      missing.map((k) => `VITE_${k}_API_URL`).join(', ') +
+      '. Defina-as nas variáveis de ambiente da Vercel (Production).',
+    );
+  }
+}
+
+export const getApiConfig = (): ApiConfig => {
+  const environment = getEnvironment();
+
+  if (environment === 'prd') {
+    validateConfig(prdConfig, 'prd');
+    return prdConfig;
+  }
+
+  return dsvConfig;
+};
+
+export const API_CONFIG = getApiConfig();
+
 if (import.meta.env.DEV) {
-  console.log('🔧 Ambiente detectado:', getEnvironment());
-  console.log('🌐 Configuração de API:', API_CONFIG);
+  console.log('[Liderum] Ambiente detectado:', getEnvironment());
 }

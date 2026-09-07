@@ -1,245 +1,186 @@
-import { NavLink, useLocation } from 'react-router-dom';
-import { useState } from 'react';
-import { motion, AnimatePresence } from "framer-motion";
-import { 
-  Home,
-  ShoppingCart,
-  FileText,
-  Package,
-  Users,
-  BarChart3,
-  Truck,
-  CreditCard,
-  TrendingUp,
-  Calendar,
-  ChevronRight,
-  ChevronDown,
-  Building2,
-  UserCheck,
-  ExternalLink,
-  Zap,
-  LayoutDashboard
+import { useMemo } from 'react';
+import { NavLink, useLocation, useNavigate } from 'react-router-dom';
+import {
+  Home, Building2, CalendarClock, DollarSign, FilePlus2,
+  BookOpen, Users, Settings, LogOut,
+  Building, Truck, Shield,
 } from 'lucide-react';
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
+import { useAuth } from '../contexts/AuthContext';
+import { useToast } from "@/hooks/use-toast";
 
-const mainNavigation = [
-  { 
-    name: 'Home', 
-    href: '/home', 
-    icon: Home,
-    badge: null
+const CSS = `
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;700&family=DM+Sans:wght@300;400;500&display=swap');
+:root{--cream2:#EDE9E1;--gold-light:#F0E4C4;}
+.sb{font-family:'DM Sans',sans-serif;width:210px;min-width:210px;background:var(--sidebar-bg,#fff);border-right:1px solid var(--bdr,rgba(26,24,20,0.10));display:flex;flex-direction:column;height:100vh;overflow:hidden;}
+.sb-logo{padding:16px 16px 12px;border-bottom:1px solid var(--bdr,rgba(26,24,20,0.10));display:flex;align-items:center;gap:10px;flex-shrink:0;}
+.sb-logo-mark{width:30px;height:30px;background:var(--brand-dark,#1A1814);border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0;position:relative;overflow:hidden;}
+.sb-logo-mark::after{content:'';position:absolute;bottom:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--gold),var(--gold2));}
+.sb-logo-mark span{font-family:'Cormorant Garamond',serif;color:#fff;font-size:15px;font-weight:700;line-height:1;}
+.sb-logo-text{flex:1;min-width:0;}
+.sb-logo-title{font-family:'Cormorant Garamond',serif;font-size:14px;font-weight:700;color:var(--ink);line-height:1.2;}
+.sb-logo-sub{font-size:10px;color:var(--ink3);font-weight:300;letter-spacing:0.3px;}
+.sb-scroll{flex:1;overflow-y:auto;padding:10px 8px;}
+.sb-scroll::-webkit-scrollbar{width:3px;}
+.sb-scroll::-webkit-scrollbar-track{background:transparent;}
+.sb-scroll::-webkit-scrollbar-thumb{background:var(--cream2);border-radius:10px;}
+.sb-section{margin-bottom:18px;}
+.sb-section-label{font-size:9.5px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--ink3);padding:0 8px;margin-bottom:4px;}
+.sb-item{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:7px 8px;border-radius:7px;font-size:12.5px;color:var(--ink2);font-weight:400;cursor:pointer;transition:all 0.16s;text-decoration:none;border:none;background:none;width:100%;font-family:'DM Sans',sans-serif;position:relative;}
+.sb-item:hover{background:var(--cream);color:var(--ink);}
+.sb-item.active{background:rgba(184,146,42,0.07);color:var(--gold);font-weight:500;}
+.sb-item.active::before{content:'';position:absolute;left:-8px;top:50%;transform:translateY(-50%);width:2px;height:65%;background:var(--gold);border-radius:0 2px 2px 0;}
+.sb-item-left{display:flex;align-items:center;gap:8px;}
+.sb-badge{min-width:17px;height:17px;padding:0 4px;background:rgba(184,146,42,0.12);color:var(--gold);border-radius:10px;font-size:10px;font-weight:600;display:flex;align-items:center;justify-content:center;}
+.sb-divider{height:1px;background:var(--bdr);margin:6px 0;}
+.sb-bottom{padding:8px;border-top:1px solid var(--bdr);flex-shrink:0;}
+.sb-user{display:flex;align-items:center;gap:9px;padding:8px;border-radius:8px;cursor:pointer;transition:all 0.16s;border:1px solid transparent;}
+.sb-user:hover{background:var(--cream);border-color:var(--bdr);}
+.sb-avatar{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--gold-light),var(--cream2));display:flex;align-items:center;justify-content:center;font-family:'Cormorant Garamond',serif;font-size:11px;font-weight:700;color:var(--gold);flex-shrink:0;border:1px solid rgba(184,146,42,0.2);}
+.sb-user-info{flex:1;min-width:0;}
+.sb-user-name{font-size:12px;font-weight:500;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.sb-user-role{font-size:10.5px;color:var(--ink3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.sb-action-row{display:flex;gap:4px;margin-top:6px;}
+.sb-action-btn{flex:1;display:flex;align-items:center;justify-content:center;gap:5px;padding:5px 6px;border-radius:6px;font-size:11px;color:var(--ink3);border:1px solid var(--bdr);background:var(--card-bg,#fff);cursor:pointer;transition:all 0.15s;font-family:'DM Sans',sans-serif;}
+.sb-action-btn:hover{background:var(--cream);color:var(--ink);}
+.sb-action-btn.danger:hover{background:#FDEDEC;color:#C0392B;border-color:rgba(192,57,43,0.2);}
+`;
+
+interface NavItem {
+  name: string;
+  href: string;
+  icon: React.ElementType;
+  badge?: string;
+  permission?: string;
+  tourId?: string;
+}
+
+interface NavSection {
+  label: string;
+  items: NavItem[];
+}
+
+// Os valores de "permission" devem coincidir com os claims "permissions"
+// emitidos no JWT pela Security API (definidos em WorksPermissions.cs e no seed SQL).
+const navSections: NavSection[] = [
+  {
+    label: 'Operação',
+    items: [
+      { name: 'Dashboard', href: '/home', icon: Home, permission: 'dashboard.read', tourId: 'nav-dashboard' },
+      { name: 'Obras', href: '/works', icon: Building2, permission: 'works.read', tourId: 'nav-obras' },
+    ],
   },
-  { 
-    name: 'Dashboard', 
-    href: '/dashboard', 
-    icon: LayoutDashboard,
-    badge: null
+  {
+    label: 'Gestão de Obras',
+    items: [
+      { name: 'Cronograma', href: '/works', icon: CalendarClock, permission: 'schedule.read', tourId: 'nav-gestao' },
+      { name: 'Orçamento', href: '/works', icon: DollarSign, permission: 'budget.read' },
+      { name: 'Extras', href: '/works', icon: FilePlus2, permission: 'extras.read' },
+      { name: 'Diário de Obra', href: '/works', icon: BookOpen, permission: 'dailylogs.read' },
+    ],
   },
-  { 
-    name: 'Vendas', 
-    href: '/sales', 
-    icon: ShoppingCart,
-    badge: '5'
+  {
+    label: 'Cadastros',
+    items: [
+      { name: 'Empresas', href: '/management/companies', icon: Building, permission: 'companies.read', tourId: 'nav-cadastros' },
+      { name: 'Clientes', href: '/management/customers', icon: Users, permission: 'customers.read' },
+      { name: 'Fornecedores', href: '/management/suppliers', icon: Truck, permission: 'suppliers.read' },
+    ],
   },
-  { 
-    name: 'Faturamento', 
-    href: '/billing', 
-    icon: FileText,
-    badge: '3'
-  },
-  { 
-    name: 'Estoque', 
-    href: '/inventory', 
-    icon: Package,
-    badge: '2'
+  {
+    label: 'Administração',
+    items: [
+      { name: 'Usuários', href: '/management/users', icon: Users, permission: 'users.view', tourId: 'nav-admin' },
+      { name: 'Controle de Acesso', href: '/management/rbac', icon: Shield, permission: 'users.rbac.manage' },
+      { name: 'Configurações', href: '/settings', icon: Settings, permission: 'settings.view' },
+    ],
   },
 ];
-
-const secondaryNavigation = [
-  {
-    name: 'Marketplaces',
-    icon: Zap,
-    children: [
-      { name: 'Mercado Livre', href: '/sales/mercadolivre', icon: ExternalLink },
-      { name: 'Amazon', href: '/sales/amazon', icon: ExternalLink },
-      { name: 'Shopee', href: '/sales/shopee', icon: ExternalLink },
-    ]
-  },
-  {
-    name: 'Relatórios',
-    icon: BarChart3,
-    children: [
-      { name: 'Vendas', href: '/dashboard/reports/sales', icon: TrendingUp },
-      { name: 'Financeiro', href: '/dashboard/reports/financial', icon: ShoppingCart },
-      { name: 'Estoque', href: '/dashboard/reports/inventory', icon: Package },
-    ]
-  },
-  {
-    name: 'Gestão',
-    icon: Building2,
-    children: [
-      { name: 'Empresas', href: '/management/companies', icon: Building2 },
-      { name: 'Clientes', href: '/management/customers', icon: Users },
-      { name: 'Fornecedores', href: '/management/suppliers', icon: Truck },
-      { name: 'Usuários', href: '/management/users', icon: UserCheck },
-    ]
-  },
-  {
-    name: 'Operações',
-    icon: ShoppingCart,
-    children: [
-      { name: 'Pedidos', href: '/dashboard/orders', icon: ShoppingCart },
-      { name: 'Entregas', href: '/dashboard/deliveries', icon: Truck },
-      { name: 'Pagamentos', href: '/dashboard/payments', icon: CreditCard },
-    ]
-  }
-];
-
-const bottomNavigation = [];
 
 export function Sidebar() {
-  const [expandedSections, setExpandedSections] = useState<string[]>([]);
   const location = useLocation();
+  const navigate = useNavigate();
+  const { user, signOut, permissions } = useAuth();
+  const { toast } = useToast();
 
-  const toggleSection = (sectionName: string) => {
-    setExpandedSections(prev => 
-      prev.includes(sectionName) 
-        ? prev.filter(name => name !== sectionName)
-        : [...prev, sectionName]
-    );
+  const isActive = (href: string) =>
+    location.pathname === href || location.pathname.startsWith(href + '/');
+
+  const getInitials = (name: string) =>
+    name.split(' ').map((w) => w[0]).join('').toUpperCase().slice(0, 2);
+
+  const handleSignOut = () => {
+    signOut();
+    toast({ title: 'Logout realizado', description: 'Você foi desconectado com sucesso' });
   };
 
-  const isActive = (href: string) => {
-    return location.pathname === href || location.pathname.startsWith(href + '/');
-  };
+  const hasPerm = (perm?: string) => !perm || permissions.includes(perm);
+
+  const visibleSections = useMemo(
+    () =>
+      navSections
+        .map((section) => ({
+          ...section,
+          items: section.items.filter((item) => hasPerm(item.permission)),
+        }))
+        .filter((section) => section.items.length > 0),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [permissions],
+  );
 
   return (
-    <div className="w-64 bg-white border-r border-gray-200 h-full flex flex-col">
-      {/* Logo */}
-      <div className="p-6">
-        <div className="flex items-center space-x-2">
-          <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-blue-800 rounded-lg flex items-center justify-center">
-            <span className="text-white font-bold text-sm">L</span>
-          </div>
-          <div>
-            <h2 className="text-lg font-bold text-gray-900">Liderum ERP</h2>
-            <p className="text-xs text-gray-500">Sistema de Gestão</p>
+    <>
+      <style>{CSS}</style>
+      <aside className="sb">
+        <div className="sb-logo">
+          <div className="sb-logo-mark"><span>L</span></div>
+          <div className="sb-logo-text">
+            <div className="sb-logo-title">Liderum</div>
+            <div className="sb-logo-sub">Gestão de Obras</div>
           </div>
         </div>
-      </div>
 
-      {/* Navegação Principal */}
-      <div className="flex-1 overflow-y-auto">
-        <nav className="p-4 space-y-2">
-          {/* Menu Principal */}
-          <div className="space-y-1">
-            <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">
-              Principal
-            </h3>
-            {mainNavigation.map((item) => {
-              const Icon = item.icon;
-              const active = isActive(item.href);
-              
-              return (
-                <NavLink
-                  key={item.name}
-                  to={item.href}
-                  className={({ isActive }) =>
-                    `group flex items-center justify-between px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200 ${
-                      isActive || active
-                        ? 'bg-blue-50 text-blue-700 border border-blue-200'
-                        : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'
-                    }`
-                  }
-                >
-                  <div className="flex items-center space-x-3">
-                    <Icon className={`h-5 w-5 ${active ? 'text-blue-600' : 'text-gray-400 group-hover:text-gray-600'}`} />
-                    <span>{item.name}</span>
-                  </div>
-                  {item.badge && (
-                    <Badge variant="destructive" className="h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs">
-                      {item.badge}
-                    </Badge>
-                  )}
-                </NavLink>
-              );
-            })}
-          </div>
-
-          <Separator className="my-4" />
-
-          {/* Navegação Secundária */}
-          <div className="space-y-1">
-            <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">
-              Módulos
-            </h3>
-            {secondaryNavigation.map((section) => {
-              const Icon = section.icon;
-              const isExpanded = expandedSections.includes(section.name);
-              const hasActiveChild = section.children.some(child => isActive(child.href));
-              
-              return (
-                <div key={section.name}>
-                  <button
-                    onClick={() => toggleSection(section.name)}
-                    className={`w-full flex items-center justify-between px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200 ${
-                      hasActiveChild
-                        ? 'bg-blue-50 text-blue-700 border border-blue-200'
-                        : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'
-                    }`}
+        <div className="sb-scroll">
+          {visibleSections.map((section) => (
+            <div key={section.label} className="sb-section">
+              <div className="sb-section-label">{section.label}</div>
+              {section.items.map((item) => {
+                const Icon = item.icon;
+                return (
+                  <NavLink
+                    key={item.name}
+                    to={item.href}
+                    data-tour-id={item.tourId}
+                    className={({ isActive: a }) =>
+                      `sb-item${a || isActive(item.href) ? ' active' : ''}`
+                    }
                   >
-                    <div className="flex items-center space-x-3">
-                      <Icon className={`h-5 w-5 ${hasActiveChild ? 'text-blue-600' : 'text-gray-400'}`} />
-                      <span>{section.name}</span>
+                    <div className="sb-item-left">
+                      <Icon size={14} />
+                      <span>{item.name}</span>
                     </div>
-                    {isExpanded ? (
-                      <ChevronDown className="h-4 w-4 text-gray-400" />
-                    ) : (
-                      <ChevronRight className="h-4 w-4 text-gray-400" />
-                    )}
-                  </button>
-                  
-                  <AnimatePresence>
-                    {isExpanded && (
-                      <motion.div
-                        initial={{ opacity: 0, height: 0 }}
-                        animate={{ opacity: 1, height: 'auto' }}
-                        exit={{ opacity: 0, height: 0 }}
-                        transition={{ duration: 0.2 }}
-                        className="ml-6 mt-1 space-y-1"
-                      >
-                        {section.children.map((child) => {
-                          const ChildIcon = child.icon;
-                          const active = isActive(child.href);
-                          
-                          return (
-                            <NavLink
-                              key={child.name}
-                              to={child.href}
-                              className={({ isActive }) =>
-                                `group flex items-center space-x-3 px-3 py-2 text-sm rounded-lg transition-all duration-200 ${
-                                  isActive || active
-                                    ? 'bg-blue-50 text-blue-700'
-                                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-                                }`
-                              }
-                            >
-                              <ChildIcon className={`h-4 w-4 ${active ? 'text-blue-600' : 'text-gray-400 group-hover:text-gray-600'}`} />
-                              <span>{child.name}</span>
-                            </NavLink>
-                          );
-                        })}
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
-              );
-            })}
+                    {item.badge && <span className="sb-badge">{item.badge}</span>}
+                  </NavLink>
+                );
+              })}
+            </div>
+          ))}
+        </div>
+
+        <div className="sb-bottom">
+          <div className="sb-user" onClick={() => navigate('/settings')}>
+            <div className="sb-avatar">{getInitials(user?.name || 'U')}</div>
+            <div className="sb-user-info">
+              <div className="sb-user-name">{user?.name || 'Usuário'}</div>
+              <div className="sb-user-role">{user?.email || ''}</div>
+            </div>
           </div>
-        </nav>
-      </div>
-    </div>
+          <div className="sb-action-row">
+            <button className="sb-action-btn danger" onClick={handleSignOut}>
+              <LogOut size={11} /> Sair
+            </button>
+          </div>
+        </div>
+      </aside>
+    </>
   );
-} 
+}

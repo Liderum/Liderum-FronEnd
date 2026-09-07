@@ -1,224 +1,160 @@
 import { useEffect, useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useSimpleToast } from '@/hooks/useSimpleToast';
 import { CompanyService } from '@/services/managementService';
 import { Company, CreateCompanyDto, UpdateCompanyDto } from '@/types/management';
+import { cleanCnpj, formatCnpj, isValidCnpj } from '@/utils/cnpj';
 import { Plus, Pencil, Trash2, Building2, RefreshCw } from 'lucide-react';
+
+const LDCSS = `
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;700&family=DM+Sans:wght@300;400;500&display=swap');
+:root{--cream2:#EDE9E1;--gold-light:#F0E4C4;}
+.ld{font-family:'DM Sans',sans-serif;color:var(--ink);}
+.ld-tag{font-size:9.5px;font-weight:500;letter-spacing:1.6px;text-transform:uppercase;color:var(--gold);display:block;margin-bottom:4px;}
+.ld-h1{font-family:'Cormorant Garamond',serif;font-size:clamp(18px,2.5vw,24px);font-weight:700;line-height:1.15;letter-spacing:-0.3px;color:var(--ink);}
+.ld-sub{font-size:12px;color:var(--ink3);font-weight:300;}
+.ld-card{background:var(--card-bg, #fff);border-radius:10px;border:1px solid var(--bdr);box-shadow:0 2px 12px rgba(26,24,20,0.04);position:relative;overflow:hidden;}
+.ld-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--gold),var(--gold2));}
+.ld-card-body{padding:14px 16px;}
+.ld-table{width:100%;border-collapse:collapse;font-size:12.5px;}
+.ld-table thead th{text-align:left;font-size:10px;font-weight:600;letter-spacing:0.5px;text-transform:uppercase;color:var(--ink3);padding:8px 10px;border-bottom:1px solid var(--bdr);background:rgb(var(--cream-rgb, 247 244 239) / 0.4);}
+.ld-table tbody td{padding:9px 10px;border-bottom:1px solid rgba(26,24,20,0.05);color:var(--ink2);}
+.ld-table tbody tr:hover{background:rgb(var(--cream-rgb, 247 244 239) / 0.3);}
+.ld-table tbody td:first-child{font-weight:500;color:var(--ink);}
+.ld-field{display:flex;flex-direction:column;gap:4px;margin-bottom:10px;}
+.ld-lbl{font-size:11px;font-weight:500;color:var(--ink2);}
+.ld-btn{display:inline-flex;align-items:center;gap:5px;padding:7px 14px;border-radius:7px;font-size:12px;font-weight:500;font-family:'DM Sans',sans-serif;border:none;cursor:pointer;transition:all 0.18s;}
+.ld-btn-dark{background:var(--brand-dark);color:#fff;}
+.ld-btn-dark:hover:not(:disabled){background:var(--brand-gold);}
+.ld-btn-outline{background:var(--card-bg, #fff);color:var(--ink);border:1px solid var(--bdr);}
+.ld-btn-outline:hover:not(:disabled){border-color:var(--gold);color:var(--gold);}
+.ld-btn-sm{padding:4px 8px;font-size:11px;}
+.ld-btn-danger{background:var(--card-bg, #fff);color:#C0392B;border:1px solid rgba(192,57,43,0.15);}
+.ld-btn-danger:hover{background:#FDEDEC;}
+.ld-btn:disabled{opacity:0.4;cursor:not-allowed;}
+.ld-empty{text-align:center;padding:28px 0;color:var(--ink3);font-size:12.5px;}
+@keyframes ld-in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.ld-a1{animation:ld-in 0.3s cubic-bezier(0.22,1,0.36,1) both;}
+.ld-a2{animation:ld-in 0.3s cubic-bezier(0.22,1,0.36,1) 0.06s both;}
+`;
 
 export function Companies() {
   const { showToast } = useSimpleToast();
-
   const [loading, setLoading] = useState(false);
   const [companies, setCompanies] = useState<Company[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingCompany, setEditingCompany] = useState<Company | null>(null);
-  const [form, setForm] = useState<CreateCompanyDto>({
-    razaoSocial: '',
-    nomeFantasia: '',
-    documento: '',
-  });
+  const [form, setForm] = useState<CreateCompanyDto>({ name: '', cnpj: '' });
 
   async function loadCompanies() {
     setLoading(true);
-    try {
-      const data = await CompanyService.list();
-      setCompanies(data);
-    } catch (e: unknown) {
-      showToast(e instanceof Error ? e.message : 'Falha ao carregar empresas', 'error');
-    } finally {
-      setLoading(false);
-    }
+    try { setCompanies(await CompanyService.list()); }
+    catch (e: unknown) { showToast(e instanceof Error ? e.message : 'Falha ao carregar empresas', 'error'); }
+    finally { setLoading(false); }
   }
 
-  useEffect(() => {
-    loadCompanies();
-  }, []);
+  useEffect(() => { loadCompanies(); }, []);
 
   function openCreate() {
     setEditingCompany(null);
-    setForm({ razaoSocial: '', nomeFantasia: '', documento: '' });
+    setForm({ name: '', cnpj: '' });
     setIsModalOpen(true);
   }
 
-  function openEdit(company: Company) {
-    setEditingCompany(company);
-    setForm({
-      razaoSocial: company.razaoSocial || '',
-      nomeFantasia: company.nomeFantasia || '',
-      documento: company.documento || '',
-    });
+  function openEdit(c: Company) {
+    setEditingCompany(c);
+    setForm({ name: c.name || '', cnpj: c.cnpj ? formatCnpj(c.cnpj) : '' });
     setIsModalOpen(true);
   }
 
   async function handleSubmit() {
     try {
-      if (!form.razaoSocial || !form.documento) {
-        showToast('Preencha os campos obrigatórios (Razão Social e Documento)', 'error');
-        return;
-      }
-
+      if (!form.name) { showToast('Preencha a Razão Social', 'error'); return; }
+      if (form.cnpj && !isValidCnpj(form.cnpj)) { showToast('CNPJ inválido', 'error'); return; }
+      const payload = { ...form, cnpj: form.cnpj ? cleanCnpj(form.cnpj) : form.cnpj };
       if (!editingCompany) {
-        await CompanyService.create(form);
+        await CompanyService.create(payload);
         showToast('Empresa criada com sucesso', 'success');
       } else {
-        const payload: UpdateCompanyDto = {
-          ...form,
-          rowVersion: editingCompany.rowVersion,
-        };
-        await CompanyService.update(editingCompany.id, payload);
+        await CompanyService.update(editingCompany.id, payload as UpdateCompanyDto);
         showToast('Empresa atualizada com sucesso', 'success');
       }
       setIsModalOpen(false);
       loadCompanies();
-    } catch (e: unknown) {
-      showToast(e instanceof Error ? e.message : 'Erro ao salvar', 'error');
-    }
+    } catch (e: unknown) { showToast(e instanceof Error ? e.message : 'Erro ao salvar', 'error'); }
   }
 
-  async function handleDelete(company: Company) {
-    const confirmed = window.confirm(`Excluir empresa ${company.razaoSocial}?`);
-    if (!confirmed) return;
-    try {
-      showToast('Funcionalidade de exclusão não disponível na API', 'info');
-    } catch (e: unknown) {
-      showToast(e instanceof Error ? e.message : 'Erro ao excluir', 'error');
-    }
+  async function handleDelete(c: Company) {
+    if (!window.confirm(`Excluir empresa ${c.name}?`)) return;
+    showToast('Funcionalidade de exclusão não disponível na API', 'info');
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Empresas</h1>
-          <p className="text-gray-600 mt-1">Gerencie as empresas cadastradas</p>
-        </div>
-        <div className="flex gap-2">
-          <Button onClick={loadCompanies} variant="outline" className="gap-2">
-            <RefreshCw className="h-4 w-4" />
-            Atualizar
-          </Button>
-          <Button onClick={openCreate} className="gap-2">
-            <Plus className="h-4 w-4" />
-            Nova Empresa
-          </Button>
-        </div>
-      </div>
+    <>
+      <style>{LDCSS}</style>
+      <div className="ld" style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Building2 className="h-5 w-5" />
-            Lista de Empresas
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          {loading ? (
-            <div className="flex items-center justify-center py-8">
-              <RefreshCw className="h-6 w-6 animate-spin text-primary" />
-            </div>
-          ) : (
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Razão Social</TableHead>
-                    <TableHead>Nome Fantasia</TableHead>
-                    <TableHead>Documento</TableHead>
-                    <TableHead className="text-right">Ações</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {companies.length === 0 && (
-                    <TableRow>
-                      <TableCell colSpan={4} className="text-center text-sm text-gray-500">
-                        Nenhuma empresa encontrada
-                      </TableCell>
-                    </TableRow>
-                  )}
-                  {companies.map((company) => (
-                    <TableRow key={company.id}>
-                      <TableCell className="font-medium">{company.razaoSocial}</TableCell>
-                      <TableCell>{company.nomeFantasia || '-'}</TableCell>
-                      <TableCell>{company.documento}</TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex justify-end gap-2">
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => openEdit(company)}
-                            className="gap-1"
-                          >
-                            <Pencil className="h-4 w-4" />
-                            Editar
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="destructive"
-                            onClick={() => handleDelete(company)}
-                            className="gap-1"
-                            disabled
-                          >
-                            <Trash2 className="h-4 w-4" />
-                            Excluir
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-          )}
-        </CardContent>
-      </Card>
-
-      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>
-              {editingCompany ? 'Editar Empresa' : 'Nova Empresa'}
-            </DialogTitle>
-          </DialogHeader>
-          <div className="grid grid-cols-1 gap-4">
-            <div>
-              <Label>Razão Social *</Label>
-              <Input
-                value={form.razaoSocial}
-                onChange={(e) => setForm({ ...form, razaoSocial: e.target.value })}
-                placeholder="Razão Social"
-              />
-            </div>
-            <div>
-              <Label>Nome Fantasia</Label>
-              <Input
-                value={form.nomeFantasia}
-                onChange={(e) => setForm({ ...form, nomeFantasia: e.target.value })}
-                placeholder="Nome Fantasia"
-              />
-            </div>
-            <div>
-              <Label>Documento (CNPJ) *</Label>
-              <Input
-                value={form.documento}
-                onChange={(e) => setForm({ ...form, documento: e.target.value })}
-                placeholder="00.000.000/0000-00"
-              />
-            </div>
+        <div className="ld-a1" style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: 10 }}>
+          <div>
+            <span className="ld-tag">Gestão</span>
+            <h1 className="ld-h1" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <Building2 size={17} color="var(--gold)" /> Empresas
+            </h1>
+            <p className="ld-sub" style={{ marginTop: 2 }}>Gerencie as empresas cadastradas</p>
           </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsModalOpen(false)}>
-              Cancelar
-            </Button>
-            <Button onClick={handleSubmit}>Salvar</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-    </div>
+          <div style={{ display: 'flex', gap: 6 }}>
+            <button className="ld-btn ld-btn-outline" onClick={loadCompanies}><RefreshCw size={12} /> Atualizar</button>
+            <button className="ld-btn ld-btn-dark" onClick={openCreate}><Plus size={12} /> Nova Empresa</button>
+          </div>
+        </div>
+
+        <div className="ld-card ld-a2">
+          <div className="ld-card-body" style={{ padding: 0 }}>
+            {loading ? (
+              <div className="ld-empty"><RefreshCw size={18} color="var(--gold)" className="animate-spin" style={{ margin: '0 auto 6px', display: 'block' }} />Carregando...</div>
+            ) : companies.length === 0 ? (
+              <div className="ld-empty">Nenhuma empresa encontrada</div>
+            ) : (
+              <table className="ld-table">
+                <thead><tr><th>Razão Social</th><th>CNPJ</th><th style={{ textAlign: 'right' }}>Ações</th></tr></thead>
+                <tbody>
+                  {companies.map(c => (
+                    <tr key={c.id}>
+                      <td>{c.name}</td>
+                      <td>{c.cnpj ? formatCnpj(c.cnpj) : '—'}</td>
+                      <td style={{ textAlign: 'right' }}>
+                        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 4 }}>
+                          <button className="ld-btn ld-btn-outline ld-btn-sm" onClick={() => openEdit(c)}><Pencil size={10} /></button>
+                          <button className="ld-btn ld-btn-danger ld-btn-sm" onClick={() => handleDelete(c)} disabled><Trash2 size={10} /></button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </div>
+        </div>
+
+        <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>
+                {editingCompany ? 'Editar Empresa' : 'Nova Empresa'}
+              </DialogTitle>
+            </DialogHeader>
+            <div style={{ display: 'flex', flexDirection: 'column' }}>
+              <div className="ld-field"><label className="ld-lbl">Razão Social *</label><Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Razão Social" /></div>
+              <div className="ld-field"><label className="ld-lbl">CNPJ</label><Input value={form.cnpj} onChange={(e) => setForm({ ...form, cnpj: formatCnpj(e.target.value) })} placeholder="00.000.000/0000-00" maxLength={18} /></div>
+            </div>
+            <DialogFooter style={{ marginTop: 4 }}>
+              <button className="ld-btn ld-btn-outline" onClick={() => setIsModalOpen(false)}>Cancelar</button>
+              <button className="ld-btn ld-btn-dark" onClick={handleSubmit}>Salvar</button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      </div>
+    </>
   );
 }
-

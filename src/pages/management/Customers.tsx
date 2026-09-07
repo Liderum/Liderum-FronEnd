@@ -1,294 +1,199 @@
 import { useEffect, useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useSimpleToast } from '@/hooks/useSimpleToast';
 import { CustomerService, CompanyService } from '@/services/managementService';
 import { Customer, CreateCustomerDto, UpdateCustomerDto, Company } from '@/types/management';
+import { cleanCnpj, formatCnpj, isValidCnpj } from '@/utils/cnpj';
 import { Plus, Pencil, Trash2, Users, RefreshCw, Building2 } from 'lucide-react';
+
+const LDCSS = `
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;700&family=DM+Sans:wght@300;400;500&display=swap');
+:root{--cream2:#EDE9E1;--gold-light:#F0E4C4;}
+.ld{font-family:'DM Sans',sans-serif;color:var(--ink);}
+.ld-tag{font-size:9.5px;font-weight:500;letter-spacing:1.6px;text-transform:uppercase;color:var(--gold);display:block;margin-bottom:4px;}
+.ld-h1{font-family:'Cormorant Garamond',serif;font-size:clamp(18px,2.5vw,24px);font-weight:700;line-height:1.15;letter-spacing:-0.3px;color:var(--ink);}
+.ld-sub{font-size:12px;color:var(--ink3);font-weight:300;}
+.ld-card{background:var(--card-bg, #fff);border-radius:10px;border:1px solid var(--bdr);box-shadow:0 2px 12px rgba(26,24,20,0.04);position:relative;overflow:hidden;}
+.ld-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--gold),var(--gold2));}
+.ld-card-body{padding:14px 16px;}
+.ld-h2{font-family:'Cormorant Garamond',serif;font-size:13.5px;font-weight:700;color:var(--ink);display:flex;align-items:center;gap:6px;margin-bottom:10px;}
+.ld-table{width:100%;border-collapse:collapse;font-size:12.5px;}
+.ld-table thead th{text-align:left;font-size:10px;font-weight:600;letter-spacing:0.5px;text-transform:uppercase;color:var(--ink3);padding:8px 10px;border-bottom:1px solid var(--bdr);background:rgb(var(--cream-rgb, 247 244 239) / 0.4);}
+.ld-table tbody td{padding:9px 10px;border-bottom:1px solid rgba(26,24,20,0.05);color:var(--ink2);}
+.ld-table tbody tr:hover{background:rgb(var(--cream-rgb, 247 244 239) / 0.3);}
+.ld-table tbody td:first-child{font-weight:500;color:var(--ink);}
+.ld-field{display:flex;flex-direction:column;gap:4px;margin-bottom:10px;}
+.ld-lbl{font-size:11px;font-weight:500;color:var(--ink2);}
+.ld-btn{display:inline-flex;align-items:center;gap:5px;padding:7px 14px;border-radius:7px;font-size:12px;font-weight:500;font-family:'DM Sans',sans-serif;border:none;cursor:pointer;transition:all 0.18s;}
+.ld-btn-dark{background:var(--brand-dark);color:#fff;}
+.ld-btn-dark:hover:not(:disabled){background:var(--brand-gold);}
+.ld-btn-outline{background:var(--card-bg, #fff);color:var(--ink);border:1px solid var(--bdr);}
+.ld-btn-outline:hover:not(:disabled){border-color:var(--gold);color:var(--gold);}
+.ld-btn-sm{padding:4px 8px;font-size:11px;}
+.ld-btn-danger{background:var(--card-bg, #fff);color:#C0392B;border:1px solid rgba(192,57,43,0.15);}
+.ld-btn-danger:hover{background:#FDEDEC;}
+.ld-btn:disabled{opacity:0.4;cursor:not-allowed;}
+.ld-empty{text-align:center;padding:28px 0;color:var(--ink3);font-size:12.5px;}
+@keyframes ld-in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.ld-a1{animation:ld-in 0.3s cubic-bezier(0.22,1,0.36,1) both;}
+.ld-a2{animation:ld-in 0.3s cubic-bezier(0.22,1,0.36,1) 0.06s both;}
+`;
 
 export function Customers() {
   const { showToast } = useSimpleToast();
-
   const [loading, setLoading] = useState(false);
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [companies, setCompanies] = useState<Company[]>([]);
-  const [selectedCompanyId, setSelectedCompanyId] = useState<number | null>(null);
+  const [selectedCompanyId, setSelectedCompanyId] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingCustomer, setEditingCustomer] = useState<Customer | null>(null);
-  const [form, setForm] = useState<CreateCustomerDto>({
-    nome: '',
-    documento: '',
-    email: '',
-  });
+  const [form, setForm] = useState<CreateCustomerDto>({ name: '', cnpj: '', email: '' });
 
   async function loadCompanies() {
     try {
       const data = await CompanyService.list();
       setCompanies(data);
-      if (data.length > 0 && !selectedCompanyId) {
-        setSelectedCompanyId(data[0].id);
-      }
-    } catch (e: unknown) {
-      showToast(e instanceof Error ? e.message : 'Falha ao carregar empresas', 'error');
-    }
+      if (data.length > 0 && !selectedCompanyId) setSelectedCompanyId(data[0].id);
+    } catch (e: unknown) { showToast(e instanceof Error ? e.message : 'Falha ao carregar empresas', 'error'); }
   }
 
   async function loadCustomers() {
-    if (!selectedCompanyId) {
-      setCustomers([]);
-      return;
-    }
-
+    if (!selectedCompanyId) { setCustomers([]); return; }
     setLoading(true);
-    try {
-      const data = await CustomerService.list(selectedCompanyId);
-      setCustomers(data);
-    } catch (e: unknown) {
-      showToast(e instanceof Error ? e.message : 'Falha ao carregar clientes', 'error');
-    } finally {
-      setLoading(false);
-    }
+    try { setCustomers(await CustomerService.list(selectedCompanyId)); }
+    catch (e: unknown) { showToast(e instanceof Error ? e.message : 'Falha ao carregar clientes', 'error'); }
+    finally { setLoading(false); }
   }
 
-  useEffect(() => {
-    loadCompanies();
-  }, []);
-
-  useEffect(() => {
-    loadCustomers();
-  }, [selectedCompanyId]);
+  useEffect(() => { loadCompanies(); }, []);
+  useEffect(() => { loadCustomers(); }, [selectedCompanyId]);
 
   function openCreate() {
-    if (!selectedCompanyId) {
-      showToast('Selecione uma empresa primeiro', 'error');
-      return;
-    }
+    if (!selectedCompanyId) { showToast('Selecione uma empresa primeiro', 'error'); return; }
     setEditingCustomer(null);
-    setForm({ nome: '', documento: '', email: '' });
+    setForm({ name: '', cnpj: '', email: '' });
     setIsModalOpen(true);
   }
 
-  function openEdit(customer: Customer) {
-    setEditingCustomer(customer);
-    setForm({
-      nome: customer.nome || '',
-      documento: customer.documento || '',
-      email: customer.email || '',
-    });
+  function openEdit(c: Customer) {
+    setEditingCustomer(c);
+    setForm({ name: c.name || '', cnpj: c.cnpj ? formatCnpj(c.cnpj) : '', email: c.email || '' });
     setIsModalOpen(true);
   }
 
   async function handleSubmit() {
-    if (!selectedCompanyId) {
-      showToast('Selecione uma empresa primeiro', 'error');
-      return;
-    }
-
+    if (!selectedCompanyId) { showToast('Selecione uma empresa primeiro', 'error'); return; }
     try {
-      if (!form.nome || !form.documento) {
-        showToast('Preencha os campos obrigatórios (Nome e Documento)', 'error');
-        return;
-      }
-
+      if (!form.name) { showToast('Preencha o Nome', 'error'); return; }
+      if (form.cnpj && !isValidCnpj(form.cnpj)) { showToast('CNPJ inválido', 'error'); return; }
+      const payload = { ...form, cnpj: form.cnpj ? cleanCnpj(form.cnpj) : form.cnpj };
       if (!editingCustomer) {
-        await CustomerService.create(selectedCompanyId, form);
+        await CustomerService.create(selectedCompanyId, payload);
         showToast('Cliente criado com sucesso', 'success');
       } else {
-        const payload: UpdateCustomerDto = {
-          ...form,
-          rowVersion: editingCustomer.rowVersion,
-        };
-        await CustomerService.update(selectedCompanyId, editingCustomer.id, payload);
+        await CustomerService.update(selectedCompanyId, editingCustomer.id, payload as UpdateCustomerDto);
         showToast('Cliente atualizado com sucesso', 'success');
       }
       setIsModalOpen(false);
       loadCustomers();
-    } catch (e: unknown) {
-      showToast(e instanceof Error ? e.message : 'Erro ao salvar', 'error');
-    }
+    } catch (e: unknown) { showToast(e instanceof Error ? e.message : 'Erro ao salvar', 'error'); }
   }
 
-  async function handleDelete(customer: Customer) {
+  async function handleDelete(c: Customer) {
     if (!selectedCompanyId) return;
-
-    const confirmed = window.confirm(`Excluir cliente ${customer.nome}?`);
-    if (!confirmed) return;
+    if (!window.confirm(`Excluir cliente ${c.name}?`)) return;
     try {
-      await CustomerService.delete(selectedCompanyId, customer.id);
+      await CustomerService.delete(selectedCompanyId, c.id);
       showToast('Cliente excluído com sucesso', 'success');
       loadCustomers();
-    } catch (e: unknown) {
-      showToast(e instanceof Error ? e.message : 'Erro ao excluir', 'error');
-    }
+    } catch (e: unknown) { showToast(e instanceof Error ? e.message : 'Erro ao excluir', 'error'); }
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Clientes</h1>
-          <p className="text-gray-600 mt-1">Gerencie os clientes cadastrados</p>
-        </div>
-        <div className="flex gap-2">
-          <Button onClick={loadCustomers} variant="outline" className="gap-2" disabled={!selectedCompanyId}>
-            <RefreshCw className="h-4 w-4" />
-            Atualizar
-          </Button>
-          <Button onClick={openCreate} className="gap-2" disabled={!selectedCompanyId}>
-            <Plus className="h-4 w-4" />
-            Novo Cliente
-          </Button>
-        </div>
-      </div>
+    <>
+      <style>{LDCSS}</style>
+      <div className="ld" style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Building2 className="h-5 w-5" />
-            Selecionar Empresa
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex gap-4 items-end">
-            <div className="flex-1">
-              <Label>Empresa</Label>
-              <Select
-                value={selectedCompanyId?.toString() || ''}
-                onValueChange={(value) => setSelectedCompanyId(Number(value))}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione uma empresa" />
-                </SelectTrigger>
-                <SelectContent>
-                  {companies.map((company) => (
-                    <SelectItem key={company.id} value={company.id.toString()}>
-                      {company.razaoSocial}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
+        <div className="ld-a1" style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: 10 }}>
+          <div>
+            <span className="ld-tag">Gestão</span>
+            <h1 className="ld-h1" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <Users size={17} color="var(--gold)" /> Clientes
+            </h1>
+            <p className="ld-sub" style={{ marginTop: 2 }}>Gerencie os clientes cadastrados</p>
+          </div>
+          <div style={{ display: 'flex', gap: 6 }}>
+            <button className="ld-btn ld-btn-outline" onClick={loadCustomers} disabled={!selectedCompanyId}><RefreshCw size={12} /> Atualizar</button>
+            <button className="ld-btn ld-btn-dark" onClick={openCreate} disabled={!selectedCompanyId}><Plus size={12} /> Novo Cliente</button>
+          </div>
+        </div>
+
+        {/* Seletor de empresa */}
+        <div className="ld-card ld-a2">
+          <div className="ld-card-body">
+            <h2 className="ld-h2"><Building2 size={12} color="var(--gold)" /> Empresa</h2>
+            <div className="ld-field" style={{ marginBottom: 0 }}>
+              <Select value={selectedCompanyId || ''} onValueChange={(v) => setSelectedCompanyId(v)}>
+                <SelectTrigger><SelectValue placeholder="Selecione uma empresa" /></SelectTrigger>
+                <SelectContent>{companies.map(c => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}</SelectContent>
               </Select>
             </div>
           </div>
-        </CardContent>
-      </Card>
+        </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Users className="h-5 w-5" />
-            Lista de Clientes
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          {loading ? (
-            <div className="flex items-center justify-center py-8">
-              <RefreshCw className="h-6 w-6 animate-spin text-primary" />
-            </div>
-          ) : !selectedCompanyId ? (
-            <div className="text-center py-8 text-gray-500">
-              Selecione uma empresa para visualizar os clientes
-            </div>
-          ) : (
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Nome</TableHead>
-                    <TableHead>Documento</TableHead>
-                    <TableHead>E-mail</TableHead>
-                    <TableHead className="text-right">Ações</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {customers.length === 0 && (
-                    <TableRow>
-                      <TableCell colSpan={4} className="text-center text-sm text-gray-500">
-                        Nenhum cliente encontrado
-                      </TableCell>
-                    </TableRow>
-                  )}
-                  {customers.map((customer) => (
-                    <TableRow key={customer.id}>
-                      <TableCell className="font-medium">{customer.nome}</TableCell>
-                      <TableCell>{customer.documento}</TableCell>
-                      <TableCell>{customer.email || '-'}</TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex justify-end gap-2">
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => openEdit(customer)}
-                            className="gap-1"
-                          >
-                            <Pencil className="h-4 w-4" />
-                            Editar
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="destructive"
-                            onClick={() => handleDelete(customer)}
-                            className="gap-1"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                            Excluir
-                          </Button>
+        {/* Tabela */}
+        <div className="ld-card ld-a2">
+          <div className="ld-card-body" style={{ padding: 0 }}>
+            {loading ? (
+              <div className="ld-empty"><RefreshCw size={18} color="var(--gold)" className="animate-spin" style={{ margin: '0 auto 6px', display: 'block' }} />Carregando...</div>
+            ) : !selectedCompanyId ? (
+              <div className="ld-empty">Selecione uma empresa para visualizar os clientes</div>
+            ) : customers.length === 0 ? (
+              <div className="ld-empty">Nenhum cliente encontrado</div>
+            ) : (
+              <table className="ld-table">
+                <thead><tr><th>Nome</th><th>CNPJ</th><th>E-mail</th><th style={{ textAlign: 'right' }}>Ações</th></tr></thead>
+                <tbody>
+                  {customers.map(c => (
+                    <tr key={c.id}>
+                      <td>{c.name}</td>
+                      <td>{c.cnpj ? formatCnpj(c.cnpj) : '—'}</td>
+                      <td>{c.email || '—'}</td>
+                      <td style={{ textAlign: 'right' }}>
+                        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 4 }}>
+                          <button className="ld-btn ld-btn-outline ld-btn-sm" onClick={() => openEdit(c)}><Pencil size={10} /></button>
+                          <button className="ld-btn ld-btn-danger ld-btn-sm" onClick={() => handleDelete(c)}><Trash2 size={10} /></button>
                         </div>
-                      </TableCell>
-                    </TableRow>
+                      </td>
+                    </tr>
                   ))}
-                </TableBody>
-              </Table>
-            </div>
-          )}
-        </CardContent>
-      </Card>
-
-      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>{editingCustomer ? 'Editar Cliente' : 'Novo Cliente'}</DialogTitle>
-          </DialogHeader>
-          <div className="grid grid-cols-1 gap-4">
-            <div>
-              <Label>Nome *</Label>
-              <Input
-                value={form.nome}
-                onChange={(e) => setForm({ ...form, nome: e.target.value })}
-                placeholder="Nome completo"
-              />
-            </div>
-            <div>
-              <Label>Documento (CPF/CNPJ) *</Label>
-              <Input
-                value={form.documento}
-                onChange={(e) => setForm({ ...form, documento: e.target.value })}
-                placeholder="000.000.000-00"
-              />
-            </div>
-            <div>
-              <Label>E-mail</Label>
-              <Input
-                type="email"
-                value={form.email}
-                onChange={(e) => setForm({ ...form, email: e.target.value })}
-                placeholder="email@exemplo.com"
-              />
-            </div>
+                </tbody>
+              </table>
+            )}
           </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsModalOpen(false)}>
-              Cancelar
-            </Button>
-            <Button onClick={handleSubmit}>Salvar</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-    </div>
+        </div>
+
+        <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>
+                {editingCustomer ? 'Editar Cliente' : 'Novo Cliente'}
+              </DialogTitle>
+            </DialogHeader>
+            <div style={{ display: 'flex', flexDirection: 'column' }}>
+              <div className="ld-field"><label className="ld-lbl">Nome *</label><Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Nome completo" /></div>
+              <div className="ld-field"><label className="ld-lbl">CNPJ</label><Input value={form.cnpj} onChange={(e) => setForm({ ...form, cnpj: formatCnpj(e.target.value) })} placeholder="00.000.000/0000-00" maxLength={18} /></div>
+              <div className="ld-field"><label className="ld-lbl">E-mail</label><Input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} placeholder="email@exemplo.com" /></div>
+            </div>
+            <DialogFooter style={{ marginTop: 4 }}>
+              <button className="ld-btn ld-btn-outline" onClick={() => setIsModalOpen(false)}>Cancelar</button>
+              <button className="ld-btn ld-btn-dark" onClick={handleSubmit}>Salvar</button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      </div>
+    </>
   );
 }
-

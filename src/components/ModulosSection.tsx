@@ -2,33 +2,33 @@
 import React from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Users, Package, ShoppingCart, Wallet } from "lucide-react";
+import { Building2, CalendarClock, DollarSign, BookOpen } from "lucide-react";
 
 const ModulosSection = () => {
   const modulos = [
     {
-      title: "Cadastros",
-      description: "Gerencie usuários, clientes, fornecedores e produtos em uma interface intuitiva e organizada.",
-      icon: <Users className="w-10 h-10 text-primary" />,
-      features: ["Cadastro de Usuários", "Cadastro de Produtos", "Perfis de Acesso", "Importação em Massa"]
+      title: "Obras",
+      description: "Centralize obras, clientes, responsáveis e status em um único painel operacional.",
+      icon: <Building2 className="w-10 h-10 text-primary" />,
+      features: ["Listagem e filtros", "Indicadores de prazo e custo", "Alertas de risco", "Visão executiva"]
     },
     {
-      title: "Vendas",
-      description: "Controle todo o processo de vendas, desde orçamentos até a emissão de notas fiscais.",
-      icon: <ShoppingCart className="w-10 h-10 text-primary" />,
-      features: ["Pedidos de Vendas", "Orçamentos", "Notas Fiscais", "Dashboard de Vendas"]
+      title: "Cronograma",
+      description: "Acompanhe etapas, dependências e bloqueios com linha do tempo clara para a equipe.",
+      icon: <CalendarClock className="w-10 h-10 text-primary" />,
+      features: ["Timeline por obra", "Progresso por etapa", "Tarefas bloqueadas", "Risco de atraso"]
     },
     {
-      title: "Estoque",
-      description: "Acompanhe seu estoque em tempo real, com alertas de nível baixo e gestão de movimentações.",
-      icon: <Package className="w-10 h-10 text-primary" />,
-      features: ["Controle de Estoque", "Entradas e Saídas", "Inventário", "Relatórios de Movimentação"]
+      title: "Orçamento",
+      description: "Compare previsto x realizado por categoria e mantenha a margem sob controle.",
+      icon: <DollarSign className="w-10 h-10 text-primary" />,
+      features: ["Itens por categoria", "Variação e margem", "Mão de obra e materiais", "Visão consolidada"]
     },
     {
-      title: "Financeiro",
-      description: "Visualize a saúde financeira da sua empresa e automatize tarefas de pagamento e recebimento.",
-      icon: <Wallet className="w-10 h-10 text-primary" />,
-      features: ["Contas a Pagar", "Contas a Receber", "Fluxo de Caixa", "Relatórios Financeiros"]
+      title: "Diário de obra",
+      description: "Registre o dia a dia com fotos, problemas e responsáveis — histórico auditável.",
+      icon: <BookOpen className="w-10 h-10 text-primary" />,
+      features: ["Linha do tempo por data", "Fotos e descrições", "Problemas e ações", "Rastreabilidade"]
     }
   ];
 
@@ -36,13 +36,13 @@ const ModulosSection = () => {
     <div className="py-20 px-6 bg-white" id="modulos">
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">Módulos Completos para Seu Negócio</h2>
+          <h2 className="text-3xl md:text-4xl font-bold mb-4">Módulos para gestão de obras</h2>
           <p className="text-lg text-gray-600 max-w-3xl mx-auto">
-            A Liderum oferece módulos integrados que cobrem todas as principais áreas da sua empresa,
-            proporcionando uma visão completa e centralizada.
+            A Liderum reúne o que importa na obra: planejamento, execução, custos e registro diário,
+            com uma visão única para sua equipe.
           </p>
         </div>
-        
+
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
           {modulos.map((modulo, index) => (
             <Card key={index} className="border-2 hover:border-primary/50 transition-all hover:shadow-lg">

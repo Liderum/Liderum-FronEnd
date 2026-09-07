@@ -114,7 +114,7 @@ export function PaymentDetails() {
             <CardHeader className="text-center">
               <CardTitle className="text-xl">PIX Instantâneo</CardTitle>
               <CardDescription>
-                Valor: <span className="font-semibold text-lg">R$ {planPrice}</span>
+                Valor: <span className="font-numeric tabular-nums font-semibold text-lg">R$ {planPrice}</span>
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
@@ -181,7 +181,7 @@ export function PaymentDetails() {
                   </Button>
                 </CardTitle>
                 <CardDescription>
-                  Valor: <span className="font-semibold text-lg">R$ {planPrice}</span>
+                  Valor: <span className="font-numeric tabular-nums font-semibold text-lg">R$ {planPrice}</span>
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">

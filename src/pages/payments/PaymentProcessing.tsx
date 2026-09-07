@@ -62,7 +62,7 @@ export function PaymentProcessing() {
             </div>
             <CardTitle className="text-xl">Processando...</CardTitle>
             <CardDescription>
-              Valor: <span className="font-semibold text-lg">R$ {planPrice}</span>
+              Valor: <span className="font-numeric tabular-nums font-semibold text-lg">R$ {planPrice}</span>
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
