@@ -6,6 +6,7 @@ import { PrivateRoute } from './components/PrivateRoute';
 import { PublicRoute } from './components/PublicRoute';
 import { useRouteSecurity } from './hooks/useRouteSecurity';
 import { Toaster } from './components/ui/toaster';
+import { SpeedInsights } from '@vercel/speed-insights/react';
 
 // Layouts — lazy: puxa framer-motion, só precisa carregar após o login
 const DashboardLayout = lazy(() =>
@@ -160,6 +161,7 @@ function App() {
         <BrowserRouter>
           <AppContent />
           <Toaster />
+          <SpeedInsights />
         </BrowserRouter>
       </AuthProvider>
     </ThemeProvider>
