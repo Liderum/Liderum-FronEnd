@@ -1,3 +1,4 @@
+import { lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
 import { ThemeProvider } from './contexts/ThemeContext';
@@ -6,10 +7,12 @@ import { PublicRoute } from './components/PublicRoute';
 import { useRouteSecurity } from './hooks/useRouteSecurity';
 import { Toaster } from './components/ui/toaster';
 
-// Layouts
-import { DashboardLayout } from './layouts/DashboardLayout';
+// Layouts — lazy: puxa framer-motion, só precisa carregar após o login
+const DashboardLayout = lazy(() =>
+  import('./layouts/DashboardLayout').then((m) => ({ default: m.DashboardLayout })),
+);
 
-// Public Pages
+// Public Pages — ficam no bundle inicial (primeira tela que o usuário vê)
 import { LandingPage } from './pages/LandingPage';
 import Login from './pages/Login';
 import Cadastro from './pages/Cadastro';
@@ -20,33 +23,50 @@ import ValidateCode from './pages/ValidateCode';
 import ResetPassword from './pages/ResetPassword';
 import { PaymentRoutes } from './pages/payments';
 
-// Modules — Dashboard
-import DashboardPage from './modules/dashboard/pages/DashboardPage';
+// Rotas protegidas — lazy: só carregam depois do login, tirando
+// recharts/framer-motion e o código de cada módulo do caminho crítico
+// de carregamento da tela pública/login.
+const DashboardPage = lazy(() => import('./modules/dashboard/pages/DashboardPage'));
 
-// Modules — Works
-import WorksListPage from './modules/works/pages/WorksListPage';
-import NewWorkPage from './modules/works/pages/NewWorkPage';
-import { WorkLayout } from './modules/works/components/WorkLayout';
-import WorkOverviewPage from './modules/works/pages/WorkOverviewPage';
+const WorksListPage = lazy(() => import('./modules/works/pages/WorksListPage'));
+const NewWorkPage = lazy(() => import('./modules/works/pages/NewWorkPage'));
+const WorkLayout = lazy(() =>
+  import('./modules/works/components/WorkLayout').then((m) => ({ default: m.WorkLayout })),
+);
+const WorkOverviewPage = lazy(() => import('./modules/works/pages/WorkOverviewPage'));
 
-// Modules — Schedule, Budget, Extras, Daily Log
-import SchedulePage from './modules/schedule/pages/SchedulePage';
-import BudgetPage from './modules/budget/pages/BudgetPage';
-import ExtrasPage from './modules/extras/pages/ExtrasPage';
-import DailyLogPage from './modules/daily-log/pages/DailyLogPage';
-import IncidentsPage from './modules/incidents/pages/IncidentsPage';
+const SchedulePage = lazy(() => import('./modules/schedule/pages/SchedulePage'));
+const BudgetPage = lazy(() => import('./modules/budget/pages/BudgetPage'));
+const ExtrasPage = lazy(() => import('./modules/extras/pages/ExtrasPage'));
+const DailyLogPage = lazy(() => import('./modules/daily-log/pages/DailyLogPage'));
+const IncidentsPage = lazy(() => import('./modules/incidents/pages/IncidentsPage'));
 
-import Users from './pages/users/Users';
-import Settings from './pages/settings/Settings';
-import { Companies } from './pages/management/Companies';
-import { Customers } from './pages/management/Customers';
-import { Suppliers } from './pages/management/Suppliers';
-import RbacAdmin from './pages/management/RbacAdmin';
+const Users = lazy(() => import('./pages/users/Users'));
+const Settings = lazy(() => import('./pages/settings/Settings'));
+const Companies = lazy(() =>
+  import('./pages/management/Companies').then((m) => ({ default: m.Companies })),
+);
+const Customers = lazy(() =>
+  import('./pages/management/Customers').then((m) => ({ default: m.Customers })),
+);
+const Suppliers = lazy(() =>
+  import('./pages/management/Suppliers').then((m) => ({ default: m.Suppliers })),
+);
+const RbacAdmin = lazy(() => import('./pages/management/RbacAdmin'));
+
+function RouteLoadingFallback() {
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-white">
+      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600" />
+    </div>
+  );
+}
 
 function AppContent() {
   useRouteSecurity();
 
   return (
+    <Suspense fallback={<RouteLoadingFallback />}>
     <Routes>
       {/* Public routes */}
       <Route path="/" element={<PublicRoute><LandingPage /></PublicRoute>} />
@@ -129,6 +149,7 @@ function AppContent() {
       {/* Fallback */}
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
+    </Suspense>
   );
 }
 

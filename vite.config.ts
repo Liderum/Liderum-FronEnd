@@ -42,6 +42,16 @@ export default defineConfig(({ mode }) => {
       sourcemap: mode !== 'prd',
       // Minificação em prd — reduz tamanho do bundle
       minify: mode === 'prd' ? 'esbuild' : false,
+      modulePreload: {
+        // Com manualChunks em formato de objeto, o Vite modulepreloada TODOS
+        // os vendor chunks no index.html, mesmo os só usados por rotas lazy
+        // (recharts/framer-motion só entram depois do login). Filtra esses
+        // do preload da entrada inicial — eles continuam sendo
+        // modulepreload'ados normalmente quando a rota lazy que os usa é
+        // de fato importada.
+        resolveDependencies: (_filename, deps) =>
+          deps.filter((dep) => !dep.includes('vendor-charts') && !dep.includes('vendor-motion')),
+      },
       rollupOptions: {
         output: {
           // Code splitting manual: isola vendors grandes para cache eficiente no browser
