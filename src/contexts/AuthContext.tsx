@@ -11,7 +11,6 @@ import {
 import {
   AuthService,
   UserService,
-  RbacService,
   SafeAuthCalls,
 } from '../services/authService';
 import { User, UserProfile, RegisterUserRequest } from '../types/auth';
@@ -108,17 +107,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => tokenStore.setOnAuthFailure(null);
   }, []);
 
-  const fetchRbac = useCallback(async () => {
-    try {
-      const data = await RbacService.getMyPermissions();
-      setPermissions(data.permissions ?? []);
-      setRoles(data.roles ?? []);
-      setModules(data.modules ?? []);
-    } catch {
-      // RBAC fetch failure is non-fatal
-    }
-  }, []);
-
   const fetchUserProfile = useCallback(async (): Promise<UserProfile | null> => {
     try {
       const profile = await UserService.getProfile();
@@ -145,8 +133,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       tokenStore.setAccessToken(data.accessToken);
       if (data.refreshToken) tokenStore.setRefreshToken(data.refreshToken);
 
-      // Chamadas diretas que não passam pelo interceptor de 401
-      const profile = await SafeAuthCalls.getProfileDirect(data.accessToken);
+      // Chamadas diretas que não passam pelo interceptor de 401, em paralelo
+      // — mesmo padrão do signIn, evita 3 RTTs sequenciais em todo bootstrap.
+      const [profile, rbac, tenantProfile] = await Promise.all([
+        SafeAuthCalls.getProfileDirect(data.accessToken),
+        SafeAuthCalls.getMyPermissionsDirect(data.accessToken),
+        SafeAuthCalls.getTenantProfileDirect(data.accessToken),
+      ]);
+
       if (profile) {
         setUser({
           identifier: profile.identifier,
@@ -156,7 +150,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (typeof profile.tourSeen === 'boolean') setTourSeenState(profile.tourSeen);
       }
 
-      const rbac = await SafeAuthCalls.getMyPermissionsDirect(data.accessToken);
       if (rbac) {
         setPermissions(rbac.permissions ?? []);
         setRoles(rbac.roles ?? []);
@@ -164,7 +157,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
 
       // Onboarding da PJ — falha é não-fatal, não deve travar o login.
-      const tenantProfile = await SafeAuthCalls.getTenantProfileDirect(data.accessToken);
       setIsOnboardingComplete(tenantProfile ? tenantProfile.isOnboardingComplete : null);
 
       return !!profile;
