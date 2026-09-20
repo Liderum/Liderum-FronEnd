@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { AlertCircle, ArrowRight, Loader2, Mail, MapPin, Phone, Send } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useSessionCleanup } from '@/hooks/useSessionCleanup';
+import { ContactService } from '@/services/contactService';
 
 const CSS = `
 @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,700;1,400;1,700&family=DM+Sans:wght@300;400;500&display=swap');
@@ -120,11 +121,14 @@ export function Contact() {
     }
     try {
       setLoading(true);
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      await ContactService.send(form);
       toast({ title: 'Mensagem enviada', description: 'Recebemos seu contato e retornaremos em breve.' });
       setForm({ nome: '', telefone: '', email: '', mensagem: '' });
     } catch (err) {
-      toast({ title: 'Erro', description: 'Não foi possível enviar sua mensagem.', variant: 'destructive' });
+      const description = err instanceof Error && err.message
+        ? err.message
+        : 'Não foi possível enviar sua mensagem.';
+      toast({ title: 'Erro', description, variant: 'destructive' });
     } finally {
       setLoading(false);
     }
