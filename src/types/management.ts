@@ -92,12 +92,18 @@ export interface UpdateSupplierDto {
   notes?: string;
 }
 
+export type MaterialUnit = 'saco' | 'm3' | 'm2' | 'kg' | 'un' | 'lata' | 'barra' | 'rolo' | 'litro' | 'ton';
+export type MaterialCategory = 'Estrutura' | 'Acabamento' | 'Hidraulica' | 'Eletrica' | 'Ferramentas' | 'EPI' | 'Outros';
+
 export interface Material {
   id: string;
   companyId: string;
+  code: string;
   name: string;
-  unit: string;
-  category?: string;
+  unit: MaterialUnit | string;
+  category?: MaterialCategory | string;
+  brand?: string;
+  description?: string;
   defaultSupplierId?: string;
   createdAt?: string;
   updatedAt?: string;
@@ -105,15 +111,19 @@ export interface Material {
 
 export interface CreateMaterialDto {
   name: string;
-  unit: string;
-  category?: string;
+  unit: MaterialUnit | string;
+  category?: MaterialCategory | string;
+  brand?: string;
+  description?: string;
   defaultSupplierId?: string;
 }
 
 export interface UpdateMaterialDto {
   name: string;
-  unit: string;
-  category?: string;
+  unit: MaterialUnit | string;
+  category?: MaterialCategory | string;
+  brand?: string;
+  description?: string;
   defaultSupplierId?: string;
 }
 
