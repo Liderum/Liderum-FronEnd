@@ -3,7 +3,7 @@ import { Outlet, NavLink, useParams, useLocation, useNavigate } from 'react-rout
 import { motion } from 'framer-motion';
 import {
   LayoutDashboard, CalendarClock, DollarSign, FilePlus2, BookOpen, ShieldAlert,
-  ArrowLeft, MapPin, User, Building2, Loader2,
+  ArrowLeft, MapPin, User, Building2, Loader2, Boxes,
 } from 'lucide-react';
 import type { Work, AddressDto } from '@/modules/shared/types';
 import { STATUS_CONFIG } from '@/modules/shared/types';
@@ -47,6 +47,7 @@ const tabs = [
   { label: 'Cronograma', path: '/schedule', icon: CalendarClock },
   { label: 'Orçamento', path: '/budget', icon: DollarSign },
   { label: 'Extras', path: '/extras', icon: FilePlus2 },
+  { label: 'Materiais', path: '/materials', icon: Boxes },
   { label: 'Diário de Obra', path: '/daily-log', icon: BookOpen },
   { label: 'Incidentes', path: '/incidents', icon: ShieldAlert },
 ];

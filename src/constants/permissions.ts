@@ -131,6 +131,17 @@ export const PERMISSION_MAP: ModulePermissions[] = [
     ],
   },
   {
+    module: 'materials',
+    label: 'Materiais',
+    icon: 'Boxes',
+    permissions: [
+      { key: 'materials.read', label: 'Listar / Detalhar', description: 'Ver catálogo de materiais' },
+      { key: 'materials.create', label: 'Criar', description: 'Criar material' },
+      { key: 'materials.update', label: 'Editar', description: 'Editar material' },
+      { key: 'materials.delete', label: 'Excluir', description: 'Excluir material' },
+    ],
+  },
+  {
     module: 'users',
     label: 'Usuários',
     icon: 'UserCog',

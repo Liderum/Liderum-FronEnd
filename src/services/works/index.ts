@@ -2,6 +2,8 @@ export { WorksService } from './worksService';
 export { BudgetService } from './budgetService';
 export { ExtrasService } from './extrasService';
 export type { CreateExtraInput } from './extrasService';
+export { WorkMaterialService } from './materialService';
+export type { WorkMaterialDto, CreateWorkMaterialInput, UpdateWorkMaterialInput } from './materialService';
 export { ScheduleService } from './scheduleService';
 export type { DependencyValidationResult } from './scheduleService';
 export { DailyLogService } from './dailyLogService';
