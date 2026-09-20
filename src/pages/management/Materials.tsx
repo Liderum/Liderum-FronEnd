@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react';
 import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useSimpleToast } from '@/hooks/useSimpleToast';
 import { MaterialService, SupplierService, CompanyService } from '@/services/managementService';
-import { Material, CreateMaterialDto, UpdateMaterialDto, Supplier, Company } from '@/types/management';
+import { Material, CreateMaterialDto, UpdateMaterialDto, Supplier, Company, MaterialUnit, MaterialCategory } from '@/types/management';
 import { Plus, Pencil, Trash2, Boxes, RefreshCw, Building2 } from 'lucide-react';
 
 const LDCSS = `
@@ -40,7 +41,30 @@ const LDCSS = `
 .ld-a2{animation:ld-in 0.3s cubic-bezier(0.22,1,0.36,1) 0.06s both;}
 `;
 
-const emptyForm: CreateMaterialDto = { name: '', unit: '', category: '', defaultSupplierId: undefined };
+const emptyForm: CreateMaterialDto = { name: '', unit: '', category: '', brand: '', description: '', defaultSupplierId: undefined };
+
+const UNIT_OPTIONS: { value: MaterialUnit; label: string }[] = [
+  { value: 'saco', label: 'Saco' },
+  { value: 'm3', label: 'm³' },
+  { value: 'm2', label: 'm²' },
+  { value: 'kg', label: 'Kg' },
+  { value: 'un', label: 'Unidade' },
+  { value: 'lata', label: 'Lata' },
+  { value: 'barra', label: 'Barra' },
+  { value: 'rolo', label: 'Rolo' },
+  { value: 'litro', label: 'Litro' },
+  { value: 'ton', label: 'Tonelada' },
+];
+
+const CATEGORY_OPTIONS: { value: MaterialCategory; label: string }[] = [
+  { value: 'Estrutura', label: 'Estrutura' },
+  { value: 'Acabamento', label: 'Acabamento' },
+  { value: 'Hidraulica', label: 'Hidráulica' },
+  { value: 'Eletrica', label: 'Elétrica' },
+  { value: 'Ferramentas', label: 'Ferramentas' },
+  { value: 'EPI', label: 'EPI' },
+  { value: 'Outros', label: 'Outros' },
+];
 
 export function Materials() {
   const { showToast } = useSimpleToast();
@@ -83,6 +107,16 @@ export function Materials() {
     return suppliers.find((s) => s.id === id)?.name ?? '—';
   }
 
+  function unitLabel(unit?: string): string {
+    if (!unit) return '—';
+    return UNIT_OPTIONS.find((u) => u.value === unit)?.label ?? unit;
+  }
+
+  function categoryLabel(category?: string): string {
+    if (!category) return '—';
+    return CATEGORY_OPTIONS.find((c) => c.value === category)?.label ?? category;
+  }
+
   function openCreate() {
     if (!selectedCompanyId) { showToast('Selecione uma empresa primeiro', 'error'); return; }
     setEditingMaterial(null);
@@ -92,7 +126,7 @@ export function Materials() {
 
   function openEdit(m: Material) {
     setEditingMaterial(m);
-    setForm({ name: m.name || '', unit: m.unit || '', category: m.category || '', defaultSupplierId: m.defaultSupplierId });
+    setForm({ name: m.name || '', unit: m.unit || '', category: m.category || '', brand: m.brand || '', description: m.description || '', defaultSupplierId: m.defaultSupplierId });
     setIsModalOpen(true);
   }
 
@@ -164,13 +198,17 @@ export function Materials() {
               <div className="ld-empty">Nenhum material encontrado</div>
             ) : (
               <table className="ld-table">
-                <thead><tr><th>Nome</th><th>Unidade</th><th>Categoria</th><th>Fornecedor Padrão</th><th style={{ textAlign: 'right' }}>Ações</th></tr></thead>
+                <thead><tr><th>Código</th><th>Nome</th><th>Unidade</th><th>Categoria</th><th>Fornecedor Padrão</th><th style={{ textAlign: 'right' }}>Ações</th></tr></thead>
                 <tbody>
                   {materials.map(m => (
                     <tr key={m.id}>
-                      <td>{m.name}</td>
-                      <td>{m.unit}</td>
-                      <td>{m.category || '—'}</td>
+                      <td style={{ fontFamily: 'monospace', fontSize: 11.5, color: 'var(--ink3)' }}>{m.code}</td>
+                      <td>
+                        {m.name}
+                        {m.brand ? <span style={{ color: 'var(--ink3)', fontWeight: 300 }}> — {m.brand}</span> : null}
+                      </td>
+                      <td>{unitLabel(m.unit)}</td>
+                      <td>{categoryLabel(m.category)}</td>
                       <td>{supplierName(m.defaultSupplierId)}</td>
                       <td style={{ textAlign: 'right' }}>
                         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 4 }}>
@@ -195,8 +233,26 @@ export function Materials() {
             </DialogHeader>
             <div style={{ display: 'flex', flexDirection: 'column' }}>
               <div className="ld-field"><label className="ld-lbl">Nome *</label><Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Nome do material" /></div>
-              <div className="ld-field"><label className="ld-lbl">Unidade *</label><Input value={form.unit} onChange={(e) => setForm({ ...form, unit: e.target.value })} placeholder="saco, m³, un..." /></div>
-              <div className="ld-field"><label className="ld-lbl">Categoria</label><Input value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} placeholder="Ex.: Estrutura, Acabamento..." /></div>
+              {editingMaterial ? (
+                <div className="ld-field"><label className="ld-lbl">Código</label><Input value={editingMaterial.code} disabled readOnly /></div>
+              ) : null}
+              <div style={{ display: 'flex', gap: 10 }}>
+                <div className="ld-field" style={{ flex: 1 }}>
+                  <label className="ld-lbl">Unidade *</label>
+                  <Select value={form.unit} onValueChange={(v) => setForm({ ...form, unit: v })}>
+                    <SelectTrigger><SelectValue placeholder="Selecione a unidade" /></SelectTrigger>
+                    <SelectContent>{UNIT_OPTIONS.map(u => <SelectItem key={u.value} value={u.value}>{u.label}</SelectItem>)}</SelectContent>
+                  </Select>
+                </div>
+                <div className="ld-field" style={{ flex: 1 }}>
+                  <label className="ld-lbl">Categoria</label>
+                  <Select value={form.category || ''} onValueChange={(v) => setForm({ ...form, category: v })}>
+                    <SelectTrigger><SelectValue placeholder="Selecione a categoria" /></SelectTrigger>
+                    <SelectContent>{CATEGORY_OPTIONS.map(c => <SelectItem key={c.value} value={c.value}>{c.label}</SelectItem>)}</SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <div className="ld-field"><label className="ld-lbl">Marca</label><Input value={form.brand || ''} onChange={(e) => setForm({ ...form, brand: e.target.value })} placeholder="Ex.: Votoran" /></div>
               <div className="ld-field">
                 <label className="ld-lbl">Fornecedor Padrão</label>
                 <Select value={form.defaultSupplierId || ''} onValueChange={(v) => setForm({ ...form, defaultSupplierId: v || undefined })}>
@@ -204,6 +260,7 @@ export function Materials() {
                   <SelectContent>{suppliers.map(s => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}</SelectContent>
                 </Select>
               </div>
+              <div className="ld-field"><label className="ld-lbl">Descrição</label><Textarea value={form.description || ''} onChange={(e) => setForm({ ...form, description: e.target.value })} placeholder="Observações sobre o material" rows={3} /></div>
             </div>
             <DialogFooter style={{ marginTop: 4 }}>
               <button className="ld-btn ld-btn-outline" onClick={() => setIsModalOpen(false)}>Cancelar</button>
