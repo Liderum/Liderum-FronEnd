@@ -15,6 +15,7 @@ import { TASK_STATUS_CONFIG, INCIDENT_SEVERITY_CONFIG } from '@/modules/shared/t
 import type {
   Work, ExtraRequest, Incident, ScheduleTask, DailyLogEntry,
 } from '@/modules/shared/types';
+import { displayPerson } from '@/utils/identity';
 
 const CSS = `
 .wo{font-family:'DM Sans',sans-serif;color:var(--ink,#1A1814);display:flex;flex-direction:column;gap:18px;}
@@ -231,7 +232,7 @@ export default function WorkOverviewPage() {
               ) : (
                 <div>
                   <div style={{ fontSize: 11, color: 'var(--ink3, #7A7670)', fontWeight: 500, textTransform: 'uppercase', letterSpacing: 0.4 }}>
-                    <BookOpen size={11} style={{ display: 'inline', verticalAlign: 'middle' }} /> {formatDate(lastLog.date)} — {lastLog.responsible}
+                    <BookOpen size={11} style={{ display: 'inline', verticalAlign: 'middle' }} /> {formatDate(lastLog.date)} — {displayPerson(lastLog.responsible)}
                   </div>
                   <div style={{ fontSize: 13, marginTop: 8, lineHeight: 1.5 }}>{lastLog.description}</div>
                   {lastLog.problems && (
