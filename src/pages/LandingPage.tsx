@@ -459,8 +459,8 @@ export function LandingPage() {
             <div className="ldr-proof-metrics">
               {[
                 { val: '', num: '6', label: 'módulos integrados nativamente', suffix: '' },
-                { val: '', num: '100%', label: 'isolamento de dados por empresa (multi-tenant)', suffix: '' },
-                { val: '', num: 'RBAC', label: 'permissões granulares por usuário e papel', suffix: '' },
+                { val: '', num: '100%', label: 'dados privados da sua construtora — ninguém de fora acessa', suffix: '' },
+                { val: '', num: 'Por Cargo', label: 'cada pessoa só acessa o que faz parte da sua função', suffix: '' },
                 { val: '', num: '< 1h', label: 'para cadastrar sua primeira obra', suffix: '' }
               ].map((m, i) => (
                 <div key={m.label} className={`ldr-metric ldr-reveal${i > 0 ? ` ldr-d${i}` : ''}`}>
@@ -626,7 +626,7 @@ export function LandingPage() {
                 <div className="ldr-plan-price" style={{ fontSize: '28px', paddingTop: '10px' }}>Sob consulta</div>
                 <div className="ldr-plan-period" style={{ marginBottom: '28px' }}>Preço personalizado para sua operação</div>
                 <ul className="ldr-plan-features">
-                  {['Tudo do Crescimento', 'Multi-empresa (multi-tenant)', 'RBAC — permissões granulares por papel', 'Integração via API', 'Implantação assistida', 'Gerente de conta dedicado'].map((f, idx) => (
+                  {['Tudo do Crescimento', 'Múltiplas empresas, dados isolados entre elas', 'Permissões por cargo, sob medida para sua equipe', 'Implantação assistida', 'Gerente de conta dedicado'].map((f, idx) => (
                     <li key={f} style={{ '--i': idx } as React.CSSProperties}><span className="ldr-check-wrap"><CheckDraw /></span>{f}</li>
                   ))}
                 </ul>
@@ -679,7 +679,7 @@ export function LandingPage() {
               <li><button type="button" onClick={() => navigate('/contact')}>Política de Privacidade</button></li>
               <li><button type="button" onClick={() => navigate('/contact')}>Termos de Uso</button></li>
             </ul>
-            <div className="ldr-footer-copy">© {new Date().getFullYear()} Liderum · CNPJ 00.000.000/0001-00</div>
+            <div className="ldr-footer-copy">© {new Date().getFullYear()} Liderum</div>
           </div>
         </footer>
       </div>
