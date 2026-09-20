@@ -5,6 +5,7 @@ export type TaskStatus = 'concluida' | 'em_andamento' | 'pendente' | 'bloqueada'
 export type IncidentSeverity = 'baixa' | 'media' | 'alta' | 'critica';
 export type IncidentStatus = 'aberto' | 'em_andamento' | 'resolvido' | 'cancelado';
 export type IncidentCategory = 'execucao' | 'seguranca' | 'qualidade' | 'prazo' | 'fornecedor' | 'cliente';
+export type WorkMaterialWorkflowStatus = 'Necessidade' | 'Orcado' | 'Comprado' | 'Recebido' | 'Consumindo' | 'Concluido' | 'Cancelado';
 
 export interface Work {
   id: string;
@@ -246,4 +247,14 @@ export const INCIDENT_CATEGORY_CONFIG: Record<IncidentCategory, { label: string;
   prazo: { label: 'Prazo', icon: 'Clock' },
   fornecedor: { label: 'Fornecedor', icon: 'Truck' },
   cliente: { label: 'Cliente', icon: 'User' },
+};
+
+export const WORK_MATERIAL_STATUS_CONFIG: Record<WorkMaterialWorkflowStatus, { label: string; color: string; bg: string }> = {
+  Necessidade: { label: 'Necessidade', color: '#7A7670', bg: '#F5F5F5' },
+  Orcado: { label: 'Orçado', color: '#B7770D', bg: '#FFF8E1' },
+  Comprado: { label: 'Comprado', color: '#1A5276', bg: '#EBF5FB' },
+  Recebido: { label: 'Recebido', color: '#6C3483', bg: '#F4ECF7' },
+  Consumindo: { label: 'Consumindo', color: '#E67E22', bg: '#FFF3E0' },
+  Concluido: { label: 'Concluído', color: '#1E8449', bg: '#E8F5E9' },
+  Cancelado: { label: 'Cancelado', color: '#C0392B', bg: '#FDEDEC' },
 };
