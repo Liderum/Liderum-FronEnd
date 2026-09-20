@@ -9,6 +9,7 @@ import { ExtrasService } from '@/services/works';
 import { useAuth } from '@/contexts/AuthContext';
 import { EXTRA_STATUS_CONFIG } from '@/modules/shared/types';
 import type { ExtraRequest, ExtraStatus } from '@/modules/shared/types';
+import { displayPerson } from '@/utils/identity';
 
 const CSS = `
 .ex{font-family:'DM Sans',sans-serif;color:var(--ink,#1A1814);display:flex;flex-direction:column;gap:18px;}
@@ -324,7 +325,7 @@ export default function ExtrasPage() {
                       <DollarSign size={12} /> <span className="ex-card-meta-value" style={{ fontFamily: 'var(--font-numeric)', fontVariantNumeric: 'tabular-nums', color: '#C0392B' }}>{formatCurrency(extra.financialImpact)}</span>
                     </div>
                     <div className="ex-card-meta-item">
-                      <User size={12} /> {extra.requestedBy}
+                      <User size={12} /> {displayPerson(extra.requestedBy)}
                     </div>
                   </div>
                 </div>
@@ -370,7 +371,7 @@ export default function ExtrasPage() {
                             <div className="ex-history-dot" />
                             <div className="ex-history-info">
                               <div className="ex-history-action">{h.action}</div>
-                              <div className="ex-history-user">{h.user}</div>
+                              <div className="ex-history-user">{displayPerson(h.user)}</div>
                               {h.notes && <div className="ex-history-notes">"{h.notes}"</div>}
                             </div>
                             <div className="ex-history-date">{formatDate(h.date)}</div>
