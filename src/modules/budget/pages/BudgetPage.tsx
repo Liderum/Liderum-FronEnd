@@ -159,7 +159,14 @@ export default function BudgetPage() {
 
   const totalPlanned = items.reduce((s, i) => s + i.plannedCost, 0);
   const totalActual = items.reduce((s, i) => s + i.actualCost, 0);
-  const totalVariation = totalPlanned === 0 ? 0 : ((totalActual - totalPlanned) / totalPlanned) * 100;
+
+  // Orçamento Total e Custo Atual dos cards de resumo vêm da obra (work.totalBudget/
+  // work.currentCost) — a mesma fonte usada na Visão Geral — e não da soma dos itens
+  // de orçamento (totalPlanned/totalActual), que fica zerada sempre que a obra ainda
+  // não tem itens individuais cadastrados, mesmo já tendo custo realizado via extras.
+  const orcamentoTotal = work?.totalBudget ?? 0;
+  const custoAtual = work?.currentCost ?? 0;
+  const totalVariation = orcamentoTotal === 0 ? 0 : ((custoAtual - orcamentoTotal) / orcamentoTotal) * 100;
 
   const startEdit = (item: BudgetItem) => {
     if (!canEdit) return;
@@ -247,13 +254,13 @@ export default function BudgetPage() {
   };
 
   const summaryStats = [
-    { label: 'Orçamento Total', value: formatCurrency(totalPlanned), icon: DollarSign, color: '#1A5276', bg: '#EBF5FB' },
+    { label: 'Orçamento Total', value: formatCurrency(orcamentoTotal), icon: DollarSign, color: '#1A5276', bg: '#EBF5FB' },
     {
       label: 'Custo Atual',
-      value: formatCurrency(totalActual),
+      value: formatCurrency(custoAtual),
       icon: TrendingUp,
-      color: totalActual > totalPlanned ? '#C0392B' : '#1E8449',
-      bg: totalActual > totalPlanned ? '#FDEDEC' : '#E8F5E9',
+      color: custoAtual > orcamentoTotal ? '#C0392B' : '#1E8449',
+      bg: custoAtual > orcamentoTotal ? '#FDEDEC' : '#E8F5E9',
     },
     {
       label: 'Variação',
