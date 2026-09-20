@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { AlertCircle, ArrowRight, Loader2, Mail, MapPin, Menu, Phone, Send, X } from 'lucide-react';
+import { AlertCircle, ArrowRight, Loader2, Mail, MapPin, Phone, Send } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useSessionCleanup } from '@/hooks/useSessionCleanup';
+import { ContactService } from '@/services/contactService';
 
 const CSS = `
 @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,700;1,400;1,700&family=DM+Sans:wght@300;400;500&display=swap');
@@ -13,7 +14,6 @@ const CSS = `
 .la-logo{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:700;color:var(--ink);background:none;border:none;cursor:pointer;letter-spacing:-0.5px;}
 .la-logo span{color:var(--gold);}
 .la-nav-links{display:flex;gap:8px;align-items:center;}
-.la-nav-links-mobile{display:none;}
 .la-nav-l,.la-nav-r{display:flex;align-items:center;}
 .la-nav-c{position:absolute;left:50%;transform:translateX(-50%);}
 .la-back-btn{background:none;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--ink2);display:inline-flex;align-items:center;gap:4px;padding:6px 10px;border-radius:6px;transition:all 0.2s;letter-spacing:0.1px;}
@@ -27,9 +27,6 @@ const CSS = `
 .la-btn-outline:hover:not(:disabled){border-color:var(--ink);}
 .la-btn:disabled{opacity:0.55;cursor:not-allowed;}
 .la-btn-full{width:100%;height:44px;justify-content:center;font-size:14px;}
-.la-btn-icon{padding:8px;border-radius:6px;background:transparent;border:none;cursor:pointer;display:flex;align-items:center;color:var(--ink);transition:background 0.2s;}
-.la-btn-icon:hover{background:var(--cream2);}
-.la-mobile-menu{background:rgb(var(--cream-rgb, 247 244 239) / 0.97);border-top:1px solid var(--bdr);padding:12px 20px 16px;display:flex;flex-direction:column;gap:4px;}
 .la-main{padding-top:64px;}
 /* HERO */
 .la-hero{background:var(--card-bg, #fff);border-bottom:1px solid var(--bdr);padding:80px 48px;}
@@ -76,9 +73,9 @@ const CSS = `
 .la-anim-2{animation:la-in 0.5s cubic-bezier(0.22,1,0.36,1) 0.1s both;}
 @media(max-width:900px){
   .la-nav{padding:0 20px;}
-  .la-nav-links{display:none;}
-  .la-nav-links-mobile{display:flex;}
   .la-nav-c{display:none;}
+  .la-nav-links{gap:6px;}
+  .la-nav-links .la-btn{padding:8px 12px;font-size:12px;}
   .la-hero{padding:60px 20px;}
   .la-hero-inner{grid-template-columns:1fr;gap:36px;}
   .la-form-section{padding:60px 20px;}
@@ -99,7 +96,6 @@ export function Contact() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   useSessionCleanup();
@@ -125,11 +121,14 @@ export function Contact() {
     }
     try {
       setLoading(true);
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      await ContactService.send(form);
       toast({ title: 'Mensagem enviada', description: 'Recebemos seu contato e retornaremos em breve.' });
       setForm({ nome: '', telefone: '', email: '', mensagem: '' });
     } catch (err) {
-      toast({ title: 'Erro', description: 'Não foi possível enviar sua mensagem.', variant: 'destructive' });
+      const description = err instanceof Error && err.message
+        ? err.message
+        : 'Não foi possível enviar sua mensagem.';
+      toast({ title: 'Erro', description, variant: 'destructive' });
     } finally {
       setLoading(false);
     }
@@ -164,24 +163,8 @@ export function Contact() {
                 Teste gratuito
               </button>
             </div>
-            <button
-              type="button"
-              className="la-btn-icon la-nav-links-mobile"
-              onClick={() => setMobileMenuOpen(prev => !prev)}
-              aria-label={mobileMenuOpen ? 'Fechar menu' : 'Abrir menu'}
-            >
-              {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
-            </button>
           </div>
         </nav>
-
-        {mobileMenuOpen && (
-          <div className="la-mobile-menu" style={{ position: 'fixed', top: '64px', left: 0, right: 0, zIndex: 99 }}>
-            <button type="button" className="la-btn la-btn-ghost" style={{ justifyContent: 'flex-start' }} onClick={() => navigate('/')}>Voltar</button>
-            <button type="button" className="la-btn la-btn-ghost" style={{ justifyContent: 'flex-start' }} onClick={() => navigate('/login')}>Entrar</button>
-            <button type="button" className="la-btn la-btn-dark" style={{ justifyContent: 'flex-start' }} onClick={() => navigate('/cadastro')}>Teste gratuito</button>
-          </div>
-        )}
 
         <main className="la-main">
           <section className="la-hero">

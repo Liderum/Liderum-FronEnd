@@ -74,6 +74,12 @@ export const getApiConfig = (): ApiConfig => {
 
 export const API_CONFIG = getApiConfig();
 
+// O endpoint público de contato (POST /liderum/api/contact) vive no mesmo
+// serviço do Auth (Liderum.Security), só muda o sufixo do path. Não é uma
+// env var obrigatória própria — derivamos de AUTH.BASE_URL para não exigir
+// uma nova VITE_CONTACT_API_URL configurada na Vercel antes do deploy.
+export const CONTACT_API_URL = API_CONFIG.AUTH.BASE_URL.replace(/\/login$/, '/contact');
+
 if (import.meta.env.DEV) {
   console.log('[Liderum] Ambiente detectado:', getEnvironment());
 }

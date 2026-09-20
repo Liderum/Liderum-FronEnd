@@ -227,10 +227,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   );
 
   const signOut = useCallback(() => {
-    const rt = tokenStore.getRefreshToken();
-    if (rt) {
-      AuthService.logout(rt).catch(() => {});
-    }
+    // Dispara antes de limpar o estado local: o endpoint exige o access token
+    // (ainda válido neste ponto) e revoga o refresh token via cookie HttpOnly.
+    AuthService.logout().catch(() => {});
     clearAuth();
   }, [clearAuth]);
 
