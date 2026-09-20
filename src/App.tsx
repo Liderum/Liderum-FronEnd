@@ -39,6 +39,7 @@ const WorkOverviewPage = lazy(() => import('./modules/works/pages/WorkOverviewPa
 const SchedulePage = lazy(() => import('./modules/schedule/pages/SchedulePage'));
 const BudgetPage = lazy(() => import('./modules/budget/pages/BudgetPage'));
 const ExtrasPage = lazy(() => import('./modules/extras/pages/ExtrasPage'));
+const WorkMaterialsPage = lazy(() => import('./modules/materials/pages/WorkMaterialsPage'));
 const DailyLogPage = lazy(() => import('./modules/daily-log/pages/DailyLogPage'));
 const IncidentsPage = lazy(() => import('./modules/incidents/pages/IncidentsPage'));
 
@@ -52,6 +53,9 @@ const Customers = lazy(() =>
 );
 const Suppliers = lazy(() =>
   import('./pages/management/Suppliers').then((m) => ({ default: m.Suppliers })),
+);
+const Materials = lazy(() =>
+  import('./pages/management/Materials').then((m) => ({ default: m.Materials })),
 );
 const RbacAdmin = lazy(() => import('./pages/management/RbacAdmin'));
 
@@ -123,6 +127,7 @@ function AppContent() {
           <Route path="schedule" element={<SchedulePage />} />
           <Route path="budget" element={<BudgetPage />} />
           <Route path="extras" element={<ExtrasPage />} />
+          <Route path="materials" element={<WorkMaterialsPage />} />
           <Route path="daily-log" element={<DailyLogPage />} />
           <Route path="incidents" element={<IncidentsPage />} />
         </Route>
@@ -136,6 +141,7 @@ function AppContent() {
         <Route path="companies" element={<PrivateRoute requiredPermission="companies.read"><Companies /></PrivateRoute>} />
         <Route path="customers" element={<PrivateRoute requiredPermission="customers.read"><Customers /></PrivateRoute>} />
         <Route path="suppliers" element={<PrivateRoute requiredPermission="suppliers.read"><Suppliers /></PrivateRoute>} />
+        <Route path="materials" element={<PrivateRoute requiredPermission="materials.read"><Materials /></PrivateRoute>} />
         <Route path="users" element={<PrivateRoute requiredPermission="users.view"><Users /></PrivateRoute>} />
         <Route path="rbac" element={<PrivateRoute requiredPermission="users.rbac.manage"><RbacAdmin /></PrivateRoute>} />
       </Route>

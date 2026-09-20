@@ -92,6 +92,31 @@ export interface UpdateSupplierDto {
   notes?: string;
 }
 
+export interface Material {
+  id: string;
+  companyId: string;
+  name: string;
+  unit: string;
+  category?: string;
+  defaultSupplierId?: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface CreateMaterialDto {
+  name: string;
+  unit: string;
+  category?: string;
+  defaultSupplierId?: string;
+}
+
+export interface UpdateMaterialDto {
+  name: string;
+  unit: string;
+  category?: string;
+  defaultSupplierId?: string;
+}
+
 export interface Profile {
   id?: number;
   name?: string;

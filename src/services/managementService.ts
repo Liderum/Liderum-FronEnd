@@ -10,6 +10,9 @@ import {
   Supplier,
   CreateSupplierDto,
   UpdateSupplierDto,
+  Material,
+  CreateMaterialDto,
+  UpdateMaterialDto,
   Profile,
   UpdateMyProfileDto,
 } from '@/types/management';
@@ -179,6 +182,71 @@ export class SupplierService {
   static async delete(companyId: string, id: string): Promise<void> {
     try {
       await worksApi.delete(`/companies/${companyId}/suppliers/${id}`);
+    } catch (error) {
+      const message = extractErrorMessage(error);
+      throw new Error(message);
+    }
+  }
+}
+
+// Materials Service
+export class MaterialService {
+  static async list(companyId: string): Promise<Material[]> {
+    try {
+      const response = await worksApi.get<Material[]>(
+        `/companies/${companyId}/materials`
+      );
+      return response.data;
+    } catch (error) {
+      const message = extractErrorMessage(error);
+      throw new Error(message);
+    }
+  }
+
+  static async getById(companyId: string, id: string): Promise<Material> {
+    try {
+      const response = await worksApi.get<Material>(
+        `/companies/${companyId}/materials/${id}`
+      );
+      return response.data;
+    } catch (error) {
+      const message = extractErrorMessage(error);
+      throw new Error(message);
+    }
+  }
+
+  static async create(companyId: string, payload: CreateMaterialDto): Promise<Material> {
+    try {
+      const response = await worksApi.post<Material>(
+        `/companies/${companyId}/materials`,
+        payload
+      );
+      return response.data;
+    } catch (error) {
+      const message = extractErrorMessage(error);
+      throw new Error(message);
+    }
+  }
+
+  static async update(
+    companyId: string,
+    id: string,
+    payload: UpdateMaterialDto
+  ): Promise<void> {
+    try {
+      await worksApi.put(
+        `/companies/${companyId}/materials/${id}`,
+        payload
+      );
+    } catch (error) {
+      const message = extractErrorMessage(error);
+      throw new Error(message);
+    }
+  }
+
+  static async delete(companyId: string, id: string): Promise<void> {
+    try {
+      await worksApi.delete(`/companies/${companyId}/materials/${id}`);
     } catch (error) {
       const message = extractErrorMessage(error);
       throw new Error(message);
