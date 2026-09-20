@@ -35,8 +35,11 @@ export const AuthService = {
     return response.data;
   },
 
-  async logout(refreshToken: string): Promise<void> {
-    await authApiInstance.post('/logout', { refreshToken });
+  // O refresh token vive só no cookie HttpOnly — o backend lê de lá, então o
+  // corpo do POST fica vazio (nunca dependa de uma cópia guardada em memória,
+  // que fica vazia sempre que a aba recarrega ou a sessão veio de um cookie já existente).
+  async logout(): Promise<void> {
+    await authApiInstance.post('/logout');
   },
 
   async forgotPassword(data: ForgotPasswordRequest): Promise<void> {
