@@ -4,6 +4,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useSimpleToast } from '@/hooks/useSimpleToast';
+import { LdConfirmDialog } from '@/components/LdConfirmDialog';
 import { MaterialService, SupplierService, CompanyService } from '@/services/managementService';
 import { Material, CreateMaterialDto, UpdateMaterialDto, Supplier, Company, MaterialUnit, MaterialCategory } from '@/types/management';
 import { Plus, Pencil, Trash2, Boxes, RefreshCw, Building2 } from 'lucide-react';
@@ -74,6 +75,8 @@ export function Materials() {
   const [companies, setCompanies] = useState<Company[]>([]);
   const [selectedCompanyId, setSelectedCompanyId] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<Material | null>(null);
+  const [deleting, setDeleting] = useState(false);
   const [editingMaterial, setEditingMaterial] = useState<Material | null>(null);
   const [form, setForm] = useState<CreateMaterialDto>(emptyForm);
 
@@ -147,14 +150,16 @@ export function Materials() {
     } catch (e: unknown) { showToast(e instanceof Error ? e.message : 'Erro ao salvar', 'error'); }
   }
 
-  async function handleDelete(m: Material) {
-    if (!selectedCompanyId) return;
-    if (!window.confirm(`Excluir material ${m.name}?`)) return;
+  async function handleDelete() {
+    if (!selectedCompanyId || !deleteTarget) return;
+    setDeleting(true);
     try {
-      await MaterialService.delete(selectedCompanyId, m.id);
+      await MaterialService.delete(selectedCompanyId, deleteTarget.id);
       showToast('Material excluído com sucesso', 'success');
+      setDeleteTarget(null);
       loadMaterials();
     } catch (e: unknown) { showToast(e instanceof Error ? e.message : 'Erro ao excluir', 'error'); }
+    finally { setDeleting(false); }
   }
 
   return (
@@ -213,7 +218,7 @@ export function Materials() {
                       <td style={{ textAlign: 'right' }}>
                         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 4 }}>
                           <button className="ld-btn ld-btn-outline ld-btn-sm" onClick={() => openEdit(m)}><Pencil size={10} /></button>
-                          <button className="ld-btn ld-btn-danger ld-btn-sm" onClick={() => handleDelete(m)}><Trash2 size={10} /></button>
+                          <button className="ld-btn ld-btn-danger ld-btn-sm" onClick={() => setDeleteTarget(m)}><Trash2 size={10} /></button>
                         </div>
                       </td>
                     </tr>
@@ -268,6 +273,15 @@ export function Materials() {
             </DialogFooter>
           </DialogContent>
         </Dialog>
+
+        <LdConfirmDialog
+          open={!!deleteTarget}
+          title="Excluir material?"
+          description={<>O material <strong>{deleteTarget?.name}</strong> será removido do catálogo. Esta ação não pode ser desfeita.</>}
+          loading={deleting}
+          onConfirm={handleDelete}
+          onCancel={() => setDeleteTarget(null)}
+        />
       </div>
     </>
   );
