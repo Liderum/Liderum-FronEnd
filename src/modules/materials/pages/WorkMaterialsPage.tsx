@@ -8,6 +8,7 @@ import { MaterialService, SupplierService, CompanyService } from '@/services/man
 import type { Material, Supplier, Company } from '@/types/management';
 import { useAuth } from '@/contexts/AuthContext';
 import { useSimpleToast } from '@/hooks/useSimpleToast';
+import { LdConfirmDialog } from '@/components/LdConfirmDialog';
 import { WORK_MATERIAL_STATUS_CONFIG } from '@/modules/shared/types';
 import type { WorkMaterialWorkflowStatus } from '@/modules/shared/types';
 
@@ -141,6 +142,8 @@ export default function WorkMaterialsPage() {
   const [editingItem, setEditingItem] = useState<WorkMaterialDto | null>(null);
   const [form, setForm] = useState<FormState>(emptyForm);
   const [saving, setSaving] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<WorkMaterialDto | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   // Histórico de transições por item (carregado sob demanda ao expandir).
   const [expandedHistory, setExpandedHistory] = useState<Record<string, boolean>>({});
@@ -268,14 +271,19 @@ export default function WorkMaterialsPage() {
     }
   }
 
-  async function handleDelete(item: WorkMaterialDto) {
-    if (!window.confirm(`Remover ${item.materialName} desta obra?`)) return;
+  async function handleDelete() {
+    if (!deleteTarget) return;
+    const item = deleteTarget;
+    setDeleting(true);
     try {
       await WorkMaterialService.delete(workId, item.id);
       setItems((prev) => prev.filter((i) => i.id !== item.id));
       showToast('Material removido', 'success');
+      setDeleteTarget(null);
     } catch (e: unknown) {
       showToast(e instanceof Error ? e.message : 'Erro ao remover material', 'error');
+    } finally {
+      setDeleting(false);
     }
   }
 
@@ -477,7 +485,7 @@ export default function WorkMaterialsPage() {
                                 <button className="wm-btn wm-btn-sm" onClick={() => openEdit(item)}><Pencil size={11} /></button>
                               )}
                               {canFreeEdit && canDelete && (
-                                <button className="wm-btn danger wm-btn-sm" onClick={() => handleDelete(item)}><Trash2 size={11} /></button>
+                                <button className="wm-btn danger wm-btn-sm" onClick={() => setDeleteTarget(item)}><Trash2 size={11} /></button>
                               )}
                             </div>
                             {nextAction && canUpdate && (
@@ -794,6 +802,16 @@ export default function WorkMaterialsPage() {
           </div>
         </div>
       )}
+
+      <LdConfirmDialog
+        open={!!deleteTarget}
+        title="Remover material da obra?"
+        description={<><strong>{deleteTarget?.materialName}</strong> será removido desta obra. Esta ação não pode ser desfeita.</>}
+        confirmLabel="Remover"
+        loading={deleting}
+        onConfirm={handleDelete}
+        onCancel={() => setDeleteTarget(null)}
+      />
     </>
   );
 }
