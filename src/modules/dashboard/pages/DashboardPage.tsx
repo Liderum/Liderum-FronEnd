@@ -72,7 +72,6 @@ export default function DashboardPage() {
   const totalPlanned = works.reduce((sum, w) => sum + w.totalBudget, 0);
   const totalActual = works.reduce((sum, w) => sum + w.currentCost, 0);
   const avgMargin = works.length === 0 ? 0 : works.reduce((sum, w) => sum + w.marginPercent, 0) / works.length;
-  const pendingExtras = extras.filter((e) => e.status === 'pendente' || e.status === 'em_analise').length;
   const openCriticalIncidents = incidents.filter(
     (i) => i.status !== 'resolvido' && i.status !== 'cancelado' && (i.severity === 'alta' || i.severity === 'critica'),
   ).length;
@@ -137,7 +136,7 @@ export default function DashboardPage() {
     { label: 'Custo Previsto', value: `R$ ${(totalPlanned / 1e6).toFixed(1)}M`, icon: DollarSign, color: '#1A5276', bg: '#EBF5FB' },
     { label: 'Custo Realizado', value: `R$ ${(totalActual / 1e6).toFixed(1)}M`, icon: TrendingUp, color: '#B7770D', bg: '#FFF8E1' },
     { label: 'Margem Média', value: `${avgMargin.toFixed(1)}%`, icon: Percent, color: '#B8922A', bg: '#F0E4C4' },
-    { label: 'Extras Pendentes', value: pendingExtras, icon: AlertTriangle, color: '#E67E22', bg: '#FFF3E0' },
+    { label: 'Extras', value: extras.length, icon: AlertTriangle, color: '#E67E22', bg: '#FFF3E0' },
     { label: 'Incidentes Críticos', value: openCriticalIncidents, icon: ShieldAlert, color: '#C0392B', bg: '#FDEDEC' },
     { label: 'Concluídas', value: completedThisMonth, icon: CheckCircle2, color: '#1E8449', bg: '#E8F5E9' },
   ];

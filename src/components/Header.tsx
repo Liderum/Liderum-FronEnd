@@ -68,7 +68,7 @@ function resolveLabel(pathname: string): string {
 
 const notifications = [
   { id: 1, icon: AlertTriangle, color: '#FDEDEC', iconColor: '#C0392B', label: 'Obra atrasada', desc: 'Galpão Logístico BR-101 com 22 dias de atraso', time: 'Há 2h' },
-  { id: 2, icon: Clock, color: '#FFF8E1', iconColor: '#B7770D', label: 'Extra pendente', desc: 'Ampliação da área de lazer aguarda aprovação', time: 'Há 6h' },
+  { id: 2, icon: Clock, color: '#FFF8E1', iconColor: '#B7770D', label: 'Novo extra', desc: 'Ampliação da área de lazer adicionada à obra', time: 'Há 6h' },
   { id: 3, icon: CheckCircle, color: '#E8F5E9', iconColor: '#1E8449', label: 'Obra concluída', desc: 'Condomínio Parque das Águas entregue', time: 'Ontem' },
 ];
 

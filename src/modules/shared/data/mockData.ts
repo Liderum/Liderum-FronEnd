@@ -163,13 +163,9 @@ export const mockExtras: ExtraRequest[] = [
     requestDate: '2026-03-10',
     scheduleImpact: '+15 dias',
     financialImpact: 185000,
-    status: 'aprovado',
     requestedBy: 'Construtora Horizonte',
-    approvedBy: 'Carlos Mendes',
     history: [
-      { date: '2026-03-10', action: 'Solicitação criada', user: 'Construtora Horizonte', notes: 'Pedido formal via e-mail' },
-      { date: '2026-03-12', action: 'Em análise', user: 'Carlos Mendes', notes: 'Orçamento sendo elaborado' },
-      { date: '2026-03-18', action: 'Aprovado', user: 'Carlos Mendes', notes: 'Aprovado com impacto de R$185k e +15 dias' },
+      { date: '2026-03-10', action: 'Extra adicionado', user: 'Construtora Horizonte', notes: 'Pedido formal via e-mail' },
     ],
   },
   {
@@ -179,11 +175,9 @@ export const mockExtras: ExtraRequest[] = [
     requestDate: '2026-03-22',
     scheduleImpact: '+30 dias',
     financialImpact: 420000,
-    status: 'em_analise',
     requestedBy: 'Construtora Horizonte',
     history: [
-      { date: '2026-03-22', action: 'Solicitação criada', user: 'Construtora Horizonte' },
-      { date: '2026-03-25', action: 'Em análise', user: 'Ana Beatriz Silva', notes: 'Verificando viabilidade técnica' },
+      { date: '2026-03-22', action: 'Extra adicionado', user: 'Construtora Horizonte' },
     ],
   },
   {
@@ -193,10 +187,9 @@ export const mockExtras: ExtraRequest[] = [
     requestDate: '2026-02-15',
     scheduleImpact: '+10 dias',
     financialImpact: 280000,
-    status: 'pendente',
     requestedBy: 'Apex Investimentos',
     history: [
-      { date: '2026-02-15', action: 'Solicitação criada', user: 'Apex Investimentos' },
+      { date: '2026-02-15', action: 'Extra adicionado', user: 'Apex Investimentos' },
     ],
   },
   {
@@ -206,11 +199,9 @@ export const mockExtras: ExtraRequest[] = [
     requestDate: '2026-01-20',
     scheduleImpact: '+5 dias',
     financialImpact: 95000,
-    status: 'rejeitado',
     requestedBy: 'Eng. Roberto Almeida',
     history: [
-      { date: '2026-01-20', action: 'Solicitação criada', user: 'Eng. Roberto Almeida' },
-      { date: '2026-01-25', action: 'Rejeitado', user: 'Carlos Mendes', notes: 'Laudo revisado — pilares dentro dos padrões' },
+      { date: '2026-01-20', action: 'Extra adicionado', user: 'Eng. Roberto Almeida' },
     ],
   },
 ];

@@ -70,7 +70,7 @@ const STEPS: TourStep[] = [
   {
     key: 'gestao',
     title: 'O fluxo de uma obra',
-    body: 'Ao entrar numa obra específica, você navega entre Cronograma (linha do tempo com dependências), Orçamento (previsto x realizado), Extras (aditivos para aprovação) e Diário de Obra (registro diário com fotos e ocorrências).',
+    body: 'Ao entrar numa obra específica, você navega entre Cronograma (linha do tempo com dependências), Orçamento (previsto x realizado), Extras (custos adicionais registrados na obra) e Diário de Obra (registro diário com fotos e ocorrências).',
     targetId: 'nav-gestao',
     arrow: 'left',
   },

@@ -9,7 +9,7 @@ const features = [
   { icon: 'ruler', title: 'Orçamento & Custos', text: 'Previsto versus realizado por item. Controle de materiais, mão de obra e serviços com alertas automáticos de desvio orçamentário.' },
   { icon: 'compass', title: 'Cronograma Inteligente', text: 'Timeline visual por etapa com dependências, marcos e indicadores de risco de atraso — para agir antes do problema aparecer.' },
   { icon: 'notebook', title: 'Diário de Obra', text: 'Registro diário com fotos, problemas, ações corretivas e condições climáticas. Histórico completo e rastreável de cada dia no canteiro.' },
-  { icon: 'stamp', title: 'Gestão de Extras', text: 'Fluxo completo de aprovação de aditivos — impacto no prazo, impacto financeiro e histórico de decisões para proteger sua margem.' },
+  { icon: 'stamp', title: 'Gestão de Extras', text: 'Registro de extras e aditivos — impacto no prazo, impacto financeiro e histórico para proteger sua margem.' },
   { icon: 'alert', title: 'Alertas de Risco', text: 'Monitoramento contínuo de prazos, custos e qualidade com alertas classificados por severidade para que nenhum problema passe despercebido.' }
 ];
 
@@ -23,7 +23,7 @@ const painItems = [
   'Cada obra controlada em planilha diferente, sem visão consolidada',
   'Desvios de orçamento descobertos tarde demais para corrigir',
   'Diário de obra em papel — impossível de rastrear ou consultar',
-  'Extras e aditivos sem aprovação formal, corroendo a margem',
+  'Extras e aditivos sem registro, corroendo a margem',
   'Cronograma desatualizado, sem visibilidade de dependências e riscos',
   'Equipe gastando horas em relatórios manuais em vez de gerenciar'
 ];
@@ -41,7 +41,7 @@ const heroRooms = [
   { x: 40, y: 40, w: 260, h: 130, lx: 60, ly: 70, sx: 60, sy: 82, name: 'Cronograma', sub: 'dependências · marcos · risco', desc: 'Timeline visual com marcos e alertas de atraso — para agir antes do problema aparecer.' },
   { x: 300, y: 40, w: 260, h: 130, lx: 320, ly: 70, sx: 320, sy: 82, name: 'Orçamento', sub: 'previsto × realizado', desc: 'Previsto versus realizado por item, com alertas automáticos de desvio orçamentário.' },
   { x: 40, y: 170, w: 260, h: 130, lx: 60, ly: 200, sx: 60, sy: 212, name: 'Diário de obra', sub: 'fotos · ocorrências', desc: 'Registro diário com fotos, problemas e condições climáticas — rastreável a qualquer momento.' },
-  { x: 300, y: 170, w: 260, h: 130, lx: 320, ly: 200, sx: 320, sy: 212, name: 'Extras', sub: 'aprovação formal', desc: 'Fluxo completo de aprovação de aditivos, com impacto no prazo e na margem.' }
+  { x: 300, y: 170, w: 260, h: 130, lx: 320, ly: 200, sx: 320, sy: 212, name: 'Extras', sub: 'registro de aditivos', desc: 'Registro de aditivos, com impacto no prazo e na margem.' }
 ];
 
 function IconGlyph({ name }: { name: string }) {
@@ -529,7 +529,7 @@ export function LandingPage() {
               {[
                 { n: '1', title: 'Cadastre suas obras', text: 'Adicione obras, defina etapas, responsáveis e orçamentos. Importe dados existentes com a planilha modelo inclusa.' },
                 { n: '2', title: 'Acompanhe em tempo real', text: 'Monitore progresso, custos, cronograma e riscos no dashboard executivo. Receba alertas automáticos de desvio.' },
-                { n: '3', title: 'Proteja sua margem', text: 'Gerencie extras com fluxo formal de aprovação, mantenha o diário de obra digital e tome decisões com dados reais.' }
+                { n: '3', title: 'Proteja sua margem', text: 'Registre extras com impacto no custo e no prazo, mantenha o diário de obra digital e tome decisões com dados reais.' }
               ].map((s, i) => (
                 <div key={s.n} className={`ldr-step ldr-reveal${i > 0 ? ` ldr-d${i * 2}` : ''}`}>
                   <div className="ldr-step-num">{s.n}</div>
