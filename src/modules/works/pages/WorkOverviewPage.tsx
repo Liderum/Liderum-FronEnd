@@ -88,7 +88,6 @@ export default function WorkOverviewPage() {
 
   const variation = work.totalBudget === 0 ? 0 : ((work.currentCost - work.totalBudget) / work.totalBudget) * 100;
   const marginPct = work.marginPercent ?? (work.totalBudget > 0 ? (work.margin / work.totalBudget) * 100 : 0);
-  const pendingExtras = extras.filter((e) => e.status === 'pendente' || e.status === 'em_analise');
   const openIncidents = incidents.filter((i) => i.status !== 'resolvido' && i.status !== 'cancelado');
   const nextMilestones = tasks.filter((t) => t.status !== 'concluida').slice(0, 4);
   const lastLog = logs[0];
@@ -99,7 +98,7 @@ export default function WorkOverviewPage() {
     { label: 'Variação', value: `${variation > 0 ? '+' : ''}${variation.toFixed(1)}%`, icon: Percent, color: variation > 0 ? '#C0392B' : '#1E8449', bg: variation > 0 ? '#FDEDEC' : '#E8F5E9' },
     { label: 'Margem', value: `${marginPct.toFixed(1)}%`, icon: TrendingUp, color: marginPct > 0 ? '#1E8449' : '#C0392B', bg: marginPct > 0 ? '#E8F5E9' : '#FDEDEC' },
     { label: 'Prazo', value: formatDate(work.expectedEndDate), icon: Calendar, color: '#B7770D', bg: '#FFF8E1' },
-    { label: 'Extras Pendentes', value: pendingExtras.length, icon: AlertTriangle, color: '#E67E22', bg: '#FFF3E0' },
+    { label: 'Extras', value: extras.length, icon: AlertTriangle, color: '#E67E22', bg: '#FFF3E0' },
     { label: 'Incidentes Abertos', value: openIncidents.length, icon: ShieldAlert, color: openIncidents.length > 0 ? '#C0392B' : '#7A7670', bg: openIncidents.length > 0 ? '#FDEDEC' : '#F5F5F5' },
   ];
 
@@ -196,16 +195,16 @@ export default function WorkOverviewPage() {
         <div className="wo-section-grid">
           <div className="wo-card">
             <div className="wo-card-header">
-              <span className="wo-card-title">Extras Pendentes</span>
+              <span className="wo-card-title">Extras</span>
               <button className="wo-card-link" onClick={() => navigate(`/works/${workId}/extras`)}>
                 Ver todos <ArrowRight size={12} />
               </button>
             </div>
             <div className="wo-card-body">
-              {pendingExtras.length === 0 ? (
-                <div style={{ color: 'var(--ink3, #7A7670)', fontSize: 12 }}>Nenhum extra pendente.</div>
+              {extras.length === 0 ? (
+                <div style={{ color: 'var(--ink3, #7A7670)', fontSize: 12 }}>Nenhum extra adicionado.</div>
               ) : (
-                pendingExtras.slice(0, 3).map((e) => (
+                extras.slice(0, 3).map((e) => (
                   <div key={e.id} className="wo-item">
                     <div style={{ flex: 1 }}>
                       <div style={{ fontSize: 12.5, fontWeight: 500 }}>{e.title}</div>

@@ -3,12 +3,11 @@ import { useParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   FilePlus2, Clock, DollarSign, Calendar,
-  CheckCircle2, XCircle, ChevronDown, ChevronUp, User, Plus, Send, X,
+  ChevronDown, ChevronUp, User, Plus, X,
 } from 'lucide-react';
 import { ExtrasService } from '@/services/works';
 import { useAuth } from '@/contexts/AuthContext';
-import { EXTRA_STATUS_CONFIG } from '@/modules/shared/types';
-import type { ExtraRequest, ExtraStatus } from '@/modules/shared/types';
+import type { ExtraRequest } from '@/modules/shared/types';
 import { displayPerson } from '@/utils/identity';
 
 const CSS = `
@@ -19,18 +18,10 @@ const CSS = `
 .ex-summary-val{font-family:var(--font-numeric);font-size:20px;font-weight:600;font-variant-numeric:tabular-nums lining-nums;color:var(--ink,#1A1814);}
 .ex-summary-label{font-size:10.5px;color:var(--ink3,#7A7670);font-weight:500;text-transform:uppercase;letter-spacing:0.3px;}
 .ex-toolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
-.ex-filters{display:flex;gap:6px;flex-wrap:wrap;}
-.ex-filter{padding:6px 12px;border-radius:7px;font-size:11.5px;font-weight:500;cursor:pointer;border:1px solid transparent;background:transparent;color:var(--ink3,#7A7670);font-family:'DM Sans',sans-serif;transition:all 0.14s;}
-.ex-filter:hover{background:var(--cream,#F7F4EF);}
-.ex-filter.active{background:rgba(184,146,42,0.08);color:var(--gold,#B8922A);border-color:rgba(184,146,42,0.15);}
 .ex-btn{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:8px;font-size:12px;font-weight:500;cursor:pointer;border:1px solid rgba(26,24,20,0.12);background:var(--card-bg,#fff);color:var(--ink,#1A1814);font-family:'DM Sans',sans-serif;transition:all 0.14s;}
 .ex-btn:hover{background:var(--cream,#F7F4EF);}
 .ex-btn.primary{background:var(--brand-gold);color:#fff;border-color:var(--brand-gold);}
 .ex-btn.primary:hover{background:#a07e1f;}
-.ex-btn.approve{background:#1E8449;color:#fff;border-color:#1E8449;}
-.ex-btn.approve:hover{background:#196e3d;}
-.ex-btn.reject{background:#C0392B;color:#fff;border-color:#C0392B;}
-.ex-btn.reject:hover{background:#a03024;}
 .ex-btn:disabled{opacity:0.5;cursor:not-allowed;}
 .ex-card{background:var(--card-bg,#fff);border-radius:12px;border:1px solid var(--bdr,rgba(26,24,20,0.10));padding:0;overflow:hidden;box-shadow:0 2px 10px rgba(26,24,20,0.04);transition:all 0.18s;}
 .ex-card:hover{box-shadow:0 6px 24px rgba(26,24,20,0.08);}
@@ -41,7 +32,6 @@ const CSS = `
 .ex-card-meta{display:flex;gap:16px;flex-wrap:wrap;}
 .ex-card-meta-item{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--ink3,#7A7670);}
 .ex-card-meta-value{font-weight:600;color:var(--ink,#1A1814);}
-.ex-card-actions{display:flex;gap:8px;padding:12px 24px;border-top:1px solid rgba(26,24,20,0.06);background:#fafaf7;flex-wrap:wrap;}
 .ex-card-history{border-top:1px solid rgba(26,24,20,0.06);padding:16px 24px;background:var(--cream,#F7F4EF);}
 .ex-history-title{font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--ink3,#7A7670);margin-bottom:10px;}
 .ex-history-item{display:flex;gap:12px;padding:8px 0;position:relative;}
@@ -62,7 +52,6 @@ const CSS = `
 .ex-currency-wrap .ex-modal-input{padding-left:36px;}
 .ex-modal-textarea{width:100%;padding:10px 12px;border-radius:8px;border:1px solid rgba(26,24,20,0.15);font-family:'DM Sans',sans-serif;font-size:13px;min-height:80px;box-sizing:border-box;resize:vertical;margin-bottom:14px;}
 .ex-modal-actions{display:flex;gap:10px;justify-content:flex-end;}
-.ex-client-badge{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:12px;font-size:10.5px;font-weight:500;background:#EBF5FB;color:#1A5276;}
 `;
 
 function formatCurrency(value: number) {
@@ -90,16 +79,6 @@ function formatDate(dateStr: string | undefined): string {
   return `${day}/${month}/${year}`;
 }
 
-type FilterKey = 'todas' | ExtraStatus;
-
-const FILTERS: { key: FilterKey; label: string }[] = [
-  { key: 'todas', label: 'Todas' },
-  { key: 'pendente', label: 'Pendentes' },
-  { key: 'em_analise', label: 'Em análise' },
-  { key: 'aprovado', label: 'Aprovadas' },
-  { key: 'rejeitado', label: 'Rejeitadas' },
-];
-
 interface FormState {
   title: string;
   description: string;
@@ -121,17 +100,12 @@ export default function ExtrasPage() {
   const workId = id ?? '1';
   const { permissions, user } = useAuth();
   const canCreate = permissions.includes('extras.create');
-  const canApprove = permissions.includes('extras.approve');
 
   const [extras, setExtras] = useState<ExtraRequest[]>([]);
-  const [filter, setFilter] = useState<FilterKey>('todas');
   const [expanded, setExpanded] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState<FormState>(emptyForm);
-  const [busyId, setBusyId] = useState<string | null>(null);
-  const [rejectTarget, setRejectTarget] = useState<ExtraRequest | null>(null);
-  const [rejectReason, setRejectReason] = useState('');
 
   useEffect(() => {
     let active = true;
@@ -146,11 +120,7 @@ export default function ExtrasPage() {
     };
   }, [workId]);
 
-  const filtered = filter === 'todas' ? extras : extras.filter((e) => e.status === filter);
-
   const totalImpact = extras.reduce((s, e) => s + e.financialImpact, 0);
-  const pending = extras.filter((e) => e.status === 'pendente' || e.status === 'em_analise').length;
-  const approved = extras.filter((e) => e.status === 'aprovado').length;
 
   const toggle = (eid: string) =>
     setExpanded((p) => (p.includes(eid) ? p.filter((x) => x !== eid) : [...p, eid]));
@@ -166,48 +136,10 @@ export default function ExtrasPage() {
       scheduleImpact: form.scheduleImpact.trim() || '—',
       financialImpact,
       requestedBy: form.requestedBy.trim() || user?.name || 'usuário',
-      clientApprovalRequired: true,
     });
     setExtras((prev) => [created, ...prev]);
     setForm(emptyForm);
     setShowForm(false);
-  };
-
-  const doTransition = async (extra: ExtraRequest, to: ExtraStatus, note?: string) => {
-    setBusyId(extra.id);
-    try {
-      const updated = await ExtrasService.transition(
-        workId,
-        extra.id,
-        to,
-        user?.name ?? user?.email ?? 'usuário',
-        note,
-      );
-      setExtras((prev) => prev.map((e) => (e.id === extra.id ? updated : e)));
-    } finally {
-      setBusyId(null);
-    }
-  };
-
-  const confirmReject = async () => {
-    if (!rejectTarget || !rejectReason.trim()) return;
-    await doTransition(rejectTarget, 'rejeitado', rejectReason.trim());
-    setRejectTarget(null);
-    setRejectReason('');
-  };
-
-  const requestClient = async (extra: ExtraRequest) => {
-    setBusyId(extra.id);
-    try {
-      const updated = await ExtrasService.requestClientApproval(
-        workId,
-        extra.id,
-        user?.name ?? user?.email ?? 'usuário',
-      );
-      setExtras((prev) => prev.map((e) => (e.id === extra.id ? updated : e)));
-    } finally {
-      setBusyId(null);
-    }
   };
 
   if (loading) {
@@ -233,24 +165,6 @@ export default function ExtrasPage() {
             </div>
           </div>
           <div className="ex-summary-card">
-            <div className="ex-summary-icon" style={{ background: '#FFF8E1' }}>
-              <Clock size={16} color="#B7770D" />
-            </div>
-            <div>
-              <div className="ex-summary-val">{pending}</div>
-              <div className="ex-summary-label">Pendentes</div>
-            </div>
-          </div>
-          <div className="ex-summary-card">
-            <div className="ex-summary-icon" style={{ background: '#E8F5E9' }}>
-              <CheckCircle2 size={16} color="#1E8449" />
-            </div>
-            <div>
-              <div className="ex-summary-val">{approved}</div>
-              <div className="ex-summary-label">Aprovadas</div>
-            </div>
-          </div>
-          <div className="ex-summary-card">
             <div className="ex-summary-icon" style={{ background: '#FDEDEC' }}>
               <DollarSign size={16} color="#C0392B" />
             </div>
@@ -262,13 +176,6 @@ export default function ExtrasPage() {
         </div>
 
         <div className="ex-toolbar">
-          <div className="ex-filters">
-            {FILTERS.map((f) => (
-              <button key={f.key} className={`ex-filter${filter === f.key ? ' active' : ''}`} onClick={() => setFilter(f.key)}>
-                {f.label}
-              </button>
-            ))}
-          </div>
           <div style={{ flex: 1 }} />
           {canCreate && (
             <button className="ex-btn primary" onClick={() => setShowForm(true)}>
@@ -277,18 +184,15 @@ export default function ExtrasPage() {
           )}
         </div>
 
-        {filtered.length === 0 && (
+        {extras.length === 0 && (
           <div style={{ padding: 40, textAlign: 'center', color: 'var(--ink3, #7A7670)', background: 'var(--card-bg, #fff)', borderRadius: 12, border: '1px solid rgba(26,24,20,0.08)' }}>
-            Nenhum extra nesta visão.
+            Nenhum extra adicionado nesta obra.
           </div>
         )}
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-          {filtered.map((extra, i) => {
-            const statusCfg = EXTRA_STATUS_CONFIG[extra.status];
+          {extras.map((extra, i) => {
             const isOpen = expanded.includes(extra.id);
-            const isBusy = busyId === extra.id;
-            const canTransitionFrom = extra.status === 'pendente' || extra.status === 'em_analise';
             return (
               <motion.div
                 key={extra.id}
@@ -301,15 +205,6 @@ export default function ExtrasPage() {
                   <div className="ex-card-top">
                     <div className="ex-card-title">{extra.title}</div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
-                      <span style={{ padding: '3px 10px', borderRadius: 20, fontSize: 10.5, fontWeight: 500, background: statusCfg.bg, color: statusCfg.color, whiteSpace: 'nowrap' }}>
-                        ● {statusCfg.label}
-                      </span>
-                      {extra.clientApprovalRequestedAt && !extra.clientApprovedAt && (
-                        <span className="ex-client-badge">aguardando cliente</span>
-                      )}
-                      {extra.clientApprovedAt && (
-                        <span className="ex-client-badge">cliente confirmou</span>
-                      )}
                       {isOpen ? <ChevronUp size={14} color="var(--ink3)" /> : <ChevronDown size={14} color="var(--ink3)" />}
                     </div>
                   </div>
@@ -329,31 +224,6 @@ export default function ExtrasPage() {
                     </div>
                   </div>
                 </div>
-
-                {canTransitionFrom && (canApprove || extra.status === 'pendente') && (
-                  <div className="ex-card-actions" onClick={(e) => e.stopPropagation()}>
-                    {extra.status === 'pendente' && canApprove && (
-                      <button className="ex-btn" disabled={isBusy} onClick={() => doTransition(extra, 'em_analise')}>
-                        Marcar em análise
-                      </button>
-                    )}
-                    {!extra.clientApprovalRequestedAt && canApprove && (
-                      <button className="ex-btn" disabled={isBusy} onClick={() => requestClient(extra)}>
-                        <Send size={12} /> Enviar para cliente
-                      </button>
-                    )}
-                    {canApprove && (
-                      <>
-                        <button className="ex-btn approve" disabled={isBusy} onClick={() => doTransition(extra, 'aprovado')}>
-                          <CheckCircle2 size={12} /> Aprovar
-                        </button>
-                        <button className="ex-btn reject" disabled={isBusy} onClick={() => { setRejectTarget(extra); setRejectReason(''); }}>
-                          <XCircle size={12} /> Rejeitar
-                        </button>
-                      </>
-                    )}
-                  </div>
-                )}
 
                 <AnimatePresence>
                   {isOpen && (
@@ -403,7 +273,7 @@ export default function ExtrasPage() {
               className="ex-modal-textarea"
               value={form.description}
               onChange={(e) => setForm({ ...form, description: e.target.value })}
-              placeholder="Contextualize o pedido, escopo e justificativa"
+              placeholder="Descreva o extra, escopo e justificativa"
             />
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
               <div>
@@ -452,33 +322,6 @@ export default function ExtrasPage() {
         </div>
       )}
 
-      {rejectTarget && (
-        <div className="ex-modal">
-          <div className="ex-modal-card" onClick={(e) => e.stopPropagation()}>
-            <div className="ex-modal-title">Rejeitar extra</div>
-            <label className="ex-modal-label">Motivo da rejeição</label>
-            <textarea
-              className="ex-modal-textarea"
-              value={rejectReason}
-              onChange={(e) => setRejectReason(e.target.value)}
-              placeholder="Explique o motivo da rejeição deste extra"
-              autoFocus
-            />
-            <div className="ex-modal-actions">
-              <button className="ex-btn" onClick={() => setRejectTarget(null)}>
-                <X size={14} /> Cancelar
-              </button>
-              <button
-                className="ex-btn reject"
-                onClick={confirmReject}
-                disabled={!rejectReason.trim() || busyId === rejectTarget.id}
-              >
-                <XCircle size={12} /> Confirmar rejeição
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </>
   );
 }

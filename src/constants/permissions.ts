@@ -60,8 +60,6 @@ export const PERMISSION_MAP: ModulePermissions[] = [
     permissions: [
       { key: 'extras.read', label: 'Visualizar', description: 'Ver solicitações extras' },
       { key: 'extras.create', label: 'Criar', description: 'Criar solicitação extra' },
-      { key: 'extras.approve', label: 'Aprovar', description: 'Aprovar/rejeitar solicitação' },
-      { key: 'extras.client.approval', label: 'Aprovação do cliente', description: 'Enviar e registrar decisão do cliente' },
       { key: 'extras.attachments', label: 'Anexos', description: 'Gerenciar anexos de extras' },
     ],
   },

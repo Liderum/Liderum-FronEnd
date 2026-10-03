@@ -1,5 +1,4 @@
 export type WorkStatus = 'em_andamento' | 'atrasada' | 'concluida' | 'pausada' | 'planejada' | 'cancelada';
-export type ExtraStatus = 'pendente' | 'aprovado' | 'rejeitado' | 'em_analise';
 export type RiskLevel = 'baixo' | 'medio' | 'alto' | 'critico';
 export type TaskStatus = 'concluida' | 'em_andamento' | 'pendente' | 'bloqueada' | 'atrasada';
 export type IncidentSeverity = 'baixa' | 'media' | 'alta' | 'critica';
@@ -106,15 +105,8 @@ export interface ExtraRequest {
   requestDate: string;
   scheduleImpact: string;
   financialImpact: number;
-  status: ExtraStatus;
   requestedBy: string;
-  approvedBy?: string;
   history: ExtraHistoryEntry[];
-  clientApprovalRequired?: boolean;
-  clientApprovalRequestedAt?: string;
-  clientApprovedAt?: string;
-  clientApprovedBy?: string;
-  clientDecisionNote?: string;
   attachments?: string[];
 }
 
@@ -217,13 +209,6 @@ export const TASK_STATUS_CONFIG: Record<TaskStatus, { label: string; color: stri
   pendente: { label: 'Pendente', color: '#7A7670', bg: '#F5F5F5' },
   bloqueada: { label: 'Bloqueada', color: '#C0392B', bg: '#FDEDEC' },
   atrasada: { label: 'Atrasada', color: '#E67E22', bg: '#FFF3E0' },
-};
-
-export const EXTRA_STATUS_CONFIG: Record<ExtraStatus, { label: string; color: string; bg: string }> = {
-  pendente: { label: 'Pendente', color: '#B7770D', bg: '#FFF8E1' },
-  aprovado: { label: 'Aprovado', color: '#1E8449', bg: '#E8F5E9' },
-  rejeitado: { label: 'Rejeitado', color: '#C0392B', bg: '#FDEDEC' },
-  em_analise: { label: 'Em análise', color: '#1A5276', bg: '#EBF5FB' },
 };
 
 export const INCIDENT_SEVERITY_CONFIG: Record<IncidentSeverity, { label: string; color: string; bg: string }> = {
