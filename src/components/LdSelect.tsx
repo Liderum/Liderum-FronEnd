@@ -12,6 +12,8 @@ interface LdSelectProps {
   options: LdSelectOption[];
   placeholder?: string;
   size?: 'default' | 'sm';
+  disabled?: boolean;
+  searchable?: boolean;
   style?: React.CSSProperties;
   className?: string;
 }
@@ -40,6 +42,15 @@ const CSS = `
   box-shadow:0 0 0 3px rgba(184,146,42,0.10);
 }
 .lds-trigger.sm{padding:6px 10px;font-size:12px;border-radius:7px;border:1px solid rgba(26,24,20,0.12);}
+.lds-trigger:disabled{opacity:0.55;cursor:not-allowed;}
+.lds-search{
+  display:block;width:calc(100% - 8px);box-sizing:border-box;margin:4px;
+  font-family:'DM Sans',sans-serif;font-size:12.5px;color:var(--ink,#1A1814);
+  background:var(--card-bg,#fff);border:1px solid rgba(26,24,20,0.12);
+  border-radius:7px;padding:6px 10px;outline:none;
+}
+.lds-search:focus{border-color:rgba(184,146,42,0.55);}
+.lds-empty{padding:8px 12px;font-family:'DM Sans',sans-serif;font-size:12px;color:var(--ink3,#7A7670);}
 .lds-trigger-placeholder{color:var(--ink3,#7A7670);}
 .lds-chevron{flex-shrink:0;color:var(--gold,#B8922A);transition:transform 0.2s;}
 .lds-chevron.open{transform:rotate(180deg);}
@@ -84,10 +95,13 @@ export function LdSelect({
   options,
   placeholder = '— Selecionar —',
   size = 'default',
+  disabled = false,
+  searchable = false,
   style,
   className = '',
 }: LdSelectProps) {
   const [open, setOpen] = useState(false);
+  const [query, setQuery] = useState('');
   const wrapRef = useRef<HTMLDivElement>(null);
 
   if (!cssInjected) {
@@ -101,6 +115,7 @@ export function LdSelect({
     function onOutside(e: MouseEvent) {
       if (wrapRef.current && !wrapRef.current.contains(e.target as Node)) {
         setOpen(false);
+        setQuery('');
       }
     }
     document.addEventListener('mousedown', onOutside);
@@ -109,6 +124,18 @@ export function LdSelect({
 
   const selected = options.find((o) => o.value === value);
   const isSm = size === 'sm';
+  const q = query.trim().toLowerCase();
+  const visible = searchable && q ? options.filter((o) => o.label.toLowerCase().includes(q)) : options;
+
+  function close() {
+    setOpen(false);
+    setQuery('');
+  }
+
+  function toggle() {
+    if (open) close();
+    else setOpen(true);
+  }
 
   return (
     <div
@@ -118,11 +145,12 @@ export function LdSelect({
     >
       <button
         type="button"
+        disabled={disabled}
         className={`lds-trigger${open ? ' open' : ''}${isSm ? ' sm' : ''}`}
-        onClick={() => setOpen((v) => !v)}
+        onClick={toggle}
         onKeyDown={(e) => {
-          if (e.key === 'Escape') setOpen(false);
-          if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setOpen((v) => !v); }
+          if (e.key === 'Escape' && open) { e.stopPropagation(); close(); }
+          if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); }
         }}
       >
         <span className={selected ? '' : 'lds-trigger-placeholder'}>
@@ -131,32 +159,43 @@ export function LdSelect({
         <ChevronDown size={isSm ? 13 : 14} className={`lds-chevron${open ? ' open' : ''}`} />
       </button>
 
-      {open && (
+      {open && !disabled && (
         <div className="lds-dropdown">
+          {searchable && (
+            <input
+              autoFocus
+              className="lds-search"
+              placeholder="Buscar…"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              onKeyDown={(e) => { if (e.key === 'Escape') { e.stopPropagation(); close(); } }}
+            />
+          )}
           <div className="lds-list" role="listbox">
-            {placeholder && (
+            {placeholder && !q && (
               <div
                 className={`lds-option${isSm ? ' sm' : ''}${value === '' ? ' selected' : ''}`}
                 role="option"
                 aria-selected={value === ''}
-                onClick={() => { onChange(''); setOpen(false); }}
+                onClick={() => { onChange(''); close(); }}
               >
                 <span style={{ color: 'var(--ink3,#7A7670)', fontStyle: 'italic' }}>{placeholder}</span>
                 {value === '' && <Check size={12} />}
               </div>
             )}
-            {options.map((opt) => (
+            {visible.map((opt) => (
               <div
                 key={opt.value}
                 className={`lds-option${isSm ? ' sm' : ''}${value === opt.value ? ' selected' : ''}`}
                 role="option"
                 aria-selected={value === opt.value}
-                onClick={() => { onChange(opt.value); setOpen(false); }}
+                onClick={() => { onChange(opt.value); close(); }}
               >
                 <span>{opt.label}</span>
                 {value === opt.value && <Check size={12} />}
               </div>
             ))}
+            {visible.length === 0 && <div className="lds-empty">Nenhum resultado</div>}
           </div>
         </div>
       )}

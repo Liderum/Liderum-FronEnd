@@ -60,8 +60,6 @@ export const PERMISSION_MAP: ModulePermissions[] = [
     permissions: [
       { key: 'extras.read', label: 'Visualizar', description: 'Ver solicitações extras' },
       { key: 'extras.create', label: 'Criar', description: 'Criar solicitação extra' },
-      { key: 'extras.approve', label: 'Aprovar', description: 'Aprovar/rejeitar solicitação' },
-      { key: 'extras.client.approval', label: 'Aprovação do cliente', description: 'Enviar e registrar decisão do cliente' },
       { key: 'extras.attachments', label: 'Anexos', description: 'Gerenciar anexos de extras' },
     ],
   },
@@ -135,10 +133,10 @@ export const PERMISSION_MAP: ModulePermissions[] = [
     label: 'Materiais',
     icon: 'Boxes',
     permissions: [
-      { key: 'materials.read', label: 'Listar / Detalhar', description: 'Ver catálogo de materiais' },
-      { key: 'materials.create', label: 'Criar', description: 'Criar material' },
-      { key: 'materials.update', label: 'Editar', description: 'Editar material' },
-      { key: 'materials.delete', label: 'Excluir', description: 'Excluir material' },
+      { key: 'materials.read', label: 'Listar / Detalhar', description: 'Ver materiais da obra e o catálogo' },
+      { key: 'materials.create', label: 'Criar', description: 'Adicionar material à obra e ao catálogo' },
+      { key: 'materials.update', label: 'Editar', description: 'Editar material da obra, avançar o fluxo e editar o catálogo' },
+      { key: 'materials.delete', label: 'Excluir', description: 'Remover material da obra e do catálogo' },
     ],
   },
   {

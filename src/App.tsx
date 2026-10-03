@@ -54,9 +54,6 @@ const Customers = lazy(() =>
 const Suppliers = lazy(() =>
   import('./pages/management/Suppliers').then((m) => ({ default: m.Suppliers })),
 );
-const Materials = lazy(() =>
-  import('./pages/management/Materials').then((m) => ({ default: m.Materials })),
-);
 const RbacAdmin = lazy(() => import('./pages/management/RbacAdmin'));
 
 function RouteLoadingFallback() {
@@ -141,7 +138,6 @@ function AppContent() {
         <Route path="companies" element={<PrivateRoute requiredPermission="companies.read"><Companies /></PrivateRoute>} />
         <Route path="customers" element={<PrivateRoute requiredPermission="customers.read"><Customers /></PrivateRoute>} />
         <Route path="suppliers" element={<PrivateRoute requiredPermission="suppliers.read"><Suppliers /></PrivateRoute>} />
-        <Route path="materials" element={<PrivateRoute requiredPermission="materials.read"><Materials /></PrivateRoute>} />
         <Route path="users" element={<PrivateRoute requiredPermission="users.view"><Users /></PrivateRoute>} />
         <Route path="rbac" element={<PrivateRoute requiredPermission="users.rbac.manage"><RbacAdmin /></PrivateRoute>} />
       </Route>
