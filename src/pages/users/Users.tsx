@@ -9,7 +9,7 @@ import { CreateUserRequest, PagedResponse, UpdateUserRequest, UserDto, UserStatu
 import {
   Pencil, Plus, Trash2, UserPlus, Search, Users as UsersIcon, Shield, UserCheck, Check,
   LayoutDashboard, Building2, CalendarClock, DollarSign, FilePlus2,
-  BookOpen, Building, Truck, UserCog, Settings, CreditCard,
+  BookOpen, Building, Truck, UserCog, Settings, CreditCard, Eye, EyeOff,
 } from 'lucide-react';
 
 const MODULE_ICON_MAP: Record<string, React.ElementType> = {
@@ -100,6 +100,8 @@ export function Users() {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<UserDto | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [form, setForm] = useState<CreateUserRequest>({ fullName: '', email: '', role: '', password: '', confirmPassword: '', permissions: [] });
 
   const totalPages = useMemo(() => Math.max(1, Math.ceil(data.total / data.pageSize)), [data.total, data.pageSize]);
@@ -124,6 +126,8 @@ export function Users() {
   function openCreate() {
     setEditingUser(null);
     setForm({ fullName: '', email: '', role: '', password: '', confirmPassword: '', permissions: [] });
+    setShowPassword(false);
+    setShowConfirmPassword(false);
     setIsModalOpen(true);
   }
 
@@ -388,11 +392,41 @@ export function Users() {
                 <>
                   <div className="ld-field">
                     <label className="ld-lbl">Senha *</label>
-                    <Input type="password" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} />
+                    <div className="relative">
+                      <Input
+                        type={showPassword ? 'text' : 'password'}
+                        className="pr-10"
+                        value={form.password}
+                        onChange={(e) => setForm({ ...form, password: e.target.value })}
+                      />
+                      <button
+                        type="button"
+                        className="absolute inset-y-0 right-0 flex items-center px-3 text-muted-foreground hover:text-foreground"
+                        onClick={() => setShowPassword((v) => !v)}
+                        aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
+                      >
+                        {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                      </button>
+                    </div>
                   </div>
                   <div className="ld-field">
                     <label className="ld-lbl">Confirmar senha *</label>
-                    <Input type="password" value={form.confirmPassword} onChange={(e) => setForm({ ...form, confirmPassword: e.target.value })} />
+                    <div className="relative">
+                      <Input
+                        type={showConfirmPassword ? 'text' : 'password'}
+                        className="pr-10"
+                        value={form.confirmPassword}
+                        onChange={(e) => setForm({ ...form, confirmPassword: e.target.value })}
+                      />
+                      <button
+                        type="button"
+                        className="absolute inset-y-0 right-0 flex items-center px-3 text-muted-foreground hover:text-foreground"
+                        onClick={() => setShowConfirmPassword((v) => !v)}
+                        aria-label={showConfirmPassword ? 'Ocultar confirmação de senha' : 'Mostrar confirmação de senha'}
+                      >
+                        {showConfirmPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                      </button>
+                    </div>
                   </div>
                 </>
               )}
