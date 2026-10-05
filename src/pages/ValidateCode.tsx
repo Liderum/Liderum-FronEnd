@@ -3,9 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { Shield, ArrowLeft, Loader2, RotateCcw } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { AuthService } from '@/services/authService';
-import { Redirecting } from '@/components/Redirecting';
 import { SimpleToast } from '@/components/SimpleToast';
-import { useRedirect } from '@/hooks/useRedirect';
 import { useAuth } from '@/contexts/AuthContext';
 
 const CSS = `
@@ -73,14 +71,6 @@ const ValidateCode = () => {
 
   const email = location.state?.email;
 
-  const { isRedirecting, countdown, startRedirect, cancelRedirect, redirectNow } = useRedirect({
-    delay: 3000,
-    destination: '/reset-password',
-    onRedirect: () => {
-      navigate('/reset-password', { state: { email, code: code.join('') } });
-    }
-  });
-
   useEffect(() => {
     if (!email) navigate('/forgot-password');
   }, [email, navigate]);
@@ -116,7 +106,7 @@ const ValidateCode = () => {
     setErrors({});
     try {
       await AuthService.validateCode({ email, code: codeString });
-      startRedirect('/reset-password');
+      navigate('/reset-password', { state: { email, code: codeString }, replace: true });
     } catch (error: unknown) {
       showError(error as Error);
       setCode(['', '', '', '', '', '']);
@@ -142,15 +132,6 @@ const ValidateCode = () => {
   };
 
   if (!email) return null;
-
-  if (isRedirecting) {
-    return (
-      <>
-        <Redirecting message="Preparando redefinição de senha..." destination="redefinição de senha" countdown={countdown} title="Código validado com sucesso!" />
-        <SimpleToast isVisible={true} message="Código validado com sucesso!" countdown={countdown} onCancel={cancelRedirect} onGoNow={() => redirectNow()} />
-      </>
-    );
-  }
 
   return (
     <>
