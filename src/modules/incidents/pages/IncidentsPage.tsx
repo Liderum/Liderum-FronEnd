@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import { LdSelect } from '@/components/LdSelect';
 import { LdDateInput } from '@/components/LdDateInput';
+import { LinkedVouchers } from '@/modules/vouchers/components/LinkedVouchers';
 import { IncidentsService, ScheduleService, ExtrasService, WorksService } from '@/services/works';
 import { useAuth } from '@/contexts/AuthContext';
 import type {
@@ -597,6 +598,8 @@ export default function IncidentsPage() {
                             ))}
                           </div>
                         )}
+
+                        <LinkedVouchers workId={workId} incidentId={incident.id} />
 
                         {/* History */}
                         <div className="inc-card-history">

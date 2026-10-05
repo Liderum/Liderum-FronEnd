@@ -20,3 +20,5 @@ export { DailyLogService } from './dailyLogService';
 export type { DailyLogFilter } from './dailyLogService';
 export { IncidentsService } from './incidentsService';
 export type { CreateIncidentInput, IncidentFilter } from './incidentsService';
+export { WorkPaymentsService, PaymentsApiError } from './workPaymentsService';
+export { WorkVouchersService } from './workVouchersService';

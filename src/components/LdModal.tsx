@@ -1,4 +1,4 @@
-import { ReactNode, useEffect } from 'react';
+import { ReactNode, useEffect, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Loader2, X } from 'lucide-react';
 
@@ -48,6 +48,10 @@ interface LdModalProps {
   onConfirm: () => void;
   confirmDisabled?: boolean;
   cancelLabel?: string;
+  /** Não fecha por clique fora nem ESC; só por Cancelar/Salvar. */
+  lockOutside?: boolean;
+  /** Com alterações não salvas, Cancelar pede confirmação. */
+  dirty?: boolean;
 }
 
 export function LdModal({
@@ -62,17 +66,26 @@ export function LdModal({
   onConfirm,
   confirmDisabled = false,
   cancelLabel = 'Cancelar',
+  lockOutside = false,
+  dirty = false,
 }: LdModalProps) {
+  const [confirmDiscard, setConfirmDiscard] = useState(false);
+  useEffect(() => { if (!open) setConfirmDiscard(false); }, [open]);
+  const requestClose = () => {
+    if (dirty) setConfirmDiscard(true);
+    else onClose();
+  };
   useEffect(() => {
     if (!open) return;
     function onKey(e: KeyboardEvent) {
-      if (e.key === 'Escape' && !busy) onClose();
+      if (e.key === 'Escape' && !busy && !lockOutside) onClose();
     }
     document.addEventListener('keydown', onKey);
     return () => document.removeEventListener('keydown', onKey);
-  }, [open, busy, onClose]);
+  }, [open, busy, onClose, lockOutside]);
 
   return (
+    <>
     <AnimatePresence>
       {open && (
         <>
@@ -82,7 +95,7 @@ export function LdModal({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            onClick={() => { if (!busy) onClose(); }}
+            onClick={() => { if (!busy && !lockOutside) onClose(); }}
           >
             <motion.div
               className="ldm-card"
@@ -99,8 +112,15 @@ export function LdModal({
               <div className="ldm-title">{title}</div>
               {subtitle && <div className="ldm-sub">{subtitle}</div>}
               {children}
+              {confirmDiscard ? (
+                <div className="ldm-actions" role="alertdialog" aria-label="Descartar alterações?" style={{ alignItems: 'center', flexWrap: 'wrap' }}>
+                  <span className="ldm-hint" style={{ marginTop: 0, marginRight: 'auto' }}>Há alterações não salvas. Descartar?</span>
+                  <button type="button" className="ldm-btn" onClick={() => setConfirmDiscard(false)}>Continuar editando</button>
+                  <button type="button" className="ldm-btn danger" onClick={() => { setConfirmDiscard(false); onClose(); }}>Descartar</button>
+                </div>
+              ) : (
               <div className="ldm-actions">
-                <button type="button" className="ldm-btn" onClick={onClose} disabled={busy}>
+                <button type="button" className="ldm-btn" onClick={lockOutside ? requestClose : onClose} disabled={busy}>
                   <X size={14} /> {cancelLabel}
                 </button>
                 <button type="button" className="ldm-btn primary" onClick={onConfirm} disabled={busy || confirmDisabled}>
@@ -108,10 +128,12 @@ export function LdModal({
                   {confirmLabel}
                 </button>
               </div>
+              )}
             </motion.div>
           </motion.div>
         </>
       )}
     </AnimatePresence>
+    </>
   );
 }

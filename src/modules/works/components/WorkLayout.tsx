@@ -3,7 +3,7 @@ import { Outlet, NavLink, useParams, useLocation, useNavigate } from 'react-rout
 import { motion } from 'framer-motion';
 import {
   LayoutDashboard, CalendarClock, DollarSign, FilePlus2, BookOpen, ShieldAlert,
-  ArrowLeft, MapPin, User, Building2, Loader2, Boxes,
+  ArrowLeft, MapPin, User, Building2, Loader2, Boxes, Wallet,
 } from 'lucide-react';
 import type { Work, AddressDto } from '@/modules/shared/types';
 import { STATUS_CONFIG } from '@/modules/shared/types';
@@ -17,6 +17,7 @@ function formatAddress(address: AddressDto | string): string {
     .join(', ') || '—';
 }
 import { WorksService } from '@/services/works/worksService';
+import { useAuth } from '@/contexts/AuthContext';
 
 const CSS = `
 .wk{font-family:'DM Sans',sans-serif;color:var(--ink,#1A1814);display:flex;flex-direction:column;gap:20px;}
@@ -42,7 +43,7 @@ const CSS = `
 .wk-tab.active{color:var(--gold,#B8922A);background:rgba(184,146,42,0.08);font-weight:500;}
 `;
 
-const tabs = [
+const tabs: { label: string; path: string; icon: typeof Wallet; anyPermission?: string[] }[] = [
   { label: 'Visão Geral', path: '', icon: LayoutDashboard },
   { label: 'Cronograma', path: '/schedule', icon: CalendarClock },
   { label: 'Orçamento', path: '/budget', icon: DollarSign },
@@ -50,12 +51,14 @@ const tabs = [
   { label: 'Materiais', path: '/materials', icon: Boxes },
   { label: 'Diário de Obra', path: '/daily-log', icon: BookOpen },
   { label: 'Incidentes', path: '/incidents', icon: ShieldAlert },
+  { label: 'Comprovantes', path: '/vouchers', icon: Wallet, anyPermission: ['workpayments.read', 'workvouchers.read'] },
 ];
 
 export function WorkLayout() {
   const { id } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
+  const { permissions } = useAuth();
   const [work, setWork] = useState<Work | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -138,7 +141,7 @@ export function WorkLayout() {
 
         {/* Tabs */}
         <div className="wk-tabs">
-          {tabs.map(tab => {
+          {tabs.filter(tab => !tab.anyPermission || tab.anyPermission.some(p => permissions.includes(p))).map(tab => {
             const Icon = tab.icon;
             const fullPath = basePath + tab.path;
             const isActive = tab.path === ''

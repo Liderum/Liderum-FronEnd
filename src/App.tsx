@@ -42,6 +42,7 @@ const ExtrasPage = lazy(() => import('./modules/extras/pages/ExtrasPage'));
 const WorkMaterialsPage = lazy(() => import('./modules/materials/pages/WorkMaterialsPage'));
 const DailyLogPage = lazy(() => import('./modules/daily-log/pages/DailyLogPage'));
 const IncidentsPage = lazy(() => import('./modules/incidents/pages/IncidentsPage'));
+const WorkVouchersPage = lazy(() => import('./modules/vouchers/pages/WorkVouchersPage'));
 
 const Users = lazy(() => import('./pages/users/Users'));
 const Settings = lazy(() => import('./pages/settings/Settings'));
@@ -127,6 +128,8 @@ function AppContent() {
           <Route path="materials" element={<WorkMaterialsPage />} />
           <Route path="daily-log" element={<DailyLogPage />} />
           <Route path="incidents" element={<IncidentsPage />} />
+          <Route path="vouchers" element={<WorkVouchersPage />} />
+          <Route path="payments" element={<Navigate to="../vouchers" replace />} />
         </Route>
       </Route>
 

@@ -64,6 +64,26 @@ export const PERMISSION_MAP: ModulePermissions[] = [
     ],
   },
   {
+    module: 'workpayments',
+    label: 'Pagamentos da Obra',
+    icon: 'Wallet',
+    permissions: [
+      { key: 'workpayments.read', label: 'Visualizar', description: 'Ver pagamentos e comprovantes da obra' },
+      { key: 'workpayments.write', label: 'Criar / Editar', description: 'Registrar pagamentos e anexar comprovantes' },
+      { key: 'workpayments.delete', label: 'Excluir', description: 'Excluir pagamentos e comprovantes' },
+    ],
+  },
+  {
+    module: 'workvouchers',
+    label: 'Compras e Serviços da Obra',
+    icon: 'Receipt',
+    permissions: [
+      { key: 'workvouchers.read', label: 'Visualizar', description: 'Ver compras, serviços e comprovantes da obra' },
+      { key: 'workvouchers.write', label: 'Criar / Editar', description: 'Registrar compras e serviços e anexar comprovantes' },
+      { key: 'workvouchers.delete', label: 'Excluir', description: 'Excluir compras, serviços e comprovantes' },
+    ],
+  },
+  {
     module: 'dailylogs',
     label: 'Diário de Obra',
     icon: 'BookOpen',
