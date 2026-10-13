@@ -15,6 +15,8 @@ import {
 } from '../services/authService';
 import { User, UserProfile, RegisterUserRequest } from '../types/auth';
 import { tokenStore } from '../services/api/tokenStore';
+import { billingQueryClient } from '../modules/billing/queryClient';
+import { PaymentRequiredError, parsePaymentRequired } from '../services/api/paymentRequired';
 
 const TENANT_ADMIN_ROLE = 'TenantAdmin';
 
@@ -36,6 +38,10 @@ interface AuthContextData {
   modules: string[];
   isOnboardingComplete: boolean | null;
   isTenantAdmin: boolean;
+  /** Tenant com pagamento pendente: há um token de checkout em memória e a sessão completa está bloqueada. */
+  paymentRequired: boolean;
+  /** Marca o fim do fluxo de checkout (token descartado) ou o início dele (token já guardado no tokenStore). */
+  setPaymentRequired: (value: boolean) => void;
   setOnboardingComplete: (complete: boolean) => void;
   tourSeen: boolean | null;
   setTourSeen: (seen: boolean) => void;
@@ -69,6 +75,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
   const [isOnboardingComplete, setIsOnboardingComplete] = useState<boolean | null>(null);
   const [tourSeen, setTourSeenState] = useState<boolean | null>(null);
+  const [paymentRequired, setPaymentRequired] = useState<boolean>(() => !!tokenStore.getCheckoutToken());
   const bootstrapRef = useRef(false);
 
   const isAuthenticated = !!user;
@@ -86,6 +93,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const clearAuth = useCallback(() => {
     tokenStore.clear();
+    billingQueryClient.clear(); // assinatura/checkouts em cache pertencem à sessão que acabou
     setUser(null);
     setPermissions([]);
     setRoles([]);
@@ -104,7 +112,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setIsOnboardingComplete(null);
       setTourSeenState(null);
     });
-    return () => tokenStore.setOnAuthFailure(null);
+    tokenStore.setOnPaymentRequired(() => {
+      setUser(null);
+      setPermissions([]);
+      setRoles([]);
+      setModules([]);
+      setIsOnboardingComplete(null);
+      setTourSeenState(null);
+      setPaymentRequired(true);
+    });
+    return () => {
+      tokenStore.setOnAuthFailure(null);
+      tokenStore.setOnPaymentRequired(null);
+    };
   }, []);
 
   const fetchUserProfile = useCallback(async (): Promise<UserProfile | null> => {
@@ -160,8 +180,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setIsOnboardingComplete(tenantProfile ? tenantProfile.isOnboardingComplete : null);
 
       return !!profile;
-    } catch {
+    } catch (err) {
       clearAuth();
+      // 402 no refresh: tenant com pagamento pendente. Guarda o token de checkout (não abre sessão).
+      const pr = parsePaymentRequired(err);
+      if (pr) {
+        tokenStore.setCheckoutToken(pr.checkoutToken, pr.checkoutTokenExpiresAt);
+        setPaymentRequired(true);
+      }
       return false;
     }
   }, [clearAuth]);
@@ -178,8 +204,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signIn = useCallback(
     async (email: string, password: string) => {
-      const data = await AuthService.login({ email, password });
+      let data;
+      try {
+        data = await AuthService.login({ email, password });
+      } catch (err) {
+        // 402 PAYMENT_REQUIRED: credenciais OK, mas o tenant precisa pagar. Retoma o checkout com o token recebido.
+        const pr = parsePaymentRequired(err);
+        if (pr) {
+          tokenStore.setCheckoutToken(pr.checkoutToken, pr.checkoutTokenExpiresAt);
+          setPaymentRequired(true);
+          throw new PaymentRequiredError(pr);
+        }
+        throw err;
+      }
       if (!data.accessToken) throw new Error('Credenciais inválidas');
+      tokenStore.clearCheckoutToken();
+      setPaymentRequired(false);
 
       tokenStore.setAccessToken(data.accessToken);
       tokenStore.setRefreshToken(data.refreshToken);
@@ -248,6 +288,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         modules,
         isOnboardingComplete,
         isTenantAdmin,
+        paymentRequired,
+        setPaymentRequired,
         setOnboardingComplete,
         tourSeen,
         setTourSeen,

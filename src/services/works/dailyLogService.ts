@@ -1,6 +1,7 @@
 import { worksApi } from '@/services/api/apiFactory';
 import { API_CONFIG } from '@/config/api';
 import { extractErrorMessage } from '@/utils/errorHandler';
+import { rethrowPlanLimit } from '@/services/billing/planLimit';
 import type { DailyLogEntry, DailyLogOccurrence } from '@/modules/shared/types';
 import { USE_MOCK, delay, genId, getList, setList } from './mockStore';
 
@@ -266,6 +267,7 @@ export class DailyLogService {
       );
       return buildPhotoUrl(data.storagePath ?? data.fileName ?? '');
     } catch (error) {
+      rethrowPlanLimit(error); // 403 PLAN_LIMIT_REACHED (storage) vira diálogo de upgrade na tela
       throw new Error(extractErrorMessage(error));
     }
   }

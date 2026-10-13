@@ -10,6 +10,7 @@ import type {
   ValidateCodeRequest,
   ResetPasswordRequest,
   RegisterUserRequest,
+  RegisterUserResponse,
   UserProfile,
   UpdateUserProfileRequest,
   TenantProfile,
@@ -56,8 +57,9 @@ export const AuthService = {
 };
 
 export const UserService = {
-  async register(data: RegisterUserRequest): Promise<void> {
-    await usersApi.post('/created', data);
+  async register(data: RegisterUserRequest): Promise<RegisterUserResponse> {
+    const response = await usersApi.post<RegisterUserResponse>('/created', data);
+    return response.data ?? {};
   },
 
   async getProfile(): Promise<UserProfile> {

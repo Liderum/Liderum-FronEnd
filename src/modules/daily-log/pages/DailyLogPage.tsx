@@ -11,6 +11,7 @@ import { LdDateInput } from '@/components/LdDateInput';
 import { DailyLogService } from '@/services/works';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
+import { usePlanLimitDialog } from '@/modules/billing/components/PlanLimitDialog';
 import type { DailyLogEntry, DailyLogOccurrence } from '@/modules/shared/types';
 
 /* ─── CSS ─────────────────────────────────────────────────────────────── */
@@ -167,6 +168,7 @@ export default function DailyLogPage() {
   const workId = id ?? '1';
   const { permissions } = useAuth();
   const { toast } = useToast();
+  const planLimit = usePlanLimitDialog();
 
   // Usuários autenticados com acesso à obra podem criar registros;
   // editar/deletar exige permissões granulares.
@@ -316,6 +318,9 @@ export default function DailyLogPage() {
           e.id === entryId ? { ...e, photos: [...e.photos, ...urls] } : e,
         ),
       );
+    } catch (err) {
+      // Franquia de arquivos esgotada: o registro já foi salvo, só as fotos ficam de fora.
+      if (!planLimit.handle(err)) throw err;
     } finally {
       setUploadingPhotos(false);
     }
@@ -446,6 +451,7 @@ export default function DailyLogPage() {
 
   return (
     <>
+      {planLimit.dialog}
       <style>{CSS}</style>
       <div className="dl">
 

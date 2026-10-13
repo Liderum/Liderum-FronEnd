@@ -11,8 +11,8 @@ const CTA = () => {
           Pronto para transformar a gestão do seu negócio?
         </h2>
         <p className="text-primary-foreground text-lg mb-8 max-w-2xl mx-auto">
-          Comece agora com nossa versão de teste gratuita por 14 dias.
-          Sem compromisso e com acesso a todos os módulos.
+          Crie sua conta, pague por PIX e comece a usar na hora.
+          Sem taxa de setup. Escolha o plano que cabe na sua operação.
         </p>
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <Button size="lg" variant="secondary" className="gap-2 group">

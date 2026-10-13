@@ -57,6 +57,19 @@ const Suppliers = lazy(() =>
 );
 const RbacAdmin = lazy(() => import('./pages/management/RbacAdmin'));
 
+// Cobrança de planos (Liderum.Payments) — domínio distinto de modules/payments (pagamentos de obra).
+const BillingShell = lazy(() =>
+  import('./modules/billing/components/BillingShell').then((m) => ({ default: m.BillingShell })),
+);
+const PlansPage = lazy(() => import('./modules/billing/pages/PlansPage'));
+const CheckoutFlowPage = lazy(() => import('./modules/billing/pages/CheckoutFlowPage'));
+const CheckoutPage = lazy(() => import('./modules/billing/pages/CheckoutPage'));
+const SubscriptionPage = lazy(() => import('./modules/billing/pages/SubscriptionPage'));
+const PaymentsDashboardPage = lazy(() => import('./modules/billing-admin/pages/PaymentsDashboardPage'));
+const PaymentsAdminGuard = lazy(() =>
+  import('./modules/billing-admin/guard').then((m) => ({ default: m.PaymentsAdminGuard })),
+);
+
 function RouteLoadingFallback() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-white">
@@ -80,6 +93,8 @@ function AppContent() {
       <Route path="/validate-code" element={<PublicRoute><ValidateCode /></PublicRoute>} />
       <Route path="/reset-password" element={<PublicRoute><ResetPassword /></PublicRoute>} />
       <Route path="/payments/*" element={<PaymentRoutes />} />
+      {/* Checkout PIX pós-cadastro/402: fora do DashboardLayout, autenticado só pelo token de checkout (memória) */}
+      <Route path="/checkout" element={<CheckoutFlowPage />} />
 
       {/* ===== Protected routes ===== */}
 
@@ -143,6 +158,20 @@ function AppContent() {
         <Route path="suppliers" element={<PrivateRoute requiredPermission="suppliers.read"><Suppliers /></PrivateRoute>} />
         <Route path="users" element={<PrivateRoute requiredPermission="users.view"><Users /></PrivateRoute>} />
         <Route path="rbac" element={<PrivateRoute requiredPermission="users.rbac.manage"><RbacAdmin /></PrivateRoute>} />
+      </Route>
+
+      {/* Billing — planos, checkout e assinatura (Payments API) */}
+      <Route
+        path="/billing"
+        element={<PrivateRoute><DashboardLayout /></PrivateRoute>}
+      >
+        <Route element={<BillingShell />}>
+          <Route index element={<Navigate to="plans" replace />} />
+          <Route path="plans" element={<PrivateRoute requiredPermission="payments.plans.read"><PlansPage /></PrivateRoute>} />
+          <Route path="checkout/:id" element={<PrivateRoute requiredPermission="payments.checkouts.read"><CheckoutPage /></PrivateRoute>} />
+          <Route path="subscription" element={<PrivateRoute requiredPermission="payments.subscription.read"><SubscriptionPage /></PrivateRoute>} />
+          <Route path="admin" element={<PaymentsAdminGuard><PaymentsDashboardPage /></PaymentsAdminGuard>} />
+        </Route>
       </Route>
 
       <Route

@@ -9,6 +9,7 @@ export interface ApiConfig {
   WORKS: { BASE_URL: string };
   RBAC: { BASE_URL: string };
   TENANT: { BASE_URL: string };
+  PAYMENTS: { BASE_URL: string };
 }
 
 export type ApiModule = keyof ApiConfig;
@@ -33,6 +34,8 @@ const dsvConfig: ApiConfig = {
   WORKS: { BASE_URL: import.meta.env.VITE_WORKS_API_URL || 'https://localhost:7141/api/v1' },
   RBAC:  { BASE_URL: import.meta.env.VITE_RBAC_API_URL  || 'http://localhost:5065/liderum/api/rbac' },
   TENANT: { BASE_URL: import.meta.env.VITE_TENANT_API_URL || 'http://localhost:5065/liderum/api/tenant' },
+  // Liderum.Payments (cobrança de planos). Compose local: localhost:5004.
+  PAYMENTS: { BASE_URL: import.meta.env.VITE_PAYMENTS_API_URL || 'http://localhost:5004/api/v1' },
 };
 
 // Sem fallback — prd exige que todas as VITE_* estejam definidas na Vercel.
@@ -43,6 +46,8 @@ const prdConfig: ApiConfig = {
   WORKS: { BASE_URL: import.meta.env.VITE_WORKS_API_URL || '' },
   RBAC:  { BASE_URL: import.meta.env.VITE_RBAC_API_URL  || '' },
   TENANT: { BASE_URL: import.meta.env.VITE_TENANT_API_URL || '' },
+  // Fora da validação de startup: billing ainda não é obrigatório em prd; o service falha com erro claro se vazio.
+  PAYMENTS: { BASE_URL: import.meta.env.VITE_PAYMENTS_API_URL || '' },
 };
 
 /**
@@ -79,6 +84,8 @@ export const API_CONFIG = getApiConfig();
 // env var obrigatória própria — derivamos de AUTH.BASE_URL para não exigir
 // uma nova VITE_CONTACT_API_URL configurada na Vercel antes do deploy.
 export const CONTACT_API_URL = API_CONFIG.AUTH.BASE_URL.replace(/\/login$/, '/contact');
+// Landing de prospecção: POST liderum/api/contact/lead (limite por e-mail e por IP no backend)
+export const LEAD_API_URL = `${CONTACT_API_URL}/lead`;
 
 if (import.meta.env.DEV) {
   console.log('[Liderum] Ambiente detectado:', getEnvironment());

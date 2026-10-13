@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSessionCleanup } from '@/hooks/useSessionCleanup';
+import { ENTERPRISE_CONTACT_PATH, HIGHLIGHT_LABEL, PLAN_CATALOG, formatPriceBRL } from '@/constants/plans';
 
-const PRICES = { p1: [97, 77], p2: [197, 157] } as const;
 
 const features = [
   { icon: 'plan', title: 'Gestão de Obras', text: 'Acompanhe todas as suas obras em tempo real — etapas, prazos, progresso e responsáveis em uma visão única e centralizada.' },
@@ -81,7 +81,6 @@ function CheckDraw() {
 export function LandingPage() {
   const navigate = useNavigate();
   const [scrolled, setScrolled] = useState(false);
-  const [annual, setAnnual] = useState(false);
   const [leadEmail, setLeadEmail] = useState('');
   const [activeRoom, setActiveRoom] = useState(0);
   const [cursorPos, setCursorPos] = useState<{ x: number; y: number } | null>(null);
@@ -110,7 +109,7 @@ export function LandingPage() {
 
   const handleLead = (e: React.FormEvent) => {
     e.preventDefault();
-    navigate('/contact');
+    navigate('/cadastro');
   };
 
   const handleBlueprintMove = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -118,9 +117,6 @@ export function LandingPage() {
     if (!rect) return;
     setCursorPos({ x: e.clientX - rect.left, y: e.clientY - rect.top });
   };
-
-  const price = (key: keyof typeof PRICES) => `R$${PRICES[key][annual ? 1 : 0]}`;
-  const period = annual ? '/mês · cobrado anualmente' : '/mês · cobrado mensalmente';
 
   return (
     <>
@@ -328,7 +324,7 @@ export function LandingPage() {
           </ul>
           <div className="ldr-nav-right">
             <button type="button" className="ldr-nav-login" onClick={() => navigate('/login')}>Entrar</button>
-            <button type="button" className="ldr-navcta" onClick={() => navigate('/contact')}>Começar grátis →</button>
+            <button type="button" className="ldr-navcta" onClick={() => navigate('/cadastro')}>Começar agora →</button>
           </div>
         </nav>
 
@@ -341,7 +337,7 @@ export function LandingPage() {
               <h1 className="ldr-h1">Todas as suas obras sob <em>controle total.</em></h1>
               <p className="ldr-hero-sub">Cronograma, orçamento, diário de obra e extras integrados — com visibilidade em tempo real para entregar no prazo, no custo e com margem protegida.</p>
               <div className="ldr-ctas">
-                <button type="button" className="ldr-btn-primary" onClick={() => navigate('/contact')}>Começar grátis →</button>
+                <button type="button" className="ldr-btn-primary" onClick={() => navigate('/cadastro')}>Começar agora →</button>
                 <button type="button" className="ldr-btn-secondary" onClick={() => scrollTo('ldr-how')}>▶ Ver demonstração</button>
               </div>
             </div>
@@ -471,7 +467,7 @@ export function LandingPage() {
             </div>
             <div style={{ textAlign: 'center', marginTop: '8px' }}>
               <span style={{ display: 'inline-block', background: 'var(--gold-light)', color: 'var(--gold)', border: '1px solid rgba(184,146,42,0.25)', borderRadius: '8px', padding: '10px 24px', fontSize: '13px', fontWeight: 500 }}>
-                ✦ Plataforma em acesso antecipado — entre agora e trave seu preço para sempre
+                ✦ Plataforma em acesso antecipado — entre agora e ative sua conta em minutos, por PIX
               </span>
             </div>
           </div>
@@ -562,7 +558,7 @@ export function LandingPage() {
               ))}
             </div>
             <div style={{ textAlign: 'center', marginTop: '48px' }}>
-              <button type="button" className="ldr-btn-gold" onClick={() => navigate('/contact')}>
+              <button type="button" className="ldr-btn-gold" onClick={() => navigate('/cadastro')}>
                 Quero ser um early adopter →
               </button>
             </div>
@@ -574,64 +570,45 @@ export function LandingPage() {
             <div style={{ textAlign: 'center' }}>
               <div className="ldr-section-tag">Folha A-104 · Preços</div>
               <h2 className="ldr-h2">Simples, <em>transparente,</em> justo</h2>
-              <p className="ldr-section-sub" style={{ margin: '0 auto', textAlign: 'center' }}>Sem taxa de setup. Cancele quando quiser. Comece grátis por 14 dias.</p>
-              <div className="ldr-ptoggle">
-                <span>Mensal</span>
-                <div
-                  className={`ldr-toggle-track${annual ? ' on' : ''}`}
-                  onClick={() => setAnnual((v) => !v)}
-                  role="switch"
-                  aria-checked={annual}
-                  tabIndex={0}
-                  onKeyDown={(e) => { if (e.key === ' ' || e.key === 'Enter') setAnnual((v) => !v); }}
-                  aria-label="Alternar entre plano mensal e anual"
-                >
-                  <div className="ldr-toggle-thumb" />
-                </div>
-                <span>Anual</span>
-                <span className="ldr-save-badge">Economize 20%</span>
-              </div>
+              <p className="ldr-section-sub" style={{ margin: '0 auto', textAlign: 'center' }}>Sem taxa de setup. Pagamento por PIX a cada 30 dias, com renovação feita por você quando quiser.</p>
             </div>
             <div className="ldr-plans">
-              <div className="ldr-plan ldr-reveal">
-                <div className="ldr-plan-name">Essencial</div>
-                <div className="ldr-plan-desc">Para construtoras com até 5 obras simultâneas</div>
-                <div className="ldr-plan-price">{price('p1')}</div>
-                <div className="ldr-plan-period">{period}</div>
-                <ul className="ldr-plan-features">
-                  {['Até 5 obras ativas', 'Dashboard executivo', 'Cronograma por etapas', 'Orçamento previsto × realizado', 'Diário de obra com fotos', 'Suporte via chat'].map((f, idx) => (
-                    <li key={f} style={{ '--i': idx } as React.CSSProperties}><span className="ldr-check-wrap"><CheckDraw /></span>{f}</li>
-                  ))}
-                </ul>
-                <button type="button" className="ldr-plan-btn light" onClick={() => navigate('/contact')}>Começar grátis</button>
-              </div>
-
-              <div className="ldr-plan featured ldr-reveal ldr-d2">
-                <div className="ldr-plan-badge">✦ Mais completo</div>
-                <div className="ldr-plan-name">Crescimento</div>
-                <div className="ldr-plan-desc"><span style={{ color: 'rgba(255,255,255,0.5)' }}>Para construtoras que gerenciam múltiplos projetos</span></div>
-                <div className="ldr-plan-price">{price('p2')}</div>
-                <div className="ldr-plan-period">{period}</div>
-                <ul className="ldr-plan-features">
-                  {['Obras ilimitadas', 'Todos os módulos do Essencial', 'Gestão de extras e aditivos', 'Registro de incidentes e ocorrências', 'Múltiplos usuários com perfis de acesso', 'Suporte prioritário'].map((f, idx) => (
-                    <li key={f} style={{ '--i': idx } as React.CSSProperties}><span className="ldr-check-wrap"><CheckDraw /></span>{f}</li>
-                  ))}
-                </ul>
-                <button type="button" className="ldr-plan-btn gold" onClick={() => navigate('/contact')}>Começar grátis</button>
-              </div>
-
-              <div className="ldr-plan ldr-reveal ldr-d3">
-                <div className="ldr-plan-name">Enterprise</div>
-                <div className="ldr-plan-desc">Para grupos com múltiplas empresas e obras</div>
-                <div className="ldr-plan-price" style={{ fontSize: '28px', paddingTop: '10px' }}>Sob consulta</div>
-                <div className="ldr-plan-period" style={{ marginBottom: '28px' }}>Preço personalizado para sua operação</div>
-                <ul className="ldr-plan-features">
-                  {['Tudo do Crescimento', 'Múltiplas empresas, dados isolados entre elas', 'Permissões por cargo, sob medida para sua equipe', 'Implantação assistida', 'Gerente de conta dedicado'].map((f, idx) => (
-                    <li key={f} style={{ '--i': idx } as React.CSSProperties}><span className="ldr-check-wrap"><CheckDraw /></span>{f}</li>
-                  ))}
-                </ul>
-                <button type="button" className="ldr-plan-btn light" onClick={() => navigate('/contact')}>Falar com a equipe</button>
-              </div>
+              {PLAN_CATALOG.map((plan, i) => (
+                <div key={plan.code} className={`ldr-plan${plan.highlighted ? ' featured' : ''} ldr-reveal${i > 0 ? ` ldr-d${i + 1}` : ''}`} data-plan={plan.code}>
+                  {plan.highlighted && <div className="ldr-plan-badge">✦ {HIGHLIGHT_LABEL}</div>}
+                  <div className="ldr-plan-name">{plan.name}</div>
+                  <div className="ldr-plan-desc">{plan.highlighted ? <span style={{ color: 'rgba(255,255,255,0.5)' }}>{plan.tagline}</span> : plan.tagline}</div>
+                  {plan.purchasable ? (
+                    <>
+                      <div className="ldr-plan-price">
+                        {plan.listPriceInCents > plan.priceInCents && (
+                          <s style={{ fontSize: '16px', opacity: 0.5, marginRight: '10px' }} aria-label={`Preço de tabela ${formatPriceBRL(plan.listPriceInCents)}`}>{formatPriceBRL(plan.listPriceInCents)}</s>
+                        )}
+                        {formatPriceBRL(plan.priceInCents)}
+                      </div>
+                      <div className="ldr-plan-period">/mês · pagamento por PIX{plan.listPriceInCents > plan.priceInCents ? ' · preço de lançamento' : ''}</div>
+                    </>
+                  ) : (
+                    <>
+                      <div className="ldr-plan-price" style={{ fontSize: '28px', paddingTop: '10px' }}>Sob consulta</div>
+                      <div className="ldr-plan-period" style={{ marginBottom: '28px' }}>Preço personalizado para sua operação</div>
+                    </>
+                  )}
+                  <ul className="ldr-plan-features">
+                    {plan.features.map((f, idx) => (
+                      <li key={f} style={{ '--i': idx } as React.CSSProperties}><span className="ldr-check-wrap"><CheckDraw /></span>{f}</li>
+                    ))}
+                    {plan.excluded.map((f) => (
+                      <li key={f} className="ldr-plan-no" style={{ opacity: 0.5 }}><span className="ldr-check-wrap" aria-hidden>–</span><span><span className="sr-only">Não inclui: </span>{f}</span></li>
+                    ))}
+                  </ul>
+                  {plan.purchasable ? (
+                    <button type="button" className={`ldr-plan-btn ${plan.highlighted ? 'gold' : 'light'}`} onClick={() => navigate(`/cadastro?plan=${plan.code}`)}>Começar agora</button>
+                  ) : (
+                    <button type="button" className="ldr-plan-btn light" onClick={() => navigate(ENTERPRISE_CONTACT_PATH)}>Falar com a equipe</button>
+                  )}
+                </div>
+              ))}
             </div>
           </div>
         </section>
@@ -652,7 +629,7 @@ export function LandingPage() {
           </div>
           <div className="ldr-section-tag">Folha A-105 · Pronto para começar?</div>
           <h2 className="ldr-h2">Sua construtora merece operar com <em>visibilidade total.</em></h2>
-          <p>14 dias grátis. Sem cartão de crédito. Todos os módulos disponíveis no período de teste.</p>
+          <p>Pagamento por PIX. Sem taxa de setup. Acesso liberado assim que o pagamento for confirmado.</p>
           <form className="ldr-cta-form" onSubmit={handleLead}>
             <label htmlFor="ldr-lead-email" className="sr-only">E-mail corporativo</label>
             <input

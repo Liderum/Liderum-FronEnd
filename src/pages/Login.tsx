@@ -6,6 +6,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useForceLightTheme } from '@/contexts/ThemeContext';
 import { validateEmail } from '@/lib/emailValidation';
 import { Redirecting } from '@/components/Redirecting';
+import { PaymentRequiredError } from '@/services/api/paymentRequired';
 
 const CSS = `
 @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,700;1,400;1,700&family=DM+Sans:wght@300;400;500&display=swap');
@@ -69,14 +70,15 @@ const LOCKOUT_DURATION_S = 30;
 
 const Login = () => {
   useForceLightTheme();
-  const [email, setEmail] = useState('');
+  const location = useLocation();
+  // E-mail vindo do fluxo de checkout ("Pagamento confirmado" -> login). Router state, nunca storage.
+  const [email, setEmail] = useState(() => (location.state as { email?: string } | null)?.email ?? '');
   const [password, setPassword] = useState('');
   const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
-  const location = useLocation();
   const { signIn, isAuthenticated, isLoading: authLoading } = useAuth();
 
   const [failedAttempts, setFailedAttempts] = useState(0);
@@ -150,6 +152,12 @@ const Login = () => {
       navigate(from, { replace: true });
     } catch (err: unknown) {
       setPassword('');
+      // 402 PAYMENT_REQUIRED: login válido, falta pagar. Não conta como tentativa falha.
+      if (err instanceof PaymentRequiredError) {
+        toast({ title: 'Pagamento pendente', description: 'Conclua o pagamento do plano para liberar o acesso.', duration: 4000 });
+        navigate('/checkout', { replace: true, state: { email: email.trim() } });
+        return;
+      }
       // Distingue erro de rede/servidor de credenciais inválidas — antes
       // qualquer falha caía em "Credenciais inválidas" e mascarava problemas
       // como porta errada, CORS ou API offline.

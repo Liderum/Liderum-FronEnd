@@ -1,6 +1,7 @@
 import axios, { InternalAxiosRequestConfig, AxiosInstance } from 'axios';
 import { API_CONFIG, ApiModule } from '@/config/api';
 import { tokenStore } from './tokenStore';
+import { parsePaymentRequired } from './paymentRequired';
 
 interface RetryableRequest extends InternalAxiosRequestConfig {
   _retry?: boolean;
@@ -55,7 +56,8 @@ class ApiFactory {
   private static addAuthInterceptors(instance: AxiosInstance) {
     instance.interceptors.request.use(
       (config) => {
-        const token = tokenStore.getAccessToken();
+        // Sem sessão completa, o token de checkout (escopo "checkout", só Payments) autentica a tela /checkout.
+        const token = tokenStore.getAccessToken() ?? tokenStore.getCheckoutToken();
         if (token) config.headers.Authorization = `Bearer ${token}`;
         return config;
       },
@@ -68,6 +70,11 @@ class ApiFactory {
         const originalRequest = error.config as RetryableRequest | undefined;
 
         if (!originalRequest || originalRequest.url?.includes('/refresh-token')) {
+          return Promise.reject(error);
+        }
+
+        // 401 usando só o token de checkout: não há sessão para renovar; a tela /checkout orienta a entrar de novo.
+        if (error.response?.status === 401 && !tokenStore.getAccessToken() && tokenStore.getCheckoutToken()) {
           return Promise.reject(error);
         }
 
@@ -92,7 +99,14 @@ class ApiFactory {
             } catch (refreshError) {
               processPendingQueue(null, refreshError);
               tokenStore.clear();
-              tokenStore.notifyAuthFailure();
+              // 402 PAYMENT_REQUIRED no refresh: o tenant voltou a exigir pagamento; retoma o checkout.
+              const pr = parsePaymentRequired(refreshError);
+              if (pr) {
+                tokenStore.setCheckoutToken(pr.checkoutToken, pr.checkoutTokenExpiresAt);
+                tokenStore.notifyPaymentRequired();
+              } else {
+                tokenStore.notifyAuthFailure();
+              }
               return Promise.reject(refreshError);
             } finally {
               isRefreshing = false;
@@ -121,6 +135,7 @@ export const usersApi = ApiFactory.getInstance('USERS');
 export const worksApi = ApiFactory.getInstance('WORKS');
 export const rbacApi = ApiFactory.getInstance('RBAC');
 export const tenantApi = ApiFactory.getInstance('TENANT');
+export const paymentsApi = ApiFactory.getInstance('PAYMENTS');
 /** @deprecated Use worksApi instead */
 export const managementApi = worksApi;
 export default authApiInstance;

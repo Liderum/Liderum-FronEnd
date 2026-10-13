@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Loader2, Save, Search } from 'lucide-react';
 import type { CreateWorkDto } from '@/modules/shared/types';
 import { LdDateInput } from '@/components/LdDateInput';
+import { usePlanLimitDialog } from '@/modules/billing/components/PlanLimitDialog';
 import { WorksService } from '@/services/works/worksService';
 
 const CSS = `
@@ -69,6 +70,7 @@ function formatCep(value: string): string {
 
 export default function NewWorkPage() {
   const navigate = useNavigate();
+  const planLimit = usePlanLimitDialog();
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
 
@@ -169,6 +171,7 @@ export default function NewWorkPage() {
       const created = await WorksService.create(payload);
       navigate(`/works/${created.id}`);
     } catch (err) {
+      if (planLimit.handle(err)) return;
       setError(err instanceof Error ? err.message : 'Erro ao criar obra.');
     } finally {
       setSaving(false);
@@ -178,6 +181,7 @@ export default function NewWorkPage() {
   return (
     <>
       <style>{CSS}</style>
+      {planLimit.dialog}
       <form className="nw" onSubmit={handleSubmit}>
         {/* Header */}
         <div className="nw-header">

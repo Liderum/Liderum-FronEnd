@@ -1,4 +1,5 @@
 import { worksApi } from '@/services/api/apiFactory';
+import { rethrowPlanLimit } from '@/services/billing/planLimit';
 import { extractErrorMessage } from '@/utils/errorHandler';
 import type { Work, WorkStatus, CreateWorkDto, AddressDto } from '@/modules/shared/types';
 
@@ -87,6 +88,7 @@ export class WorksService {
       const { data } = await worksApi.post(BASE, payload);
       return mapWork(data);
     } catch (error) {
+      rethrowPlanLimit(error);
       throw new Error(extractErrorMessage(error));
     }
   }

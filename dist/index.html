@@ -21,12 +21,20 @@
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:site" content="@liderum" />
   <meta name="twitter:image" content="/logo.svg" />
-  <script type="module" crossorigin src="/assets/index-A-GjWpjy.js"></script>
-  <link rel="modulepreload" crossorigin href="/assets/vendor-react-D-Wx9cx6.js">
-  <link rel="modulepreload" crossorigin href="/assets/vendor-ui-epDK2Y06.js">
-  <link rel="modulepreload" crossorigin href="/assets/vendor-charts-C9aYzYQk.js">
-  <link rel="modulepreload" crossorigin href="/assets/vendor-motion-Bc9utOE5.js">
-  <link rel="stylesheet" crossorigin href="/assets/index-CG2c6n4w.css">
+
+  <script>
+    (function () {
+      try {
+        var pref = localStorage.getItem('liderum:theme');
+        var dark = pref === 'dark' || (pref !== 'light' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+        if (dark) document.documentElement.classList.add('dark');
+      } catch (e) {}
+    })();
+  </script>
+  <script type="module" crossorigin src="/assets/index-B44Z8p8V.js"></script>
+  <link rel="modulepreload" crossorigin href="/assets/vendor-react-BhN-5YFj.js">
+  <link rel="modulepreload" crossorigin href="/assets/vendor-ui-BPQrMr1Q.js">
+  <link rel="stylesheet" crossorigin href="/assets/index-BX7EhHlb.css">
 </head>
 
 <body>
