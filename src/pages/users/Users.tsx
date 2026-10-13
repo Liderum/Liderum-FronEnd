@@ -11,6 +11,7 @@ import {
   LayoutDashboard, Building2, CalendarClock, DollarSign, FilePlus2,
   BookOpen, Building, Truck, UserCog, Settings, CreditCard, Eye, EyeOff,
 } from 'lucide-react';
+import { usePlanLimitDialog } from '@/modules/billing/components/PlanLimitDialog';
 
 const MODULE_ICON_MAP: Record<string, React.ElementType> = {
   LayoutDashboard, Building2, CalendarClock, DollarSign, FilePlus2,
@@ -88,6 +89,7 @@ const LDCSS = `
 
 export function Users() {
   const { showToast } = useSimpleToast();
+  const planLimit = usePlanLimitDialog();
 
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | UserStatus>('all');
@@ -167,6 +169,7 @@ export function Users() {
       setIsModalOpen(false);
       loadUsers();
     } catch (e: unknown) {
+      if (planLimit.handle(e)) { setIsModalOpen(false); return; }
       showToast(e instanceof Error ? e.message : 'Erro ao salvar', 'error');
     }
   }
@@ -193,6 +196,7 @@ export function Users() {
   return (
     <>
       <style>{LDCSS}</style>
+      {planLimit.dialog}
       <div className="ld" style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
 
         {/* Header */}

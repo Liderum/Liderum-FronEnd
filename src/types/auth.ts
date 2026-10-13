@@ -69,6 +69,15 @@ export interface RegisterUserRequest {
   cnpj: string;
 }
 
+/** Resposta de POST /liderum/api/user/created. Não-bypass: paymentRequired=true + checkoutToken (sem sessão). */
+export interface RegisterUserResponse {
+  identifier?: string;
+  name?: string;
+  paymentRequired?: boolean;
+  checkoutToken?: string;
+  checkoutTokenExpiresAt?: string;
+}
+
 export interface UserProfile {
   identifier: string;
   name: string;

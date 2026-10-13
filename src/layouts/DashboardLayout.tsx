@@ -5,6 +5,7 @@ import { Sidebar } from '../components/Sidebar';
 import { Header } from '../components/Header';
 import { ProductTour } from '../components/onboarding/ProductTour';
 import { X, Menu } from "lucide-react";
+import { SubscriptionBanner } from '../modules/billing/components/SubscriptionBanner';
 
 // Um `style={{display:...}}` inline sempre vence a classe utilitária `md:hidden`
 // do Tailwind (que só troca `display` dentro de uma media query) — por isso o
@@ -44,6 +45,7 @@ export function DashboardLayout() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
           >
+            <SubscriptionBanner />
             <Outlet />
           </motion.div>
         </main>

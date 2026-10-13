@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { isPurchasablePlanCode } from '@/constants/plans';
 import { Mail, User, Phone, Building, Lock, Shield, AlertCircle, Loader2, Eye, EyeOff, Check } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useForceLightTheme } from '@/contexts/ThemeContext';
 import { validateEmail } from '@/lib/emailValidation';
 import { UserService } from '@/services/authService';
+import { tokenStore } from '@/services/api/tokenStore';
+import { useAuth } from '@/contexts/AuthContext';
 
 const CSS = `
 @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,700;1,400;1,700&family=DM+Sans:wght@300;400;500&display=swap');
@@ -66,6 +69,11 @@ const CSS = `
 const Cadastro = () => {
   useForceLightTheme();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  // Plano escolhido na landing; só pré-seleciona no checkout (o preço vem da API).
+  const planParam = searchParams.get('plan')?.toLowerCase();
+  const preselectedPlan = isPurchasablePlanCode(planParam) ? planParam : undefined;
+  const { setPaymentRequired } = useAuth();
 
   const [formData, setFormData] = useState({
     nome: '',
@@ -155,13 +163,20 @@ const Cadastro = () => {
     if (validateForm()) {
       setIsLoading(true);
       try {
-        await UserService.register({
+        const result = await UserService.register({
           name: formData.nome,
           email: formData.email,
           password: formData.senha,
           phone: getCleanPhone(formData.telefone),
           cnpj: getCleanCNPJ(formData.cnpj),
         });
+        // Não-bypass: o cadastro não abre sessão; o token de checkout (só em memória) leva direto ao pagamento PIX.
+        if (result?.paymentRequired && result.checkoutToken) {
+          tokenStore.setCheckoutToken(result.checkoutToken, result.checkoutTokenExpiresAt ?? null);
+          setPaymentRequired(true);
+          navigate('/checkout', { replace: true, state: { email: formData.email.trim(), name: formData.nome, plan: preselectedPlan } });
+          return;
+        }
         toast({
           title: '🎉 Cadastro realizado com sucesso!',
           description: `Bem-vindo, ${formData.nome}! Você será redirecionado para a página de login em alguns segundos.`,
@@ -229,7 +244,7 @@ const Cadastro = () => {
           <div className="la-wrap">
             <div className="la-grid-2">
               <div className="la-anim-1" style={{ paddingTop: '16px' }}>
-                <div className="la-tag">Teste grátis por 14 dias</div>
+                <div className="la-tag">Pagamento por PIX, acesso imediato</div>
                 <h1 className="la-h1">Comece a operar com <em>controle real</em></h1>
                 <p className="la-sub">
                   Cadastro direto, sem excesso. Tudo pronto para centralizar vendas, financeiro, estoque e segurança desde o primeiro acesso.
@@ -237,7 +252,7 @@ const Cadastro = () => {
                 <div className="la-trust">
                   <div className="la-trust-item">
                     <span className="la-trust-check">✓</span>
-                    Todos os módulos disponíveis no período de teste
+                    Acesso liberado assim que o PIX for confirmado
                   </div>
                   <div className="la-trust-item">
                     <span className="la-trust-check">✓</span>
@@ -249,7 +264,7 @@ const Cadastro = () => {
                   </div>
                   <div className="la-trust-item">
                     <span className="la-trust-check">✓</span>
-                    Sem cartão de crédito obrigatório
+                    Pagamento seguro via PIX, sem dados de cartão
                   </div>
                 </div>
               </div>

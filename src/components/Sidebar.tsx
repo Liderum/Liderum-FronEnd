@@ -3,7 +3,7 @@ import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import {
   Home, Building2, CalendarClock, DollarSign, FilePlus2,
   BookOpen, Users, Settings, LogOut,
-  Building, Truck, Shield,
+  Building, Truck, Shield, CreditCard, BarChart3, BadgeCheck,
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useToast } from "@/hooks/use-toast";
@@ -84,6 +84,14 @@ const navSections: NavSection[] = [
       { name: 'Empresas', href: '/management/companies', icon: Building, permission: 'companies.read', tourId: 'nav-cadastros' },
       { name: 'Clientes', href: '/management/customers', icon: Users, permission: 'customers.read' },
       { name: 'Fornecedores', href: '/management/suppliers', icon: Truck, permission: 'suppliers.read' },
+    ],
+  },
+  {
+    label: 'Assinatura',
+    items: [
+      { name: 'Planos', href: '/billing/plans', icon: CreditCard, permission: 'payments.plans.read' },
+      { name: 'Minha assinatura', href: '/billing/subscription', icon: BadgeCheck, permission: 'payments.subscription.read' },
+      { name: 'Pagamentos (plataforma)', href: '/billing/admin', icon: BarChart3, permission: 'payments.admin' },
     ],
   },
   {

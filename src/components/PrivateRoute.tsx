@@ -11,7 +11,7 @@ const HOME_PATH = '/home';
 const SETTINGS_PATH = '/settings';
 
 export function PrivateRoute({ children, requiredPermission, requiredRole }: PrivateRouteProps) {
-  const { isAuthenticated, isLoading, permissions, roles, isOnboardingComplete } = useAuth();
+  const { isAuthenticated, isLoading, permissions, roles, isOnboardingComplete, paymentRequired } = useAuth();
   const location = useLocation();
 
   if (isLoading) {
@@ -26,6 +26,8 @@ export function PrivateRoute({ children, requiredPermission, requiredRole }: Pri
   }
 
   if (!isAuthenticated) {
+    // Pagamento pendente (402): em vez do login, retoma o checkout com o token de checkout em memória.
+    if (paymentRequired) return <Navigate to="/checkout" replace />;
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 

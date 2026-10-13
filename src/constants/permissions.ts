@@ -183,3 +183,14 @@ export const PERMISSION_MAP: ModulePermissions[] = [
 ];
 
 export const ALL_PERMISSIONS = PERMISSION_MAP.flatMap((m) => m.permissions.map((p) => p.key));
+
+// Permissões do Liderum.Payments (cobrança de planos). Ficam fora do PERMISSION_MAP de propósito:
+// o map alimenta o editor de RBAC do tenant, e `payments.admin` é permissão de PLATAFORMA —
+// nunca deve ser atribuível por um TenantAdmin.
+export const PAYMENTS_PERMISSIONS = {
+  PLANS_READ: 'payments.plans.read',
+  CHECKOUTS_CREATE: 'payments.checkouts.create',
+  CHECKOUTS_READ: 'payments.checkouts.read',
+  SUBSCRIPTION_READ: 'payments.subscription.read',
+  ADMIN: 'payments.admin',
+} as const;

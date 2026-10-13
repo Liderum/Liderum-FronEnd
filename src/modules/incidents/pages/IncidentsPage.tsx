@@ -11,6 +11,7 @@ import { LdDateInput } from '@/components/LdDateInput';
 import { LinkedVouchers } from '@/modules/vouchers/components/LinkedVouchers';
 import { IncidentsService, ScheduleService, ExtrasService, WorksService } from '@/services/works';
 import { useAuth } from '@/contexts/AuthContext';
+import { usePlanLimitDialog } from '@/modules/billing/components/PlanLimitDialog';
 import type {
   Incident, IncidentCategory, IncidentSeverity, IncidentStatus, ScheduleTask, ExtraRequest,
 } from '@/modules/shared/types';
@@ -125,6 +126,7 @@ export default function IncidentsPage() {
   const { id } = useParams();
   const workId = id ?? '1';
   const { permissions, user } = useAuth();
+  const planLimit = usePlanLimitDialog();
   const canCreate = permissions.includes('incidents.create') || permissions.includes('daily-log.create');
   const canUpdate = permissions.includes('incidents.update') || permissions.includes('daily-log.update') || permissions.includes('daily-log.create');
 
@@ -296,6 +298,8 @@ export default function IncidentsPage() {
           i.id === incident.id ? { ...i, photos: [...i.photos, ...urls] } : i,
         ),
       );
+    } catch (err) {
+      if (!planLimit.handle(err)) throw err;
     } finally {
       setUploadingFor(null);
     }
@@ -312,6 +316,7 @@ export default function IncidentsPage() {
 
   return (
     <>
+      {planLimit.dialog}
       <style>{CSS}</style>
       <div className="inc">
 
