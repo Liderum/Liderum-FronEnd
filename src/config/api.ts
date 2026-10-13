@@ -84,6 +84,8 @@ export const API_CONFIG = getApiConfig();
 // env var obrigatória própria — derivamos de AUTH.BASE_URL para não exigir
 // uma nova VITE_CONTACT_API_URL configurada na Vercel antes do deploy.
 export const CONTACT_API_URL = API_CONFIG.AUTH.BASE_URL.replace(/\/login$/, '/contact');
+// Landing de prospecção: POST liderum/api/contact/lead (limite por e-mail e por IP no backend)
+export const LEAD_API_URL = `${CONTACT_API_URL}/lead`;
 
 if (import.meta.env.DEV) {
   console.log('[Liderum] Ambiente detectado:', getEnvironment());
